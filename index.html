@@ -697,36 +697,74 @@ body {
 .w-pub:hover { opacity: 0.82; }
 
 /* ─── KONAMI EFFECT ─── */
-#konami-flash {
+#konami-overlay {
     position: fixed; inset: 0; z-index: 9000;
-    background: var(--red);
-    display: flex; align-items: center; justify-content: center;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.12s;
+    display: none; pointer-events: none;
 }
-#konami-flash.active { opacity: 1; }
-.konami-text {
+#konami-overlay.active { display: block; }
+
+/* --- Matrix --- */
+#konami-matrix-canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+}
+#konami-matrix-label {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
     font-family: 'Space Mono', monospace;
     font-size: clamp(1rem, 4vw, 2rem);
-    letter-spacing: 6px;
-    color: #fff;
-    text-align: center;
-    animation: konami-flicker 0.08s steps(1) infinite;
+    letter-spacing: 8px; color: #0f0;
+    text-shadow: 0 0 20px #0f0, 0 0 40px #0f0;
+    animation: konami-pulse 0.5s ease infinite alternate;
 }
-@keyframes konami-flicker {
-    0%   { opacity: 1; }
-    50%  { opacity: 0.4; }
-    100% { opacity: 1; }
+@keyframes konami-pulse { from { opacity: 0.7; } to { opacity: 1; } }
+
+/* --- Glitch --- */
+#konami-glitch-wrap {
+    position: absolute; inset: 0;
+    background: #000;
 }
-@keyframes konami-shake {
-    0%,100% { transform: translate(0,0) rotate(0deg); }
-    20%     { transform: translate(-4px, 2px) rotate(-0.5deg); }
-    40%     { transform: translate(4px,-2px) rotate(0.5deg); }
-    60%     { transform: translate(-3px, 3px) rotate(-0.3deg); }
-    80%     { transform: translate(3px,-1px) rotate(0.3deg); }
+.glitch-line {
+    position: absolute; left: 0; right: 0;
+    height: 3px; background: #0ff;
+    animation: glitch-scan 0.06s steps(1) infinite;
+    opacity: 0.8;
 }
-body.konami-shake { animation: konami-shake 0.35s ease; }
+.glitch-block {
+    position: absolute;
+    background: #f0f;
+    mix-blend-mode: screen;
+    animation: glitch-block-move 0.1s steps(1) infinite;
+}
+#konami-glitch-text {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 12px;
+}
+.glitch-word {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(1.2rem, 5vw, 3rem);
+    letter-spacing: 6px; color: #fff;
+    position: relative;
+    animation: glitch-text 0.15s steps(1) infinite;
+}
+.glitch-word::before, .glitch-word::after {
+    content: attr(data-text);
+    position: absolute; top: 0; left: 0; right: 0;
+}
+.glitch-word::before { color: #f0f; animation: glitch-r 0.12s steps(1) infinite; clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%); }
+.glitch-word::after  { color: #0ff; animation: glitch-l 0.09s steps(1) infinite; clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%); }
+@keyframes glitch-text { 0%,90%,100% { transform: none; } 92% { transform: translateX(4px); } 95% { transform: translateX(-4px); } }
+@keyframes glitch-r    { 0%,80%,100% { transform: none; } 85% { transform: translateX(6px); } }
+@keyframes glitch-l    { 0%,75%,100% { transform: none; } 80% { transform: translateX(-6px); } }
+@keyframes glitch-scan { 0% { top: 10%; } 25% { top: 55%; } 50% { top: 30%; } 75% { top: 80%; } 100% { top: 5%; } }
+@keyframes glitch-block-move {
+    0%   { top:15%; left:10%; width:120px; height:8px; }
+    20%  { top:60%; left:50%; width:80px;  height:4px; }
+    40%  { top:35%; left:20%; width:200px; height:6px; }
+    60%  { top:75%; left:70%; width:60px;  height:10px; }
+    80%  { top:25%; left:40%; width:150px; height:5px; }
+    100% { top:50%; left:5%;  width:100px; height:7px; }
+}
 
 /* ─── TOAST ─── */
 #toast {
@@ -1093,9 +1131,21 @@ body.konami-shake { animation: konami-shake 0.35s ease; }
     </div>
 </div>
 
-<!-- KONAMI FLASH -->
-<div id="konami-flash">
-    <div class="konami-text">ADMIN MODE<br>UNLOCKED</div>
+<!-- KONAMI OVERLAY -->
+<div id="konami-overlay">
+    <!-- Matrix -->
+    <canvas id="konami-matrix-canvas"></canvas>
+    <div id="konami-matrix-label">ADMIN MODE UNLOCKED</div>
+    <!-- Glitch -->
+    <div id="konami-glitch-wrap" style="display:none">
+        <div class="glitch-line"></div>
+        <div class="glitch-block"></div>
+        <div class="glitch-block" style="background:#0ff;animation-delay:0.05s"></div>
+        <div id="konami-glitch-text">
+            <div class="glitch-word" data-text="ADMIN MODE">ADMIN MODE</div>
+            <div class="glitch-word" data-text="UNLOCKED" style="font-size:clamp(0.8rem,3vw,1.8rem);color:#0ff">UNLOCKED</div>
+        </div>
+    </div>
 </div>
 
 <!-- PHOTO MODAL -->
@@ -1197,36 +1247,82 @@ function applyAdminState() {
 // ── KONAMI CODE ──
 const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 let konamiIdx = 0;
+let konamiEffectType = 0; // 0=matrix, 1=glitch (交互)
+let matrixRAF = null;
+
+function runMatrixEffect(canvas) {
+    const ctx = canvas.getContext('2d');
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const cols = Math.floor(canvas.width / 16);
+    const drops = Array(cols).fill(1);
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*';
+    function draw() {
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0f0';
+        ctx.font = '15px monospace';
+        drops.forEach((y, i) => {
+            ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * 16, y * 16);
+            if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        });
+        matrixRAF = requestAnimationFrame(draw);
+    }
+    draw();
+}
+
+function showKonamiOverlay(type) {
+    const overlay = document.getElementById('konami-overlay');
+    const canvas  = document.getElementById('konami-matrix-canvas');
+    const label   = document.getElementById('konami-matrix-label');
+    const glitch  = document.getElementById('konami-glitch-wrap');
+    overlay.classList.add('active');
+    if (type === 0) {
+        canvas.style.display = ''; label.style.display = '';
+        glitch.style.display = 'none';
+        runMatrixEffect(canvas);
+    } else {
+        canvas.style.display = 'none'; label.style.display = 'none';
+        glitch.style.display = '';
+    }
+}
+
+function hideKonamiOverlay() {
+    document.getElementById('konami-overlay').classList.remove('active');
+    if (matrixRAF) { cancelAnimationFrame(matrixRAF); matrixRAF = null; }
+    const ctx = document.getElementById('konami-matrix-canvas').getContext('2d');
+    ctx.clearRect(0, 0, 9999, 9999);
+}
 
 function triggerKonamiEffect() {
-    const flash = document.getElementById('konami-flash');
-    flash.classList.add('active');
-    document.body.classList.add('konami-shake');
+    const type = konamiEffectType;
+    konamiEffectType = 1 - konamiEffectType;
+    showKonamiOverlay(type);
     setTimeout(() => {
-        flash.classList.remove('active');
-        document.body.classList.remove('konami-shake');
+        hideKonamiOverlay();
         isAdmin = true;
         sessionStorage.setItem('ozi-admin', '1');
         applyAdminState();
         renderStrips();
         showToast('ADMIN MODE');
-    }, 900);
+    }, 1800);
 }
 
 function triggerKonamiLogout() {
-    const flash = document.getElementById('konami-flash');
-    flash.querySelector('.konami-text').textContent = 'LOGGED OUT';
-    flash.classList.add('active');
-    document.body.classList.add('konami-shake');
+    showKonamiOverlay(1); // logout は常にglitch
+    document.getElementById('konami-glitch-text').innerHTML =
+        '<div class="glitch-word" data-text="LOGGED OUT">LOGGED OUT</div>';
     setTimeout(() => {
-        flash.classList.remove('active');
-        flash.querySelector('.konami-text').textContent = 'ADMIN MODE\nUNLOCKED';
-        document.body.classList.remove('konami-shake');
+        hideKonamiOverlay();
+        document.getElementById('konami-glitch-text').innerHTML =
+            '<div class="glitch-word" data-text="ADMIN MODE">ADMIN MODE</div>' +
+            '<div class="glitch-word" data-text="UNLOCKED" style="font-size:clamp(0.8rem,3vw,1.8rem);color:#0ff">UNLOCKED</div>';
         isAdmin = false;
         sessionStorage.removeItem('ozi-admin');
         applyAdminState();
         renderStrips();
-    }, 700);
+    }, 1000);
 }
 
 // ── TOAST ──
@@ -1588,7 +1684,7 @@ document.addEventListener('keydown', e => {
         else if (document.getElementById('photo-modal').classList.contains('active'))   closePhotoUpload();
         else if (document.getElementById('search-overlay').classList.contains('active')) toggleSearch();
         else if (document.getElementById('write-modal').classList.contains('active'))   closeWriter();
-        else if (isAdmin) triggerKonamiLogout();
+        else if (isAdmin) { triggerKonamiLogout(); }
     }
     // Konami code detection
     if (e.key === KONAMI[konamiIdx]) {
