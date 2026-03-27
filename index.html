@@ -1164,7 +1164,7 @@ body {
 <script type="module">
 // ── FIREBASE ──
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyC84FjbrkhiTVQvU0sS9QO52VAu-Jv53Gs",
@@ -1179,6 +1179,7 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const db = getDatabase(fbApp);
 const diaryRef    = ref(db, 'diary');
+const visitsRef   = ref(db, 'visits');
 const photosRef   = ref(db, 'photos');
 const lastReadRef = ref(db, 'lastread');
 
@@ -1653,15 +1654,15 @@ window.addEventListener('scroll', () => {
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') dec(); });
 })();
 
-// ── VISITOR COUNTER ──
-(function() {
-    fetch('https://api.countapi.xyz/hit/oyaji-diary-v1/visits')
-        .then(r => r.json()).then(d => {
-            document.getElementById('vc-num').textContent = d.value.toLocaleString();
-        }).catch(() => {
-            document.getElementById('vc-num').textContent = '\u2014';
-        });
-})();
+// ── VISITOR COUNTER (Firebase) ──
+runTransaction(visitsRef, (current) => (current || 0) + 1)
+    .then(result => {
+        const v = result.snapshot.val();
+        document.getElementById('vc-num').textContent = v ? v.toLocaleString() : '—';
+    })
+    .catch(() => {
+        document.getElementById('vc-num').textContent = '—';
+    });
 
 // ── REAL-TIME LISTENERS (Firebase) ──
 onValue(diaryRef, snap => {
