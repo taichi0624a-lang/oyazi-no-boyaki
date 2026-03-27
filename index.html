@@ -696,58 +696,37 @@ body {
 }
 .w-pub:hover { opacity: 0.82; }
 
-/* ─── ADMIN MODAL ─── */
-#admin-modal {
-    position: fixed; inset: 0; z-index: 900;
-    background: rgba(245,242,236,0.97);
-    display: none; align-items: center; justify-content: center;
-    backdrop-filter: blur(16px);
+/* ─── KONAMI EFFECT ─── */
+#konami-flash {
+    position: fixed; inset: 0; z-index: 9000;
+    background: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s;
 }
-#admin-modal.active { display: flex; }
-.am-inner {
-    background: var(--paper); border: 1px solid var(--ink);
-    padding: 44px 40px; width: 100%; max-width: 300px; text-align: center;
-}
-.am-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.3rem; font-weight: 600;
-    color: var(--ink); margin-bottom: 8px;
-    letter-spacing: -0.01em;
-}
-.am-sub {
+#konami-flash.active { opacity: 1; }
+.konami-text {
     font-family: 'Space Mono', monospace;
-    font-size: 9px; letter-spacing: 4px;
-    color: var(--red); margin-bottom: 28px;
+    font-size: clamp(1rem, 4vw, 2rem);
+    letter-spacing: 6px;
+    color: #fff;
+    text-align: center;
+    animation: konami-flicker 0.08s steps(1) infinite;
 }
-.am-err {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px; color: var(--red);
-    letter-spacing: 2px; margin-bottom: 10px; min-height: 14px;
+@keyframes konami-flicker {
+    0%   { opacity: 1; }
+    50%  { opacity: 0.4; }
+    100% { opacity: 1; }
 }
-.am-input {
-    width: 100%; background: var(--bg);
-    border: 1px solid var(--rule); color: var(--ink);
-    font-family: 'Space Mono', monospace;
-    font-size: 1rem; padding: 10px 12px;
-    text-align: center; letter-spacing: 6px;
-    outline: none; margin-bottom: 10px;
-    transition: border-color 0.2s;
+@keyframes konami-shake {
+    0%,100% { transform: translate(0,0) rotate(0deg); }
+    20%     { transform: translate(-4px, 2px) rotate(-0.5deg); }
+    40%     { transform: translate(4px,-2px) rotate(0.5deg); }
+    60%     { transform: translate(-3px, 3px) rotate(-0.3deg); }
+    80%     { transform: translate(3px,-1px) rotate(0.3deg); }
 }
-.am-input:focus { border-color: var(--ink); }
-.am-btn {
-    width: 100%; background: var(--ink); border: none; color: var(--bg);
-    font-family: 'Space Mono', monospace; font-size: 10px;
-    letter-spacing: 3px; padding: 12px; cursor: pointer; transition: opacity 0.15s;
-}
-.am-btn:hover { opacity: 0.8; }
-.am-cancel {
-    background: transparent; border: none; color: var(--dim);
-    font-family: 'Space Mono', monospace; font-size: 9px;
-    letter-spacing: 2px; cursor: pointer; margin-top: 14px;
-    display: inline-block;
-    transition: color 0.15s;
-}
-.am-cancel:hover { color: var(--ink); }
+body.konami-shake { animation: konami-shake 0.35s ease; }
 
 /* ─── TOAST ─── */
 #toast {
@@ -968,7 +947,6 @@ body {
             <button class="mh-btn" onclick="toggleSearch()">SEARCH</button>
             <button class="mh-btn red admin-only" onclick="openWriter()" style="display:none">+ NEW</button>
             <button class="mh-btn" id="theme-btn" onclick="toggleTheme()">◐</button>
-            <button class="mh-btn active" id="admin-lock-btn" onclick="toggleAdminModal()">🔒</button>
         </nav>
     </div>
     <div class="mh-dateline">
@@ -1115,18 +1093,9 @@ body {
     </div>
 </div>
 
-<!-- ADMIN MODAL -->
-<div id="admin-modal">
-    <div class="am-inner">
-        <div class="am-title">Admin Access</div>
-        <div class="am-sub">ENTER PASSWORD</div>
-        <div class="am-err" id="admin-err"></div>
-        <input class="am-input" id="admin-pass-input" type="password"
-               placeholder="••••••••" autocomplete="off">
-        <button class="am-btn" onclick="submitAdminPass()">UNLOCK</button>
-        <br>
-        <button class="am-cancel" onclick="toggleAdminModal()">CANCEL</button>
-    </div>
+<!-- KONAMI FLASH -->
+<div id="konami-flash">
+    <div class="konami-text">ADMIN MODE<br>UNLOCKED</div>
 </div>
 
 <!-- PHOTO MODAL -->
@@ -1216,48 +1185,48 @@ let photos = [];
 let pendingPhotoSrc = null;
 
 // ── ADMIN ──
-const ADMIN_PASS = 'oyaji2025';
 let isAdmin = sessionStorage.getItem('ozi-admin') === '1';
 
 function applyAdminState() {
     document.querySelectorAll('.admin-only').forEach(el => {
         el.style.display = isAdmin ? '' : 'none';
     });
-    const lb = document.getElementById('admin-lock-btn');
-    if (lb) { lb.textContent = isAdmin ? '\ud83d\udd13' : '\ud83d\udd12'; lb.classList.toggle('active', isAdmin); }
     renderPhotos();
 }
 
-function toggleAdminModal() {
-    if (isAdmin) {
+// ── KONAMI CODE ──
+const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let konamiIdx = 0;
+
+function triggerKonamiEffect() {
+    const flash = document.getElementById('konami-flash');
+    flash.classList.add('active');
+    document.body.classList.add('konami-shake');
+    setTimeout(() => {
+        flash.classList.remove('active');
+        document.body.classList.remove('konami-shake');
+        isAdmin = true;
+        sessionStorage.setItem('ozi-admin', '1');
+        applyAdminState();
+        renderStrips();
+        showToast('ADMIN MODE');
+    }, 900);
+}
+
+function triggerKonamiLogout() {
+    const flash = document.getElementById('konami-flash');
+    flash.querySelector('.konami-text').textContent = 'LOGGED OUT';
+    flash.classList.add('active');
+    document.body.classList.add('konami-shake');
+    setTimeout(() => {
+        flash.classList.remove('active');
+        flash.querySelector('.konami-text').textContent = 'ADMIN MODE\nUNLOCKED';
+        document.body.classList.remove('konami-shake');
         isAdmin = false;
         sessionStorage.removeItem('ozi-admin');
         applyAdminState();
         renderStrips();
-        showToast('LOGGED OUT');
-        return;
-    }
-    const m = document.getElementById('admin-modal');
-    const a = m.classList.toggle('active');
-    if (a) {
-        document.getElementById('admin-pass-input').value = '';
-        document.getElementById('admin-err').textContent = '';
-        setTimeout(() => document.getElementById('admin-pass-input').focus(), 80);
-    }
-}
-
-function submitAdminPass() {
-    if (document.getElementById('admin-pass-input').value === ADMIN_PASS) {
-        isAdmin = true;
-        sessionStorage.setItem('ozi-admin', '1');
-        document.getElementById('admin-modal').classList.remove('active');
-        applyAdminState();
-        renderStrips();
-        showToast('ADMIN MODE');
-    } else {
-        document.getElementById('admin-err').textContent = 'INCORRECT PASSWORD';
-        document.getElementById('admin-pass-input').value = '';
-    }
+    }, 700);
 }
 
 // ── TOAST ──
@@ -1619,10 +1588,17 @@ document.addEventListener('keydown', e => {
         else if (document.getElementById('photo-modal').classList.contains('active'))   closePhotoUpload();
         else if (document.getElementById('search-overlay').classList.contains('active')) toggleSearch();
         else if (document.getElementById('write-modal').classList.contains('active'))   closeWriter();
-        else if (document.getElementById('admin-modal').classList.contains('active'))   toggleAdminModal();
+        else if (isAdmin) triggerKonamiLogout();
     }
-    if (e.key === 'Enter' && document.getElementById('admin-modal').classList.contains('active')) {
-        submitAdminPass();
+    // Konami code detection
+    if (e.key === KONAMI[konamiIdx]) {
+        konamiIdx++;
+        if (konamiIdx === KONAMI.length) {
+            konamiIdx = 0;
+            if (!isAdmin) triggerKonamiEffect();
+        }
+    } else {
+        konamiIdx = e.key === KONAMI[0] ? 1 : 0;
     }
 });
 
@@ -1706,7 +1682,7 @@ applyAdminState();
 // ── GLOBAL EXPOSURE (onclick\u5c5e\u6027\u304b\u3089\u547c\u3073\u51fa\u305b\u308b\u3088\u3046\u306b) ──
 Object.assign(window, {
     toggleTheme,
-    toggleAdminModal, submitAdminPass,
+
     toggleSearch, doSearch,
     openWriter, openEditor, closeWriter, toggleTag, publishEntry,
     openPhotoUpload, closePhotoUpload, handleFileSelect, clearPhotoPreview,
