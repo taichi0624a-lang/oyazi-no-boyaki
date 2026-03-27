@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O24 | Cinematic Archive</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+        :root {
+            --turq: #45b5aa;
+            --bg-dark: #050505;
+            --paper: #ece8e1;
+            --bg: #050505;
+            --text: #fff;
+            --text-sub: #888;
+            --filter-bg: rgba(255,255,255,0.05);
+            --filter-border: rgba(255,255,255,0.1);
+            --card-hover-shadow: rgba(0,0,0,0.8);
+        }
+        body.light-mode {
+            --bg: #f0ebe3; --text: #0a0a0a; --text-sub: #555;
+            --filter-bg: rgba(0,0,0,0.05); --filter-border: rgba(0,0,0,0.15);
+            --card-hover-shadow: rgba(0,0,0,0.4);
+        }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; transition: background 0.4s, color 0.4s; }
+
+        /* ── ローダー ── */
+        #chic-loader { position: fixed; inset: 0; background: var(--paper); display: flex; justify-content: center; align-items: center; z-index: 9999; overflow: hidden; }
+        .chic-logo-wrap { display: flex; gap: 3vw; position: relative; z-index: 2; }
+        .c-char { font-family: 'Playfair Display', serif; font-size: clamp(8rem, 20vw, 18rem); color: #0a0a0a; font-weight: 400; line-height: 1; opacity: 0; }
+        /* 映写機ビーム */
+        .projector-beam { position: absolute; bottom: -10%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 35vw solid transparent; border-right: 35vw solid transparent; border-bottom: 120vh solid rgba(255,245,180,0.06); pointer-events: none; z-index: 1; animation: beam-flicker 3s ease-in-out infinite; }
+        @keyframes beam-flicker { 0%,100%{opacity:1} 50%{opacity:0.7} 75%{opacity:0.9} }
+        /* フィルムグレイン */
+        #chic-loader::after { content:''; position:absolute; inset:-50%; width:200%; height:200%; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E"); opacity:0.12; animation:grain 0.4s steps(1) infinite; pointer-events:none; z-index:3; }
+        @keyframes grain { 0%{transform:translate(0,0)} 20%{transform:translate(-3%,-3%)} 40%{transform:translate(3%,-1%)} 60%{transform:translate(-1%,3%)} 80%{transform:translate(2%,2%)} 100%{transform:translate(0,0)} }
+        /* フィルムストリップ（ローダー上下） */
+        .film-bar { position:absolute; left:0; right:0; height:28px; background: repeating-linear-gradient(90deg, #0a0a0a 0px, #0a0a0a 12px, transparent 12px, transparent 26px); }
+        .film-bar.top { top:0; }
+        .film-bar.bottom { bottom:0; }
+        .film-bar::after { content:''; position:absolute; inset:4px 0; background: repeating-linear-gradient(90deg, transparent 0px, transparent 6px, rgba(255,255,255,0.15) 6px, rgba(255,255,255,0.15) 20px, transparent 20px, transparent 26px); }
+
+        /* ── フィルムストリップ スクロールバー ── */
+        #film-scroll { position:fixed; left:0; top:0; width:18px; height:100vh; z-index:400; pointer-events:none; background:#0d0d0d; background-image: radial-gradient(circle, rgba(255,255,255,0.18) 3px, transparent 3px); background-size:18px 18px; background-position:center; }
+        body.light-mode #film-scroll { background:#c8c2b8; background-image: radial-gradient(circle, rgba(0,0,0,0.2) 3px, transparent 3px); background-size:18px 18px; }
+        #film-progress { position:absolute; top:0; left:0; width:100%; background:rgba(69,181,170,0.35); transition:height 0.08s linear; }
+        @media (max-width:600px) { #film-scroll { display:none; } }
+
+        /* ── コントロール ── */
+        .theme-toggle { position:fixed; top:25px; right:25px; z-index:1000; background:var(--filter-bg); border:1px solid var(--filter-border); border-radius:100px; padding:8px 18px; cursor:pointer; color:var(--text); font-size:0.7rem; letter-spacing:2px; transition:0.3s; backdrop-filter:blur(10px); }
+        .theme-toggle:hover { border-color:var(--turq); color:var(--turq); }
+        #app-wrapper { display:flex; flex-direction:column; align-items:center; padding:80px 20px 150px; padding-left:38px; }
+        .brand-logo { font-family:'Playfair Display',serif; font-size:clamp(4rem,10vw,6rem); color:var(--text); margin:0 0 40px 0; font-weight:400; letter-spacing:15px; margin-left:15px; }
+        .controls-section { width:100%; max-width:1100px; margin-bottom:40px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; }
+        .search-input { background:var(--filter-bg); border:1px solid var(--filter-border); color:var(--text); padding:8px 15px; border-radius:5px; font-size:0.7rem; outline:none; letter-spacing:1px; transition:0.3s; width:160px; font-family:'Inter',sans-serif; }
+        .search-input:focus { border-color:var(--turq); width:220px; }
+        .search-input::placeholder { color:var(--text-sub); }
+        .filter-select { background:var(--filter-bg); border:1px solid var(--filter-border); color:var(--text); padding:8px 15px; border-radius:5px; font-size:0.7rem; outline:none; cursor:pointer; letter-spacing:1px; transition:0.3s; }
+        .filter-select:focus { border-color:var(--turq); }
+        .filter-select option { background:#1a1a1a; color:#fff; }
+        body.light-mode .filter-select option { background:#f0ebe3; color:#0a0a0a; }
+        .random-btn { background:transparent; border:1px solid var(--turq); color:var(--turq); padding:8px 20px; border-radius:5px; font-size:0.7rem; letter-spacing:2px; cursor:pointer; transition:0.3s; }
+        .random-btn:hover { background:var(--turq); color:#000; }
+
+        /* ── タブ ── */
+        .archive-header { width:100%; max-width:600px; margin-bottom:60px; display:flex; justify-content:center; }
+        .archive-tabs { display:flex; position:relative; border-radius:100px; background:rgba(128,128,128,0.08); padding:5px; width:100%; }
+        .t-btn { flex:1; background:transparent; border:none; color:#666; padding:12px; cursor:pointer; font-size:0.7rem; letter-spacing:2px; font-weight:500; z-index:2; transition:0.3s; }
+        .t-btn.active { color:#000; }
+        .pill { position:absolute; top:5px; left:5px; height:calc(100% - 10px); width:calc(33.33% - 4px); background:var(--turq); border-radius:100px; z-index:1; transition:transform 0.5s cubic-bezier(0.2,1,0.3,1); }
+
+        /* ── ギャラリー ── */
+        .gallery-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:40px; width:100%; max-width:1100px; }
+        .c-card { background:transparent; border:none; cursor:pointer; position:relative; }
+        .c-poster-wrap { position:relative; width:100%; aspect-ratio:2/3; overflow:hidden; border-radius:4px; }
+        .c-poster { width:100%; height:100%; background-size:cover; background-position:center; filter:grayscale(100%); opacity:0.8; transition:0.6s cubic-bezier(0.2,1,0.3,1); }
+        .c-card:hover .c-poster { filter:grayscale(0%); opacity:1; transform:scale(1.03); box-shadow:0 20px 40px var(--card-hover-shadow); }
+        .c-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.3) 50%,transparent 100%); opacity:0; transition:0.4s; display:flex; flex-direction:column; justify-content:flex-end; padding:15px; box-sizing:border-box; pointer-events:none; }
+        .c-card:hover .c-overlay { opacity:1; }
+        .c-overlay-title { font-family:'Playfair Display',serif; font-size:0.95rem; color:#fff; margin-bottom:4px; line-height:1.3; }
+        .c-overlay-meta { font-size:0.65rem; color:var(--turq); letter-spacing:1px; }
+        .c-info { padding:12px 0; text-align:center; }
+        .c-title { font-family:'Playfair Display',serif; font-size:1rem; color:var(--text); margin-bottom:5px; line-height:1.4; height:2.8em; overflow:hidden; }
+        .c-sub { font-size:0.7rem; color:var(--text-sub); letter-spacing:1px; margin-top:5px; }
+        .c-stars-display { font-size:0.65rem; color:var(--turq); margin-top:4px; letter-spacing:1px; }
+
+        /* ── スケルトン ── */
+        .skeleton-card { cursor:default; pointer-events:none; }
+        .skeleton-poster { width:100%; aspect-ratio:2/3; border-radius:4px; background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.09) 50%,rgba(255,255,255,0.04) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; }
+        body.light-mode .skeleton-poster { background:linear-gradient(90deg,rgba(0,0,0,0.06) 25%,rgba(0,0,0,0.12) 50%,rgba(0,0,0,0.06) 75%); background-size:200% 100%; }
+        .skeleton-line { height:13px; border-radius:4px; margin-top:12px; background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.09) 50%,rgba(255,255,255,0.04) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; }
+        body.light-mode .skeleton-line { background:linear-gradient(90deg,rgba(0,0,0,0.06) 25%,rgba(0,0,0,0.12) 50%,rgba(0,0,0,0.06) 75%); background-size:200% 100%; }
+        .skeleton-line.short { width:55%; margin:8px auto 0; }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* ── 統計 ── */
+        #stats-view { width:100%; max-width:1100px; display:none; }
+        .stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:20px; margin-bottom:40px; }
+        .stat-card { background:var(--filter-bg); border:1px solid var(--filter-border); border-radius:12px; padding:28px; }
+        .stat-label { font-size:0.6rem; letter-spacing:3px; color:var(--text-sub); margin-bottom:10px; }
+        .stat-number { font-family:'Playfair Display',serif; font-size:3.2rem; color:var(--turq); line-height:1; }
+        .stat-desc { font-size:0.72rem; color:var(--text-sub); margin-top:8px; }
+        .chart-section { background:var(--filter-bg); border:1px solid var(--filter-border); border-radius:12px; padding:30px; margin-bottom:25px; }
+        .chart-title { font-size:0.65rem; letter-spacing:3px; color:var(--text-sub); margin-bottom:25px; }
+        .bar-row { display:flex; align-items:center; gap:12px; margin-bottom:13px; }
+        .bar-label { font-size:0.68rem; color:var(--text); width:75px; text-align:right; flex-shrink:0; }
+        .bar-track { flex:1; height:5px; background:rgba(128,128,128,0.12); border-radius:3px; overflow:hidden; }
+        .bar-fill { height:100%; background:var(--turq); border-radius:3px; width:0; transition:width 1s cubic-bezier(0.2,1,0.3,1); }
+        .bar-count { font-size:0.65rem; color:var(--text-sub); width:20px; }
+
+        /* ── スマホ ── */
+        @media (max-width:600px) {
+            #app-wrapper { padding:40px 15px 100px; }
+            .brand-logo { font-size:3.5rem; margin-bottom:30px; letter-spacing:10px; }
+            .gallery-grid { grid-template-columns:repeat(2,1fr); gap:15px; }
+            .c-info { padding:10px 0; }
+            .c-title { font-size:0.85rem; height:2.6em; }
+            .theme-toggle { top:15px; right:15px; font-size:0; padding:10px 14px; }
+            .theme-toggle::before { content:'◐'; font-size:0.9rem; }
+        }
+
+        /* ── モーダル ── */
+        .i-modal { display:none; position:fixed; inset:0; z-index:2000; background:var(--bg-dark); overflow-y:auto; }
+        .i-modal-bg { position:fixed; top:0; left:0; width:100%; height:100%; background-size:cover; background-position:center; filter:blur(60px) brightness(0.25); transform:scale(1.1); z-index:1; transition:filter 0.6s; }
+        .i-modal.theater-mode .i-modal-bg { filter:blur(0px) brightness(0.05); }
+        .i-modal-content { position:relative; z-index:10; display:flex; flex-direction:column; align-items:center; min-height:100%; }
+        .i-close { position:fixed; top:30px; right:40px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:50%; width:50px; height:50px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:2rem; cursor:pointer; opacity:0.7; transition:0.3s; z-index:100; backdrop-filter:blur(10px); }
+        .i-close:hover { opacity:1; border-color:var(--turq); color:var(--turq); transform:rotate(90deg); }
+        .i-theater-zone { width:100%; max-width:1000px; padding:80px 20px 0; box-sizing:border-box; position:relative; }
+        /* シアターモードボタン */
+        .theater-btn { position:absolute; bottom:12px; right:28px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.15); color:#888; padding:5px 12px; border-radius:4px; font-size:0.6rem; letter-spacing:2px; cursor:pointer; transition:0.3s; z-index:20; backdrop-filter:blur(6px); }
+        .theater-btn:hover { color:var(--turq); border-color:var(--turq); }
+        .i-video-wrap { width:100%; aspect-ratio:16/9; background:#000; border-radius:10px; box-shadow:0 50px 100px rgba(0,0,0,0.9); overflow:hidden; position:relative; border:1px solid rgba(69,181,170,0.2); }
+        .i-poster-view { width:100%; height:100%; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; cursor:pointer; position:absolute; top:0; left:0; z-index:2; transition:opacity 0.5s; filter:brightness(0.6); }
+        .i-poster-view:hover { filter:brightness(0.8); }
+        .play-hint { display:flex; flex-direction:column; align-items:center; gap:15px; }
+        .play-ring { width:80px; height:80px; border:2px solid var(--turq); border-radius:50%; position:relative; animation:pulse 2s infinite; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); }
+        .play-ring::after { content:''; position:absolute; top:50%; left:55%; transform:translate(-50%,-50%); border-left:25px solid var(--turq); border-top:15px solid transparent; border-bottom:15px solid transparent; }
+        @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(69,181,170,0.4)} 70%{box-shadow:0 0 0 30px rgba(69,181,170,0)} 100%{box-shadow:0 0 0 0 rgba(69,181,170,0)} }
+        .i-player { position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background:#000; }
+        .i-player iframe { width:100%; height:100%; border:none; display:block; }
+
+        /* ── シネマチケット ── */
+        .cinema-ticket { margin:40px 0 10px; position:relative; display:flex; }
+        .ticket-body { flex:1; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-right:none; border-radius:8px 0 0 8px; padding:20px 24px; display:grid; grid-template-columns:1fr 1fr; gap:14px 30px; }
+        .ticket-stub { width:90px; background:rgba(69,181,170,0.08); border:1px solid rgba(69,181,170,0.2); border-left:none; border-radius:0 8px 8px 0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; position:relative; }
+        .ticket-stub::before { content:''; position:absolute; left:-1px; top:50%; transform:translateY(-50%); width:0; height:0; border-top:10px solid transparent; border-bottom:10px solid transparent; border-left:10px solid var(--bg-dark); }
+        /* ミシン目 */
+        .ticket-body::after { content:''; position:absolute; top:0; right:89px; bottom:0; width:1px; border-right:2px dashed rgba(255,255,255,0.1); }
+        .ticket-field { }
+        .ticket-field-label { font-size:0.55rem; letter-spacing:2px; color:var(--text-sub); margin-bottom:4px; }
+        .ticket-field-value { font-size:0.78rem; color:var(--text); letter-spacing:0.5px; }
+        .ticket-stub-text { font-size:0.55rem; letter-spacing:2px; color:var(--turq); writing-mode:vertical-rl; text-orientation:mixed; }
+        .ticket-stub-seat { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--turq); }
+
+        /* ── モーダルタブ ── */
+        .i-story-zone { width:100%; max-width:800px; padding:30px 20px 150px; box-sizing:border-box; }
+        .i-huge-title { font-family:'Playfair Display',serif; font-size:clamp(2rem,6vw,4.5rem); color:#fff; margin:0 0 10px 0; line-height:1.1; }
+        .i-line { width:80px; height:3px; background:var(--turq); margin:0 0 12px 0; }
+        /* タイトル下のアクションバー */
+        .i-action-bar { display:flex; align-items:center; gap:10px; margin-bottom:15px; flex-wrap:wrap; }
+        #i-meta { font-size:0.8rem; color:var(--turq); letter-spacing:2px; font-weight:500; flex:1; }
+        .director-link { cursor:pointer; text-decoration:underline; text-decoration-color:rgba(69,181,170,0.4); text-underline-offset:3px; transition:0.2s; }
+        .director-link:hover { text-decoration-color:var(--turq); }
+        .share-btn { background:transparent; border:1px solid rgba(255,255,255,0.15); color:#888; padding:5px 14px; border-radius:100px; font-size:0.6rem; letter-spacing:2px; cursor:pointer; transition:0.3s; white-space:nowrap; }
+        .share-btn:hover { border-color:var(--turq); color:var(--turq); }
+        .watched-btn { background:var(--turq); border:none; color:#000; padding:8px 20px; border-radius:100px; font-size:0.65rem; letter-spacing:2px; cursor:pointer; font-weight:500; transition:0.3s; white-space:nowrap; }
+        .watched-btn:hover { opacity:0.85; }
+        .i-tabs { display:flex; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:30px; }
+        .i-tab-btn { background:transparent; border:none; color:#666; padding:12px 16px; cursor:pointer; font-size:0.65rem; letter-spacing:2px; font-weight:500; transition:0.3s; border-bottom:2px solid transparent; margin-bottom:-1px; }
+        .i-tab-btn.active { color:var(--turq); border-bottom-color:var(--turq); }
+        .i-tab-btn:hover:not(.active) { color:#aaa; }
+        .i-body-text { font-size:1.1rem; line-height:2.2; color:#f0f0f0; text-align:justify; letter-spacing:0.05em; font-weight:300; text-shadow:0 2px 10px rgba(0,0,0,0.5); }
+        .i-back-btn { margin-top:60px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#aaa; padding:15px 40px; border-radius:100px; cursor:pointer; font-weight:bold; letter-spacing:3px; transition:0.3s; }
+        .i-back-btn:hover { border-color:var(--turq); color:var(--turq); background:rgba(69,181,170,0.05); }
+
+        /* ── 評価・メモ ── */
+        .rating-section { padding:25px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; }
+        .rating-label { font-size:0.62rem; letter-spacing:3px; color:#666; margin-bottom:14px; }
+        .star-rating { display:flex; gap:8px; margin-bottom:20px; }
+        .star { font-size:2rem; cursor:pointer; color:#2a2a2a; transition:color 0.2s,transform 0.2s; user-select:none; }
+        .star.active { color:var(--turq); }
+        .star:hover { transform:scale(1.2); }
+        .memo-input { width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:12px; border-radius:8px; font-size:0.9rem; font-family:'Inter',sans-serif; resize:none; outline:none; box-sizing:border-box; transition:border-color 0.3s; }
+        .memo-input:focus { border-color:var(--turq); }
+        .memo-input::placeholder { color:#444; }
+        .save-memo-btn { margin-top:12px; background:transparent; border:1px solid var(--turq); color:var(--turq); padding:9px 24px; border-radius:5px; font-size:0.7rem; letter-spacing:2px; cursor:pointer; transition:0.3s; }
+        .save-memo-btn:hover { background:var(--turq); color:#000; }
+
+        /* ── キャスト / レコメンド ── */
+        .cast-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:16px; margin-top:5px; }
+        .cast-item { text-align:center; }
+        .cast-photo { width:100%; aspect-ratio:2/3; background-size:cover; background-position:center; border-radius:6px; background-color:rgba(255,255,255,0.05); margin-bottom:8px; }
+        .cast-name { font-size:0.68rem; color:#ddd; line-height:1.3; }
+        .cast-char { font-size:0.58rem; color:#666; margin-top:2px; }
+        .cast-loading { color:#555; font-size:0.75rem; letter-spacing:2px; padding:20px 0; }
+        .rec-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:16px; margin-top:5px; }
+        .rec-item { cursor:default; }
+        .rec-poster { width:100%; aspect-ratio:2/3; background-size:cover; background-position:center; border-radius:6px; background-color:rgba(255,255,255,0.05); margin-bottom:8px; filter:grayscale(40%); transition:0.3s; }
+        .rec-item:hover .rec-poster { filter:grayscale(0%); }
+        .rec-title { font-size:0.7rem; color:#ddd; line-height:1.3; text-align:center; }
+        .rec-year { font-size:0.6rem; color:#666; text-align:center; margin-top:2px; }
+
+        /* ── 監督フィルモグラフィーパネル ── */
+        #director-panel { position:fixed; top:0; right:0; width:320px; height:100vh; background:#0e0e0e; border-left:1px solid rgba(255,255,255,0.08); z-index:3000; transform:translateX(100%); transition:transform 0.4s cubic-bezier(0.2,1,0.3,1); overflow-y:auto; padding:30px 24px; box-sizing:border-box; }
+        #director-panel.open { transform:translateX(0); }
+        .dir-panel-close { position:absolute; top:20px; right:20px; background:transparent; border:none; color:#666; font-size:1.5rem; cursor:pointer; transition:0.2s; }
+        .dir-panel-close:hover { color:var(--turq); }
+        .dir-panel-name { font-family:'Playfair Display',serif; font-size:1.5rem; color:#fff; margin:30px 0 5px; }
+        .dir-panel-label { font-size:0.6rem; letter-spacing:3px; color:var(--text-sub); margin-bottom:20px; }
+        .dir-film-list { display:flex; flex-direction:column; gap:10px; }
+        .dir-film-item { display:flex; gap:12px; align-items:center; padding:10px; border-radius:8px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); }
+        .dir-film-poster { width:40px; height:60px; background-size:cover; background-position:center; border-radius:4px; flex-shrink:0; background-color:#1a1a1a; }
+        .dir-film-title { font-size:0.78rem; color:#ddd; line-height:1.3; }
+        .dir-film-year { font-size:0.65rem; color:#555; margin-top:3px; }
+        #director-overlay { position:fixed; inset:0; z-index:2999; background:rgba(0,0,0,0.5); display:none; backdrop-filter:blur(2px); }
+
+        .hidden { display:none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- フィルムストリップスクロールバー -->
+    <div id="film-scroll"><div id="film-progress"></div></div>
+
+    <!-- ローダー -->
+    <section id="chic-loader">
+        <div class="projector-beam"></div>
+        <div class="chic-logo-wrap">
+            <span class="c-char">O</span><span class="c-char">2</span><span class="c-char">4</span>
+        </div>
+    </section>
+
+    <button class="theme-toggle" onclick="toggleTheme()">◐ THEME</button>
+
+    <div id="app-wrapper" style="opacity:0; visibility:hidden;">
+        <h1 class="brand-logo">O24</h1>
+
+        <div class="controls-section">
+            <input id="search-input" class="search-input" type="text" placeholder="🔍  SEARCH TITLE / DIRECTOR" oninput="applyFilters()">
+            <select id="filter-year" class="filter-select" onchange="applyFilters()">
+                <option value="">ALL YEARS</option>
+                <option value="202">2020s</option>
+                <option value="201">2010s</option>
+                <option value="200">2000s</option>
+                <option value="199">1990s</option>
+                <option value="198">1980s</option>
+                <option value="197">OLDER</option>
+            </select>
+            <select id="filter-genre" class="filter-select" onchange="applyFilters()">
+                <option value="">ALL GENRES</option>
+                <option value="Action">ACTION</option>
+                <option value="Adventure">ADVENTURE</option>
+                <option value="Animation">ANIMATION</option>
+                <option value="Comedy">COMEDY</option>
+                <option value="Crime">CRIME</option>
+                <option value="Drama">DRAMA</option>
+                <option value="Fantasy">FANTASY</option>
+                <option value="Horror">HORROR</option>
+                <option value="Mystery">MYSTERY</option>
+                <option value="Romance">ROMANCE</option>
+                <option value="Sci-Fi">SCI-FI</option>
+                <option value="Thriller">THRILLER</option>
+                <option value="War">WAR</option>
+            </select>
+            <select id="sort-by" class="filter-select" onchange="applyFilters()">
+                <option value="added">ADDED ORDER</option>
+                <option value="year-desc">YEAR ↓</option>
+                <option value="year-asc">YEAR ↑</option>
+                <option value="title">TITLE A-Z</option>
+            </select>
+            <button class="random-btn" onclick="pickRandom()">⚄ RANDOM</button>
+        </div>
+
+        <header class="archive-header">
+            <nav class="archive-tabs">
+                <div id="tab-pill" class="pill"></div>
+                <button class="t-btn active" onclick="switchView('towatch',this,0)">TO WATCH</button>
+                <button class="t-btn" onclick="switchView('watched',this,1)">WATCHED</button>
+                <button class="t-btn" onclick="switchView('stats',this,2)">STATS</button>
+            </nav>
+        </header>
+
+        <main id="towatch-grid" class="gallery-grid"></main>
+        <main id="watched-grid" class="gallery-grid hidden"></main>
+        <div id="stats-view"></div>
+    </div>
+
+    <!-- モーダル -->
+    <div id="immersive-modal" class="i-modal">
+        <div id="modal-bg" class="i-modal-bg"></div>
+        <div class="i-modal-content">
+            <button class="i-close" onclick="closeImmersive()">×</button>
+            <section class="i-theater-zone">
+                <div id="i-trailer-wrap" class="i-video-wrap">
+                    <div id="i-placeholder" class="i-poster-view" onclick="startCinema()">
+                        <div class="play-hint"><div class="play-ring"></div></div>
+                    </div>
+                    <div id="i-player" class="i-player hidden"></div>
+                </div>
+                <button class="theater-btn" onclick="toggleTheater()">⬛ THEATER</button>
+            </section>
+            <section class="i-story-zone">
+                <h2 id="i-title" class="i-huge-title"></h2>
+                <div class="i-line"></div>
+
+                <!-- アクションバー -->
+                <div class="i-action-bar">
+                    <div id="i-meta"></div>
+                    <button id="watched-btn" class="watched-btn" onclick="markAsWatched()" style="display:none;">✓ MARK AS WATCHED</button>
+                    <button class="share-btn" onclick="shareMovie()">↗ SHARE</button>
+                </div>
+
+                <!-- シネマチケット -->
+                <div class="cinema-ticket" id="cinema-ticket"></div>
+
+                <!-- タブ -->
+                <div class="i-tabs">
+                    <button class="i-tab-btn active" onclick="switchModalTab('overview',this)">OVERVIEW</button>
+                    <button class="i-tab-btn" onclick="switchModalTab('cast',this)">CAST</button>
+                    <button class="i-tab-btn" onclick="switchModalTab('recs',this)">MORE LIKE THIS</button>
+                    <button id="review-tab-btn" class="i-tab-btn" onclick="switchModalTab('review',this)">MY REVIEW</button>
+                </div>
+
+                <div id="overview-tab"><p id="i-overview" class="i-body-text"></p></div>
+                <div id="cast-tab" style="display:none;"><div id="cast-grid" class="cast-grid"></div></div>
+                <div id="recs-tab" style="display:none;"><div id="recs-grid" class="rec-grid"></div></div>
+                <div id="review-tab" style="display:none;">
+                    <div class="rating-section">
+                        <div class="rating-label">MY RATING</div>
+                        <div class="star-rating" id="star-rating">
+                            <span class="star" onclick="setRating(1)">★</span>
+                            <span class="star" onclick="setRating(2)">★</span>
+                            <span class="star" onclick="setRating(3)">★</span>
+                            <span class="star" onclick="setRating(4)">★</span>
+                            <span class="star" onclick="setRating(5)">★</span>
+                        </div>
+                        <div class="rating-label">MY MEMO</div>
+                        <textarea class="memo-input" id="memo-input" rows="4" placeholder="この映画についてのメモ..."></textarea>
+                        <button class="save-memo-btn" id="save-btn" onclick="saveMemo()">SAVE</button>
+                    </div>
+                </div>
+
+                <button class="i-back-btn" onclick="closeImmersive()">RETURN</button>
+            </section>
+        </div>
+    </div>
+
+    <!-- 監督パネル -->
+    <div id="director-overlay" onclick="closeDirectorPanel()"></div>
+    <div id="director-panel">
+        <button class="dir-panel-close" onclick="closeDirectorPanel()">×</button>
+        <div class="dir-panel-label">DIRECTOR</div>
+        <div class="dir-panel-name" id="dir-panel-name"></div>
+        <div class="dir-panel-label" style="margin-top:5px;">FILMOGRAPHY</div>
+        <div class="dir-film-list" id="dir-film-list"></div>
+    </div>
+
+    <script>
+        const API_KEY = 'c6dc0382ae920c2cb5143ff6a7ce97e6';
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTmG8i1VC9T_UZarakreWFHQQURph171YsAEZVUkMciHZ-mxrJrqJCGxGYBnLdD7yuf4OjsKdl3gsdT/pub?gid=0&single=true&output=csv';
+
+        let allMovies = [];
+        let activeMovie = null;
+        let currentRating = 0;
+        let reviews = JSON.parse(localStorage.getItem('o24-reviews') || '{}');
+        let statusOverrides = JSON.parse(localStorage.getItem('o24-overrides') || '{}');
+        let isLightMode = localStorage.getItem('o24-theme') === 'light';
+        let theaterMode = false;
+
+        if (isLightMode) document.body.classList.add('light-mode');
+
+        // フィルムストリップスクロール
+        window.addEventListener('scroll', () => {
+            const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) || 0;
+            document.getElementById('film-progress').style.height = (pct * 100) + '%';
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.style.overflow = 'hidden';
+            renderSkeletons('towatch-grid');
+            loadFromSheet();
+
+            // URLパラメータでモーダル直接開く
+            const urlId = new URLSearchParams(location.search).get('id');
+            if (urlId) window._openMovieId = parseInt(urlId);
+
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    document.getElementById('chic-loader').style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            tl.fromTo('.c-char',
+                { opacity:0, filter:'blur(30px)', x:(i)=>(i-1)*150, scale:1.2 },
+                { opacity:1, filter:'blur(0px)', x:0, scale:1, duration:3.5, stagger:0.2, ease:'power2.out' }
+            )
+            .to({}, { duration:1.8 })
+            .set('#app-wrapper', { visibility:'visible', opacity:1 })
+            .to('#chic-loader', { opacity:0, duration:2.5, ease:'power2.inOut' });
+        });
+
+        function renderSkeletons(gridId) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+            for (let i = 0; i < 8; i++) {
+                grid.innerHTML += `<div class="c-card skeleton-card"><div class="skeleton-poster"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>`;
+            }
+        }
+
+        function toggleTheme() {
+            isLightMode = !isLightMode;
+            document.body.classList.toggle('light-mode', isLightMode);
+            localStorage.setItem('o24-theme', isLightMode ? 'light' : 'dark');
+        }
+
+        async function loadFromSheet() {
+            try {
+                const res = await fetch(SHEET_CSV_URL + '&t=' + Date.now());
+                const text = await res.text();
+                const rows = text.split(/\r?\n/);
+                const promises = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const cols = rows[i].split('\t');
+                    const c = cols.length > 1 ? cols : rows[i].split(',');
+                    if (c[0]) promises.push(fetchMovieData({
+                        title: c[0].trim(),
+                        status: c[1]?.trim().toLowerCase() || 'towatch',
+                        country: c[2]?.trim() || '',
+                        genre: c[3]?.trim() || '',
+                        director: c[4]?.trim() || ''
+                    }));
+                }
+                await Promise.allSettled(promises);
+                renderAll();
+                // URL共有で直接開く
+                if (window._openMovieId) {
+                    const m = allMovies.find(m => m.id === window._openMovieId);
+                    if (m) openImmersive(m);
+                }
+            } catch(e) { console.error('シートの読み込みに失敗しました', e); }
+        }
+
+        async function fetchMovieData(sheetData) {
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&language=ja-JP&query=${encodeURIComponent(sheetData.title)}`);
+                const data = await res.json();
+                if (data.results?.[0]) {
+                    const movie = data.results[0];
+                    movie.appStatus = sheetData.status;
+                    movie.appCountry = sheetData.country;
+                    movie.appGenre = sheetData.genre;
+                    movie.appDirector = sheetData.director;
+                    movie.year = movie.release_date ? movie.release_date.split('-')[0] : '';
+                    const imgRes = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}/images?api_key=${API_KEY}&include_image_language=en,null`);
+                    const imgData = await imgRes.json();
+                    if (imgData.posters?.length > 0) movie.poster_path = imgData.posters[0].file_path;
+                    allMovies.push(movie);
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        function effectiveStatus(movie) {
+            return statusOverrides[movie.id] || movie.appStatus;
+        }
+
+        function getFilteredSorted() {
+            const yearFilter = document.getElementById('filter-year').value;
+            const genreFilter = document.getElementById('filter-genre').value;
+            const sortBy = document.getElementById('sort-by').value;
+            const search = document.getElementById('search-input').value.toLowerCase().trim();
+
+            let filtered = allMovies.filter(m => {
+                const matchYear = !yearFilter || (yearFilter === '197' ? parseInt(m.year) < 1980 : m.year.startsWith(yearFilter));
+                const matchGenre = !genreFilter || m.appGenre.toLowerCase().includes(genreFilter.toLowerCase());
+                const matchSearch = !search || m.title.toLowerCase().includes(search) || m.appDirector.toLowerCase().includes(search);
+                return matchYear && matchGenre && matchSearch;
+            });
+
+            if (sortBy === 'year-desc') filtered.sort((a,b) => (b.year||'0').localeCompare(a.year||'0'));
+            else if (sortBy === 'year-asc') filtered.sort((a,b) => (a.year||'0').localeCompare(b.year||'0'));
+            else if (sortBy === 'title') filtered.sort((a,b) => a.title.localeCompare(b.title));
+            return filtered;
+        }
+
+        function renderAll() {
+            document.getElementById('towatch-grid').innerHTML = '';
+            document.getElementById('watched-grid').innerHTML = '';
+            getFilteredSorted().forEach(movie => {
+                const status = effectiveStatus(movie);
+                const review = reviews[movie.id] || {};
+                const starsHtml = review.rating ? `<div class="c-stars-display">${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</div>` : '';
+                const card = document.createElement('div');
+                card.className = 'c-card';
+                const poster = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '';
+                card.innerHTML = `
+                    <div class="c-poster-wrap">
+                        <div class="c-poster" style="background-image:url('${poster}')"></div>
+                        <div class="c-overlay">
+                            <div class="c-overlay-title">${movie.title}</div>
+                            <div class="c-overlay-meta">${movie.year}${movie.appGenre ? ' · '+movie.appGenre : ''}</div>
+                        </div>
+                    </div>
+                    <div class="c-info">
+                        <div class="c-title">${movie.title}</div>
+                        <div class="c-sub">${movie.year}${movie.appDirector ? ' | '+movie.appDirector : ''}</div>
+                        ${starsHtml}
+                    </div>`;
+                card.onclick = () => openImmersive(movie);
+                document.getElementById(`${status}-grid`).appendChild(card);
+            });
+        }
+
+        function applyFilters() { renderAll(); }
+
+        function pickRandom() {
+            const pool = allMovies.filter(m => effectiveStatus(m) === 'towatch');
+            if (!pool.length) return;
+            const movie = pool[Math.floor(Math.random() * pool.length)];
+            switchView('towatch', document.querySelectorAll('.t-btn')[0], 0);
+            setTimeout(() => openImmersive(movie), 80);
+        }
+
+        function openImmersive(movie) {
+            activeMovie = movie;
+            const status = effectiveStatus(movie);
+            const backdrop = movie.backdrop_path || movie.poster_path;
+            document.getElementById('modal-bg').style.backgroundImage = `url('https://image.tmdb.org/t/p/original${backdrop}')`;
+            document.getElementById('i-placeholder').style.backgroundImage = `url('https://image.tmdb.org/t/p/original${backdrop}')`;
+            document.getElementById('i-title').textContent = movie.title;
+
+            // メタ（監督名をクリッカブルに）
+            const metaParts = [movie.year, movie.appCountry, movie.appGenre];
+            let metaHtml = metaParts.filter(Boolean).join(' / ');
+            if (movie.appDirector) metaHtml += ` / <span class="director-link" onclick="openDirectorPanel('${movie.appDirector.replace(/'/g,"\\'")}')">DIR: ${movie.appDirector}</span>`;
+            document.getElementById('i-meta').innerHTML = metaHtml;
+
+            // MARK AS WATCHED ボタン
+            document.getElementById('watched-btn').style.display = status === 'towatch' ? '' : 'none';
+
+            // MY REVIEWタブ
+            document.getElementById('review-tab-btn').style.display = status === 'watched' ? '' : 'none';
+
+            // 既存レビュー
+            const review = reviews[movie.id] || {};
+            currentRating = review.rating || 0;
+            document.getElementById('memo-input').value = review.memo || '';
+            updateStars(currentRating);
+            document.getElementById('save-btn').textContent = 'SAVE';
+
+            // シネマチケット
+            renderTicket(movie);
+
+            // リセット
+            document.getElementById('i-player').classList.add('hidden');
+            document.getElementById('i-placeholder').classList.remove('hidden');
+            document.getElementById('i-player').innerHTML = '';
+            document.getElementById('cast-grid').innerHTML = '<div class="cast-loading">LOADING CAST...</div>';
+            document.getElementById('recs-grid').innerHTML = '<div class="cast-loading">LOADING...</div>';
+            switchModalTab('overview', document.querySelector('.i-tab-btn'));
+
+            // シアターモードリセット
+            theaterMode = false;
+            document.getElementById('immersive-modal').classList.remove('theater-mode');
+
+            document.getElementById('immersive-modal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            document.getElementById('immersive-modal').scrollTo(0, 0);
+        }
+
+        function renderTicket(movie) {
+            const runtime = movie.runtime ? `${movie.runtime} MIN` : '— MIN';
+            document.getElementById('cinema-ticket').innerHTML = `
+                <div class="ticket-body">
+                    <div class="ticket-field">
+                        <div class="ticket-field-label">FEATURE</div>
+                        <div class="ticket-field-value">${movie.title}</div>
+                    </div>
+                    <div class="ticket-field">
+                        <div class="ticket-field-label">YEAR</div>
+                        <div class="ticket-field-value">${movie.year || '—'}</div>
+                    </div>
+                    <div class="ticket-field">
+                        <div class="ticket-field-label">GENRE</div>
+                        <div class="ticket-field-value">${movie.appGenre || '—'}</div>
+                    </div>
+                    <div class="ticket-field">
+                        <div class="ticket-field-label">COUNTRY</div>
+                        <div class="ticket-field-value">${movie.appCountry || '—'}</div>
+                    </div>
+                    <div class="ticket-field">
+                        <div class="ticket-field-label">DIRECTOR</div>
+                        <div class="ticket-field-value">${movie.appDirector || '—'}</div>
+                    </div>
+                    <div class="ticket-field">
+                        <div class="ticket-field-label">STATUS</div>
+                        <div class="ticket-field-value">${effectiveStatus(movie).toUpperCase()}</div>
+                    </div>
+                </div>
+                <div class="ticket-stub">
+                    <div class="ticket-stub-text">ADMIT ONE</div>
+                    <div class="ticket-stub-seat">A‑24</div>
+                </div>`;
+        }
+
+        function toggleTheater() {
+            theaterMode = !theaterMode;
+            document.getElementById('immersive-modal').classList.toggle('theater-mode', theaterMode);
+        }
+
+        function shareMovie() {
+            if (!activeMovie) return;
+            const url = `${location.origin}${location.pathname}?id=${activeMovie.id}`;
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = document.querySelector('.share-btn');
+                btn.textContent = '✓ COPIED';
+                setTimeout(() => btn.textContent = '↗ SHARE', 2000);
+            });
+        }
+
+        function markAsWatched() {
+            if (!activeMovie) return;
+            statusOverrides[activeMovie.id] = 'watched';
+            localStorage.setItem('o24-overrides', JSON.stringify(statusOverrides));
+            document.getElementById('watched-btn').style.display = 'none';
+            document.getElementById('review-tab-btn').style.display = '';
+            renderTicket(activeMovie);
+            renderAll();
+            const btn = document.getElementById('watched-btn');
+            btn.textContent = '✓ WATCHED';
+        }
+
+        function switchModalTab(tab, btn) {
+            ['overview','cast','recs','review'].forEach(t => {
+                document.getElementById(`${t}-tab`).style.display = t === tab ? '' : 'none';
+            });
+            document.querySelectorAll('.i-tab-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            if (tab === 'cast') loadCast();
+            if (tab === 'recs') loadRecs();
+        }
+
+        async function loadCast() {
+            if (!activeMovie) return;
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/movie/${activeMovie.id}/credits?api_key=${API_KEY}&language=ja-JP`);
+                const data = await res.json();
+                const cast = (data.cast || []).slice(0, 12);
+                const grid = document.getElementById('cast-grid');
+                if (!cast.length) { grid.innerHTML = '<div class="cast-loading">CAST INFO UNAVAILABLE</div>'; return; }
+                grid.innerHTML = cast.map(p => `
+                    <div class="cast-item">
+                        <div class="cast-photo" style="background-image:url('${p.profile_path ? `https://image.tmdb.org/t/p/w185${p.profile_path}` : ''}')"></div>
+                        <div class="cast-name">${p.name}</div>
+                        <div class="cast-char">${p.character || ''}</div>
+                    </div>`).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadRecs() {
+            if (!activeMovie) return;
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/movie/${activeMovie.id}/recommendations?api_key=${API_KEY}&language=ja-JP`);
+                const data = await res.json();
+                const recs = (data.results || []).slice(0, 12);
+                const grid = document.getElementById('recs-grid');
+                if (!recs.length) { grid.innerHTML = '<div class="cast-loading">NO RECOMMENDATIONS FOUND</div>'; return; }
+                grid.innerHTML = recs.map(m => `
+                    <div class="rec-item">
+                        <div class="rec-poster" style="background-image:url('${m.poster_path ? `https://image.tmdb.org/t/p/w342${m.poster_path}` : ''}')"></div>
+                        <div class="rec-title">${m.title}</div>
+                        <div class="rec-year">${m.release_date ? m.release_date.split('-')[0] : ''}</div>
+                    </div>`).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function openDirectorPanel(directorName) {
+            document.getElementById('dir-panel-name').textContent = directorName;
+            document.getElementById('dir-film-list').innerHTML = '<div class="cast-loading">LOADING...</div>';
+            document.getElementById('director-panel').classList.add('open');
+            document.getElementById('director-overlay').style.display = 'block';
+            try {
+                const searchRes = await fetch(`https://api.themoviedb.org/3/search/person?api_key=${API_KEY}&query=${encodeURIComponent(directorName)}&language=ja-JP`);
+                const searchData = await searchRes.json();
+                const person = searchData.results?.[0];
+                if (!person) { document.getElementById('dir-film-list').innerHTML = '<div class="cast-loading">NOT FOUND</div>'; return; }
+                const credRes = await fetch(`https://api.themoviedb.org/3/person/${person.id}/movie_credits?api_key=${API_KEY}&language=ja-JP`);
+                const credData = await credRes.json();
+                const films = (credData.crew || []).filter(c => c.job === 'Director').sort((a,b) => (b.release_date||'').localeCompare(a.release_date||'')).slice(0, 20);
+                if (!films.length) { document.getElementById('dir-film-list').innerHTML = '<div class="cast-loading">NO FILMS FOUND</div>'; return; }
+                document.getElementById('dir-film-list').innerHTML = films.map(f => `
+                    <div class="dir-film-item">
+                        <div class="dir-film-poster" style="background-image:url('${f.poster_path ? `https://image.tmdb.org/t/p/w92${f.poster_path}` : ''}')"></div>
+                        <div>
+                            <div class="dir-film-title">${f.title}</div>
+                            <div class="dir-film-year">${f.release_date ? f.release_date.split('-')[0] : '—'}</div>
+                        </div>
+                    </div>`).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        function closeDirectorPanel() {
+            document.getElementById('director-panel').classList.remove('open');
+            document.getElementById('director-overlay').style.display = 'none';
+        }
+
+        function setRating(n) { currentRating = n; updateStars(n); }
+        function updateStars(n) { document.querySelectorAll('.star').forEach((s,i) => s.classList.toggle('active', i < n)); }
+
+        function saveMemo() {
+            if (!activeMovie) return;
+            reviews[activeMovie.id] = { rating: currentRating, memo: document.getElementById('memo-input').value };
+            localStorage.setItem('o24-reviews', JSON.stringify(reviews));
+            renderAll();
+            const btn = document.getElementById('save-btn');
+            btn.textContent = 'SAVED ✓';
+            setTimeout(() => btn.textContent = 'SAVE', 2000);
+        }
+
+        async function startCinema() {
+            if (!activeMovie) return;
+            try {
+                let video = null;
+                for (const lang of [`language=ja-JP`, ``]) {
+                    const r = await fetch(`https://api.themoviedb.org/3/movie/${activeMovie.id}/videos?api_key=${API_KEY}&${lang}`);
+                    const d = await r.json();
+                    const yt = (d.results || []).filter(v => v.site === 'YouTube');
+                    video = yt.find(v => v.type === 'Trailer') || yt.find(v => v.type === 'Teaser') || yt[0];
+                    if (video) break;
+                }
+                if (video) {
+                    document.getElementById('i-placeholder').classList.add('hidden');
+                    const player = document.getElementById('i-player');
+                    player.classList.remove('hidden');
+                    player.innerHTML = `<iframe src="https://www.youtube.com/embed/${video.key}?autoplay=1&mute=0&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                } else {
+                    alert('予告編が見つかりませんでした。');
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        function closeImmersive() {
+            document.getElementById('immersive-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.getElementById('i-player').innerHTML = '';
+            theaterMode = false;
+        }
+
+        function switchView(type, btn, idx) {
+            document.querySelectorAll('.gallery-grid').forEach(g => g.classList.add('hidden'));
+            document.getElementById('stats-view').style.display = 'none';
+            if (type === 'stats') {
+                renderStats();
+                document.getElementById('stats-view').style.display = 'block';
+            } else {
+                document.getElementById(`${type}-grid`).classList.remove('hidden');
+            }
+            document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelector('.pill').style.transform = `translateX(calc(${idx * 100}% + ${idx * 5}px))`;
+        }
+
+        function renderStats() {
+            const watched = allMovies.filter(m => effectiveStatus(m) === 'watched');
+            const towatch = allMovies.filter(m => effectiveStatus(m) === 'towatch');
+            const rated = Object.values(reviews).filter(r => r.rating > 0);
+            const avgRating = rated.length ? (rated.reduce((s,r) => s+r.rating, 0) / rated.length).toFixed(1) : '—';
+            const genreCount = {};
+            allMovies.forEach(m => { if (m.appGenre) genreCount[m.appGenre] = (genreCount[m.appGenre]||0)+1; });
+            const topGenres = Object.entries(genreCount).sort((a,b) => b[1]-a[1]).slice(0,8);
+            const maxGenre = topGenres[0]?.[1] || 1;
+            const decadeCount = {};
+            allMovies.forEach(m => { if (m.year) { const d = Math.floor(parseInt(m.year)/10)*10; decadeCount[d] = (decadeCount[d]||0)+1; } });
+            const topDecades = Object.entries(decadeCount).sort((a,b) => b[0]-a[0]).slice(0,8);
+            const maxDecade = topDecades[0]?.[1] || 1;
+
+            document.getElementById('stats-view').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-label">TOTAL WATCHED</div><div class="stat-number">${watched.length}</div><div class="stat-desc">films in the archive</div></div>
+                    <div class="stat-card"><div class="stat-label">TO WATCH</div><div class="stat-number">${towatch.length}</div><div class="stat-desc">films awaiting</div></div>
+                    <div class="stat-card"><div class="stat-label">AVG RATING</div><div class="stat-number">${avgRating}</div><div class="stat-desc">across ${rated.length} rated films</div></div>
+                    <div class="stat-card"><div class="stat-label">TOTAL ARCHIVE</div><div class="stat-number">${allMovies.length}</div><div class="stat-desc">films catalogued</div></div>
+                </div>
+                <div class="chart-section">
+                    <div class="chart-title">GENRE DISTRIBUTION</div>
+                    ${topGenres.map(([g,c]) => `<div class="bar-row"><div class="bar-label">${g.toUpperCase()}</div><div class="bar-track"><div class="bar-fill" data-width="${(c/maxGenre*100).toFixed(1)}"></div></div><div class="bar-count">${c}</div></div>`).join('')}
+                </div>
+                <div class="chart-section">
+                    <div class="chart-title">DECADE DISTRIBUTION</div>
+                    ${topDecades.map(([d,c]) => `<div class="bar-row"><div class="bar-label">${d}s</div><div class="bar-track"><div class="bar-fill" data-width="${(c/maxDecade*100).toFixed(1)}"></div></div><div class="bar-count">${c}</div></div>`).join('')}
+                </div>`;
+            requestAnimationFrame(() => {
+                document.querySelectorAll('.bar-fill').forEach(el => { el.style.width = el.dataset.width + '%'; });
+            });
+        }
+    </script>
+</body>
+</html>
