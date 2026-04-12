@@ -772,7 +772,7 @@
                     const res = await fetch('https://o24-filmarks.onrender.com/post-comment', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ markUrl: activeMovie.filmarksUrl, comment: memo })
+                        body: JSON.stringify({ markUrl: activeMovie.filmarksUrl, comment: memo, token: 'o24-secret-2026' })
                     });
                     const data = await res.json();
                     if (data.ok) {

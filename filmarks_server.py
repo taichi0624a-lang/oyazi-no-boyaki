@@ -15,6 +15,7 @@ CORS(app)
 
 FILMARKS_EMAIL = os.environ.get("FILMARKS_EMAIL", "taichi0624a@gmail.com")
 FILMARKS_PASS  = os.environ.get("FILMARKS_PASS",  "sally0624")
+ADMIN_TOKEN    = os.environ.get("ADMIN_TOKEN", "")
 PORT = int(os.environ.get("PORT", 5000))
 
 session = requests.Session()
@@ -231,6 +232,9 @@ def post_comment(movie_url: str, comment: str):
 @app.route("/post-comment", methods=["POST"])
 def api_post_comment():
     data     = request.get_json()
+    token    = data.get("token", "")
+    if ADMIN_TOKEN and token != ADMIN_TOKEN:
+        return jsonify({"ok": False, "error": "Unauthorized"}), 403
     mark_url = data.get("markUrl", "")
     comment  = data.get("comment", "")
     if not mark_url or not comment:
