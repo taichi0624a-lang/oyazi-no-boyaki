@@ -195,8 +195,10 @@
         .memo-input { width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:12px; border-radius:8px; font-size:0.9rem; font-family:'Inter',sans-serif; resize:none; outline:none; box-sizing:border-box; transition:border-color 0.3s; }
         .memo-input:focus { border-color:var(--turq); }
         .memo-input::placeholder { color:#444; }
-        .save-memo-btn { margin-top:12px; background:transparent; border:1px solid var(--turq); color:var(--turq); padding:9px 24px; border-radius:5px; font-size:0.7rem; letter-spacing:2px; cursor:pointer; transition:0.3s; }
+        .save-memo-btn { margin-top:12px; background:transparent; border:1px solid var(--turq); color:var(--turq); padding:9px 24px; border-radius:5px; font-size:0.7rem; letter-spacing:2px; cursor:pointer; transition:0.3s; display:none; }
         .save-memo-btn:hover { background:var(--turq); color:#000; }
+        #admin-indicator { position:fixed; bottom:18px; right:18px; font-size:0.6rem; letter-spacing:2px; color:var(--turq); opacity:0; transition:opacity 0.5s; pointer-events:none; }
+        #admin-indicator.visible { opacity:1; }
 
         /* ── キャスト / レコメンド ── */
         .cast-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:16px; margin-top:5px; }
@@ -230,6 +232,7 @@
     </style>
 </head>
 <body>
+    <div id="admin-indicator"></div>
 
     <!-- フィルムストリップスクロールバー -->
     <div id="film-scroll"><div id="film-progress"></div></div>
@@ -830,6 +833,33 @@
             btn.classList.add('active');
             document.querySelector('.pill').style.transform = `translateX(calc(${idx * 100}% + ${idx * 5}px))`;
         }
+
+        // ── コナミコード管理者モード ──
+        (function() {
+            const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+            let pos = 0;
+            let adminMode = false;
+            document.addEventListener('keydown', e => {
+                if (e.key === KONAMI[pos]) {
+                    pos++;
+                    if (pos === KONAMI.length) {
+                        pos = 0;
+                        adminMode = !adminMode;
+                        document.querySelectorAll('.save-memo-btn').forEach(btn => {
+                            btn.style.display = adminMode ? 'inline-block' : 'none';
+                        });
+                        const ind = document.getElementById('admin-indicator');
+                        if (ind) {
+                            ind.textContent = adminMode ? 'ADMIN MODE' : 'ADMIN OFF';
+                            ind.classList.add('visible');
+                            setTimeout(() => ind.classList.remove('visible'), 2000);
+                        }
+                    }
+                } else {
+                    pos = e.key === KONAMI[0] ? 1 : 0;
+                }
+            });
+        })();
 
         function renderStats() {
             const watched = allMovies.filter(m => effectiveStatus(m) === 'watched');
