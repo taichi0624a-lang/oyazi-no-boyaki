@@ -589,13 +589,17 @@
             // シネマチケット
             renderTicket(movie);
 
-            // TMDB overview + Filmarksレビューブロック
+            // TMDB overview + Filmarksレビューブロック（毎回クリアして再描画）
+            document.getElementById('i-overview').innerHTML = '';
             const tmdbOverview = movie.overview ? `<p class="i-body-text">${movie.overview}</p>` : '';
             let filmarksBlock = '';
-            if (movie.filmarksScore || movie.filmarksComment) {
-                const scoreStr = movie.filmarksScore ? `<div class="filmarks-review-score">★ ${movie.filmarksScore} / 5.0</div>` : '';
-                const commentStr = movie.filmarksComment ? `<p class="filmarks-review-text">"${movie.filmarksComment}"</p>` : '';
-                const linkStr = movie.filmarksUrl ? `<a class="filmarks-link" href="${movie.filmarksUrl}" target="_blank">VIEW ON FILMARKS ↗</a>` : '';
+            const fScore = movie.filmarksScore || '';
+            const fComment = movie.filmarksComment || '';
+            const fUrl = movie.filmarksUrl || '';
+            if (fScore || fComment) {
+                const scoreStr = fScore ? `<div class="filmarks-review-score">★ ${fScore} / 5.0</div>` : '';
+                const commentStr = fComment ? `<p class="filmarks-review-text">"${fComment}"</p>` : '';
+                const linkStr = fUrl ? `<a class="filmarks-link" href="${fUrl}" target="_blank">VIEW ON FILMARKS ↗</a>` : '';
                 filmarksBlock = `<div class="filmarks-review"><div class="filmarks-review-label">MY FILMARKS REVIEW</div>${scoreStr}${commentStr}${linkStr}</div>`;
             }
             document.getElementById('i-overview').innerHTML = tmdbOverview + filmarksBlock;
