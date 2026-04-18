@@ -711,54 +711,69 @@ body {
 }
 #noise-loader.done { display: none; }
 
-.sl-backdrop {
-    position: absolute; inset: 0;
-    background: #0a0a0a;
-}
+.sl-backdrop { position: absolute; inset: 0; background: #0a0a0a; }
 
-/* 左から右へのターコイズワイプ */
+/* 中心から四角く膨らむターコイズ（カメラレンズ風） */
 .sl-turq {
     position: absolute; inset: 0;
-    background: #3eb5aa;
-    clip-path: inset(0 100% 0 0);
-    animation: wipeIn 0.55s cubic-bezier(0.76,0,0.24,1) 0.1s forwards;
+    background: #3cb5aa;
+    clip-path: inset(50% 50%);
+    animation: rectOpen 0.85s cubic-bezier(0.76,0,0.24,1) 0.15s forwards;
 }
-@keyframes wipeIn { to { clip-path: inset(0 0% 0 0); } }
+@keyframes rectOpen {
+    0%   { clip-path: inset(50% 50%); }
+    80%  { clip-path: inset(-2% -1.5%); }
+    100% { clip-path: inset(0% 0%); }
+}
 
-/* ターコイズ上の中央マーク */
+/* 中央マーク */
 .sl-mark {
     position: absolute; inset: 0;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    gap: 18px; z-index: 2;
+    gap: 10px; z-index: 2;
 }
 
-.sl-diamond {
-    width: 14px; height: 14px;
-    background: white;
-    transform: rotate(45deg) scale(0);
-    animation: diamondIn 0.4s cubic-bezier(0.2,1.5,0.3,1) 0.75s forwards;
+/* ホライゾンライン（中心から左右へ伸びる） */
+.sl-horizon {
+    position: relative;
+    height: 1px; width: 0;
+    background: rgba(255,255,255,0.9);
+    animation: horizonGrow 0.7s cubic-bezier(0.76,0,0.24,1) 1.05s forwards;
 }
-@keyframes diamondIn { to { transform: rotate(45deg) scale(1); } }
+@keyframes horizonGrow { to { width: 140px; } }
 
-.sl-lines {
-    display: flex; flex-direction: column; gap: 5px; align-items: center;
+.sl-horizon::before,
+.sl-horizon::after {
+    content: '';
+    position: absolute; top: 50%;
+    width: 4px; height: 4px; border-radius: 50%;
+    background: white; transform: translateY(-50%);
     opacity: 0;
-    animation: linesIn 0.4s ease 0.9s forwards;
+    animation: endDot 0.25s ease 1.65s forwards;
 }
-.sl-line-a { width: 48px; height: 1px; background: rgba(255,255,255,0.7); }
-.sl-line-b { width: 28px; height: 1px; background: rgba(255,255,255,0.4); }
-@keyframes linesIn { to { opacity: 1; } }
+.sl-horizon::before { left: -2px; }
+.sl-horizon::after  { right: -2px; }
+@keyframes endDot { to { opacity: 1; } }
 
-/* 右から左への暗幕ワイプ */
+/* ラベル */
+.sl-label {
+    font-size: 0.5rem; letter-spacing: 5px;
+    color: rgba(255,255,255,0.45);
+    font-family: 'Inter', sans-serif;
+    opacity: 0; white-space: nowrap;
+    animation: labelIn 0.5s ease 1.4s forwards;
+}
+@keyframes labelIn { to { opacity: 1; } }
+
+/* 中心から四角く閉じる暗幕（同じ動きで対称） */
 .sl-close {
     position: absolute; inset: 0;
     background: #0a0a0a;
-    clip-path: inset(0 0 0 100%);
+    clip-path: inset(50% 50%);
     z-index: 3;
-    animation: wipeOut 0.55s cubic-bezier(0.76,0,0.24,1) 1.85s forwards;
+    animation: rectOpen 0.85s cubic-bezier(0.76,0,0.24,1) 2.1s forwards;
 }
-@keyframes wipeOut { to { clip-path: inset(0 0 0 0%); } }
 
 /* ─── KONAMI EFFECT ─── */
 #konami-overlay {
@@ -997,11 +1012,8 @@ body {
     <div class="sl-backdrop"></div>
     <div class="sl-turq"></div>
     <div class="sl-mark">
-        <div class="sl-diamond"></div>
-        <div class="sl-lines">
-            <div class="sl-line-a"></div>
-            <div class="sl-line-b"></div>
-        </div>
+        <div class="sl-horizon"></div>
+        <div class="sl-label">PERSONAL DIARY</div>
     </div>
     <div class="sl-close"></div>
 </div>
@@ -1775,7 +1787,7 @@ onValue(lastReadRef, snap => {
 // ── STUDIO LOADER ──
 (function() {
     const loader = document.getElementById('noise-loader');
-    setTimeout(() => { loader.classList.add('done'); }, 2500);
+    setTimeout(() => { loader.classList.add('done'); }, 3100);
 })();
 
 // ── THEME ──
