@@ -197,6 +197,23 @@
         .wp-confirm:hover { opacity:0.85; }
         .wp-cancel { background:transparent; border:1px solid rgba(255,255,255,0.15); color:#666; padding:8px 16px; border-radius:100px; font-size:0.62rem; letter-spacing:2px; cursor:pointer; transition:0.3s; }
         .wp-cancel:hover { border-color:#fff; color:#fff; }
+
+        /* ── WHERE TO WATCH ── */
+        .wtw-section { margin-bottom:28px; padding:16px 18px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:10px; }
+        .wtw-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+        .wtw-label { font-size:0.6rem; letter-spacing:3px; color:#666; }
+        .wtw-refresh { background:transparent; border:1px solid rgba(255,255,255,0.12); color:#555; padding:3px 9px; border-radius:100px; font-size:0.55rem; letter-spacing:2px; cursor:pointer; transition:0.3s; }
+        .wtw-refresh:hover { border-color:var(--turq); color:var(--turq); }
+        .wtw-logos { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+        .provider-item { display:flex; flex-direction:column; align-items:center; gap:5px; cursor:default; }
+        .provider-logo-wrap { width:48px; height:48px; border-radius:10px; overflow:hidden; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); flex-shrink:0; }
+        .provider-logo { width:100%; height:100%; object-fit:cover; display:block; }
+        .provider-name { font-size:0.5rem; color:#666; letter-spacing:0.5px; text-align:center; max-width:56px; }
+        .wtw-none { font-size:0.7rem; color:#444; letter-spacing:1px; }
+
+        /* カードのサブスクアイコン */
+        .c-providers { display:flex; flex-wrap:wrap; gap:3px; margin-top:7px; min-height:20px; }
+        .c-provider-icon { width:20px; height:20px; border-radius:5px; object-fit:cover; border:1px solid rgba(255,255,255,0.08); }
         .i-tabs { display:flex; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:30px; }
         .i-tab-btn { background:transparent; border:none; color:#666; padding:12px 16px; cursor:pointer; font-size:0.65rem; letter-spacing:2px; font-weight:500; transition:0.3s; border-bottom:2px solid transparent; margin-bottom:-1px; }
         .i-tab-btn.active { color:var(--turq); border-bottom-color:var(--turq); }
@@ -374,7 +391,7 @@
                     <button id="review-tab-btn" class="i-tab-btn" onclick="switchModalTab('review',this)">MY REVIEW</button>
                 </div>
 
-                <div id="overview-tab"><p id="i-overview" class="i-body-text"></p></div>
+                <div id="overview-tab"><div id="where-to-watch"></div><p id="i-overview" class="i-body-text"></p></div>
                 <div id="cast-tab" style="display:none;"><div id="cast-grid" class="cast-grid"></div></div>
                 <div id="recs-tab" style="display:none;"><div id="recs-grid" class="rec-grid"></div></div>
                 <div id="review-tab" style="display:none;">
@@ -420,6 +437,84 @@
         let statusOverrides = JSON.parse(localStorage.getItem('o24-overrides') || '{}');
         let isLightMode = localStorage.getItem('o24-theme') === 'light';
         let theaterMode = false;
+        let watchProvidersCache = JSON.parse(localStorage.getItem('o24-providers') || '{}');
+        const PROVIDERS_TTL = 86400000; // 24時間キャッシュ
+
+        async function fetchWatchProviders(movieId, forceRefresh = false) {
+            const now = Date.now();
+            const cached = watchProvidersCache[movieId];
+            if (!forceRefresh && cached && (now - cached.ts) < PROVIDERS_TTL) {
+                return cached.providers;
+            }
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/movie/${movieId}/watch/providers?api_key=${API_KEY}`);
+                const data = await res.json();
+                const jp = data.results?.JP || {};
+                const providers = jp.flatrate || [];
+                watchProvidersCache[movieId] = { providers, ts: now };
+                localStorage.setItem('o24-providers', JSON.stringify(watchProvidersCache));
+                return providers;
+            } catch(e) { return []; }
+        }
+
+        function providerLogosHtml(providers) {
+            if (!providers || !providers.length) return '<div class="wtw-none">日本での配信サービスなし</div>';
+            return providers.map(p => `
+                <div class="provider-item" title="${p.provider_name}">
+                    <div class="provider-logo-wrap">
+                        <img class="provider-logo" src="https://image.tmdb.org/t/p/original${p.logo_path}" alt="${p.provider_name}" loading="lazy">
+                    </div>
+                    <div class="provider-name">${p.provider_name.replace('Amazon ', 'Prime\n').replace(' (JP)', '')}</div>
+                </div>`).join('');
+        }
+
+        function providerIconsHtml(providers) {
+            if (!providers || !providers.length) return '';
+            return providers.map(p =>
+                `<img class="c-provider-icon" src="https://image.tmdb.org/t/p/original${p.logo_path}" alt="${p.provider_name}" title="${p.provider_name}" loading="lazy">`
+            ).join('');
+        }
+
+        async function loadWatchProviders(movie, forceRefresh = false) {
+            const el = document.getElementById('where-to-watch');
+            if (!el) return;
+            if (effectiveStatus(movie) !== 'towatch') { el.innerHTML = ''; return; }
+            el.innerHTML = `<div class="wtw-section"><div class="wtw-header"><div class="wtw-label">WHERE TO WATCH — JP</div></div><div class="wtw-logos" style="opacity:0.4;font-size:0.7rem;color:#555">CHECKING...</div></div>`;
+            const providers = await fetchWatchProviders(movie.id, forceRefresh);
+            el.innerHTML = `
+                <div class="wtw-section">
+                    <div class="wtw-header">
+                        <div class="wtw-label">WHERE TO WATCH — JP</div>
+                        <button class="wtw-refresh" onclick="loadWatchProviders(activeMovie, true)">↺ REFRESH</button>
+                    </div>
+                    <div class="wtw-logos">${providerLogosHtml(providers)}</div>
+                </div>`;
+            // カードアイコンも更新
+            const card = document.querySelector(`[data-mid="${movie.id}"]`);
+            if (card) {
+                const ic = card.querySelector('.c-providers');
+                if (ic) ic.innerHTML = providerIconsHtml(providers);
+            }
+        }
+
+        async function prefetchProviders() {
+            const towatch = allMovies.filter(m => effectiveStatus(m) === 'towatch');
+            for (const movie of towatch) {
+                const cached = watchProvidersCache[movie.id];
+                const stale = !cached || (Date.now() - cached.ts) > PROVIDERS_TTL;
+                if (stale) {
+                    await fetchWatchProviders(movie.id);
+                    await new Promise(r => setTimeout(r, 200));
+                }
+                // カードアイコン更新
+                const card = document.querySelector(`[data-mid="${movie.id}"]`);
+                if (card) {
+                    const ic = card.querySelector('.c-providers');
+                    const providers = watchProvidersCache[movie.id]?.providers || [];
+                    if (ic) ic.innerHTML = providerIconsHtml(providers);
+                }
+            }
+        }
 
         if (isLightMode) document.body.classList.add('light-mode');
 
@@ -525,6 +620,8 @@
                 const m = allMovies.find(m => m.id === window._openMovieId);
                 if (m) openImmersive(m);
             }
+            // TOWATCHのサブスク情報をバックグラウンドで取得
+            prefetchProviders();
         }
 
         const TMDB_GENRE_MAP = {
@@ -594,7 +691,9 @@
                     : '';
                 const card = document.createElement('div');
                 card.className = 'c-card';
+                card.dataset.mid = movie.id;
                 const poster = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '';
+                const cachedProviders = status === 'towatch' ? (watchProvidersCache[movie.id]?.providers || []) : [];
                 card.innerHTML = `
                     <div class="c-poster-wrap">
                         <div class="c-poster" style="background-image:url('${poster}')"></div>
@@ -608,6 +707,7 @@
                         <div class="c-sub">${movie.year}</div>
                         ${scoreHtml}
                         ${commentHtml}
+                        ${status === 'towatch' ? `<div class="c-providers">${providerIconsHtml(cachedProviders)}</div>` : ''}
                     </div>`;
                 card.onclick = () => openImmersive(movie);
                 document.getElementById(`${status}-grid`).appendChild(card);
@@ -675,7 +775,11 @@
             document.getElementById('i-player').innerHTML = '';
             document.getElementById('cast-grid').innerHTML = '<div class="cast-loading">LOADING CAST...</div>';
             document.getElementById('recs-grid').innerHTML = '<div class="cast-loading">LOADING...</div>';
+            document.getElementById('where-to-watch').innerHTML = '';
             switchModalTab('overview', document.querySelector('.i-tab-btn'));
+
+            // WHERE TO WATCH（TOWATCHのみ）
+            loadWatchProviders(movie);
 
             // シアターモードリセット
             theaterMode = false;
