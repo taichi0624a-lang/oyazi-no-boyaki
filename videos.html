@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOOST | Videos that make me feel alive</title>
+    <title>BOOST | Video Archive</title>
     <link rel="icon" href="favicon.png" type="image/png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
@@ -65,38 +65,51 @@
         #hero {
             padding: 140px 40px 60px;
             max-width: 1200px; margin: 0 auto;
+            display: flex; align-items: flex-end; justify-content: space-between;
+            border-bottom: 1px solid var(--rule);
+            padding-bottom: 40px;
         }
-        .hero-eyebrow {
+        .hero-left {}
+        .hero-code {
             font-size: 0.6rem; letter-spacing: 5px; color: var(--turq);
-            margin-bottom: 20px;
+            margin-bottom: 16px; font-family: 'Inter', sans-serif;
         }
         .hero-title {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(3rem, 8vw, 6rem);
-            font-weight: 400; line-height: 1.05;
-            color: #fff; margin-bottom: 20px;
+            font-size: clamp(4rem, 10vw, 7rem);
+            font-weight: 400; line-height: 1;
+            color: #fff; letter-spacing: -2px;
         }
-        .hero-title em { font-style: italic; color: var(--turq); }
+        .hero-right {
+            text-align: right; padding-bottom: 8px;
+        }
+        .hero-num {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(4rem, 8vw, 6rem);
+            color: rgba(255,255,255,0.05);
+            line-height: 1; letter-spacing: -4px;
+        }
         .hero-sub {
-            font-size: 0.85rem; color: var(--text-sub); line-height: 1.8;
-            max-width: 500px;
+            font-size: 0.65rem; letter-spacing: 3px; color: var(--text-sub);
+            margin-top: 6px;
         }
 
-        /* ── FILTER TAGS ── */
+        /* ── FILTER BAR ── */
         #tag-bar {
             max-width: 1200px; margin: 0 auto;
-            padding: 0 40px 50px;
-            display: flex; gap: 10px; flex-wrap: wrap;
+            padding: 28px 40px 50px;
+            display: flex; gap: 0; align-items: center;
         }
         .tag-btn {
-            background: transparent; border: 1px solid var(--card-border);
-            color: var(--text-sub); padding: 6px 18px; border-radius: 100px;
-            font-size: 0.65rem; letter-spacing: 2px; cursor: pointer; transition: 0.3s;
+            background: transparent; border: none;
+            color: #444; padding: 4px 16px; border-right: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.6rem; letter-spacing: 3px; cursor: pointer; transition: color 0.3s;
+            font-family: 'Inter', sans-serif;
         }
-        .tag-btn:hover, .tag-btn.active {
-            border-color: var(--turq); color: var(--turq);
-        }
-        .tag-btn.active { background: rgba(69,181,170,0.1); }
+        .tag-btn:first-child { padding-left: 0; }
+        .tag-btn:last-child { border-right: none; }
+        .tag-btn:hover { color: #888; }
+        .tag-btn.active { color: var(--turq); }
 
         /* ── GRID ── */
         #video-grid {
@@ -301,9 +314,14 @@
 </header>
 
 <section id="hero">
-    <div class="hero-eyebrow">PERSONAL VIDEO ARCHIVE</div>
-    <h1 class="hero-title">Videos that make<br><em>me feel alive</em></h1>
-    <p class="hero-sub">元気が出る動画、繰り返し観たい動画を集めた個人アーカイブ。</p>
+    <div class="hero-left">
+        <div class="hero-code">V.01 — VIDEO ARCHIVE</div>
+        <h1 class="hero-title">BOOST</h1>
+    </div>
+    <div class="hero-right">
+        <div class="hero-num" id="hero-count">000</div>
+        <div class="hero-sub">VIDEOS ARCHIVED</div>
+    </div>
 </section>
 
 <div id="tag-bar">
@@ -431,6 +449,8 @@
         const grid = document.getElementById('video-grid');
         const empty = document.getElementById('empty-state');
         const filtered = currentTag === 'all' ? videos : videos.filter(v => v.tag === currentTag);
+        const countEl = document.getElementById('hero-count');
+        if (countEl) countEl.textContent = String(videos.length).padStart(3, '0');
 
         if (filtered.length === 0) {
             grid.innerHTML = '';
