@@ -229,6 +229,106 @@ def post_comment(movie_url: str, comment: str):
     else:
         return {"ok": False, "error": f"HTTP {resp.status_code}", "detail": resp.text[:200]}
 
+def mark_movie(title, score, comment):
+    """Filmarksで映画を検索して鑑賞チェック（スコア・コメント付き）を登録"""
+    global logged_in, current_user_id
+    if not logged_in:
+        if not login():
+            return {"ok": False, "error": "ログインに失敗しました"}
+
+    # 映画を検索
+    search_url = f"https://filmarks.com/search/movies?q={requests.utils.quote(title)}"
+    session.headers.update({"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"})
+    r = session.get(search_url)
+    soup = BeautifulSoup(r.text, "html.parser")
+
+    card = soup.select_one(".p-content-cassette")
+    if not card:
+        return {"ok": False, "error": f"Filmarksで見つかりません: {title}"}
+
+    link_el = card.select_one("a[href*='/movies/']")
+    if not link_el:
+        return {"ok": False, "error": "映画URLが見つかりません"}
+
+    href = link_el.get("href", "")
+    m_id = re.search(r'/movies/(\d+)', href)
+    if not m_id:
+        return {"ok": False, "error": "movie_idが取得できません"}
+
+    movie_id  = m_id.group(1)
+    movie_url = "https://filmarks.com" + href.split("?")[0]
+
+    # 映画ページからCSRF取得
+    r2 = session.get(f"https://filmarks.com/movies/{movie_id}")
+    csrf = get_csrf_token(r2.text)
+    if not csrf:
+        return {"ok": False, "error": "CSRFトークン取得失敗"}
+
+    # POSTデータ
+    data = {
+        "id":               "",
+        "movieId":          movie_id,
+        "animeSeriesId":    "",
+        "animeSeasonId":    "",
+        "dramaSeriesId":    "",
+        "dramaSeasonId":    "",
+        "review":           comment,
+        "isSpoiler":        "false",
+        "createdAt":        "",
+        "count":            "",
+        "tags[]":           "",
+        "userId":           current_user_id,
+        "viewingRecords[]": "",
+        "isTwitterShare":   "0",
+        "social[twitter]":  "false",
+        "isActive":         "true",
+        "show":             "true",
+        "isApiProcessing":  "true",
+    }
+    # スコアがある場合のみ付加
+    if score and str(score) not in ("", "0", "0.0"):
+        data["score"] = str(score)
+
+    session.headers.update({
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "X-Requested-With": "XMLHttpRequest"
+    })
+    resp = session.post(
+        f"https://filmarks.com/movies/{movie_id}/marks",
+        headers={
+            "x-csrf-token":     csrf,
+            "Content-Type":     "application/x-www-form-urlencoded; charset=UTF-8",
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer":          f"https://filmarks.com/movies/{movie_id}"
+        },
+        data=data
+    )
+    print(f"mark_movie [{title}] score={score}: {resp.status_code} {resp.text[:200]}")
+
+    if resp.status_code in (200, 201):
+        return {"ok": True, "movieUrl": movie_url}
+    elif resp.status_code in (401, 403, 302):
+        logged_in = False
+        return mark_movie(title, score, comment)
+    else:
+        return {"ok": False, "error": f"HTTP {resp.status_code}", "detail": resp.text[:200]}
+
+
+@app.route("/mark-movie", methods=["POST"])
+def api_mark_movie():
+    data    = request.get_json()
+    token   = data.get("token", "")
+    if ADMIN_TOKEN and token != ADMIN_TOKEN:
+        return jsonify({"ok": False, "error": "Unauthorized"}), 403
+    title   = data.get("title", "")
+    score   = data.get("score", "")
+    comment = data.get("comment", "")
+    if not title:
+        return jsonify({"ok": False, "error": "title が必要です"})
+    result = mark_movie(title, score, comment)
+    return jsonify(result)
+
+
 @app.route("/post-comment", methods=["POST"])
 def api_post_comment():
     data     = request.get_json()

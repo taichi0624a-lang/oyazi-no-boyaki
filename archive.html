@@ -177,6 +177,26 @@
         .share-btn:hover { border-color:var(--turq); color:var(--turq); }
         .watched-btn { background:var(--turq); border:none; color:#000; padding:8px 20px; border-radius:100px; font-size:0.65rem; letter-spacing:2px; cursor:pointer; font-weight:500; transition:0.3s; white-space:nowrap; }
         .watched-btn:hover { opacity:0.85; }
+
+        /* ── WATCH PANEL (TOWATCH→WATCHED) ── */
+        .watch-panel { margin-top:14px; padding:18px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; }
+        .wp-label { font-size:0.6rem; letter-spacing:3px; color:#666; margin-bottom:10px; }
+        .hs-wrap { display:flex; gap:5px; margin-bottom:8px; }
+        .hs-pos { position:relative; font-size:2.2rem; cursor:pointer; user-select:none; line-height:1; }
+        .hs-glyph { color:#2a2a2a; transition:color 0.15s; display:block; }
+        .hs-pos.hs-full .hs-glyph { color:var(--turq); }
+        .hs-pos.hs-half .hs-glyph { background:linear-gradient(90deg,var(--turq) 50%,#2a2a2a 50%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .hs-l, .hs-r { position:absolute; top:0; height:100%; width:50%; z-index:1; }
+        .hs-l { left:0; }
+        .hs-r { right:0; }
+        .hs-val { font-size:0.75rem; color:#aaa; margin-bottom:14px; letter-spacing:1px; }
+        .wp-textarea { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#ccc; font-size:0.8rem; padding:10px; resize:vertical; box-sizing:border-box; font-family:inherit; margin-bottom:12px; }
+        .wp-textarea::placeholder { color:#444; }
+        .wp-btns { display:flex; gap:8px; }
+        .wp-confirm { background:var(--turq); border:none; color:#000; padding:8px 20px; border-radius:100px; font-size:0.62rem; letter-spacing:2px; cursor:pointer; font-weight:600; flex:1; transition:0.3s; }
+        .wp-confirm:hover { opacity:0.85; }
+        .wp-cancel { background:transparent; border:1px solid rgba(255,255,255,0.15); color:#666; padding:8px 16px; border-radius:100px; font-size:0.62rem; letter-spacing:2px; cursor:pointer; transition:0.3s; }
+        .wp-cancel:hover { border-color:#fff; color:#fff; }
         .i-tabs { display:flex; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:30px; }
         .i-tab-btn { background:transparent; border:none; color:#666; padding:12px 16px; cursor:pointer; font-size:0.65rem; letter-spacing:2px; font-weight:500; transition:0.3s; border-bottom:2px solid transparent; margin-bottom:-1px; }
         .i-tab-btn.active { color:var(--turq); border-bottom-color:var(--turq); }
@@ -323,6 +343,24 @@
                     <div id="i-meta"></div>
                     <button id="watched-btn" class="watched-btn" onclick="markAsWatched()" style="display:none;">✓ MARK AS WATCHED</button>
                     <button class="share-btn" onclick="shareMovie()">↗ SHARE</button>
+                </div>
+                <!-- WATCH PANEL -->
+                <div id="watch-panel" class="watch-panel" style="display:none;">
+                    <div class="wp-label">RATING (optional)</div>
+                    <div class="hs-wrap" id="hs-wrap">
+                        <span class="hs-pos" id="hs1"><span class="hs-l" onclick="setWR(0.5)"></span><span class="hs-r" onclick="setWR(1.0)"></span><span class="hs-glyph">★</span></span>
+                        <span class="hs-pos" id="hs2"><span class="hs-l" onclick="setWR(1.5)"></span><span class="hs-r" onclick="setWR(2.0)"></span><span class="hs-glyph">★</span></span>
+                        <span class="hs-pos" id="hs3"><span class="hs-l" onclick="setWR(2.5)"></span><span class="hs-r" onclick="setWR(3.0)"></span><span class="hs-glyph">★</span></span>
+                        <span class="hs-pos" id="hs4"><span class="hs-l" onclick="setWR(3.5)"></span><span class="hs-r" onclick="setWR(4.0)"></span><span class="hs-glyph">★</span></span>
+                        <span class="hs-pos" id="hs5"><span class="hs-l" onclick="setWR(4.5)"></span><span class="hs-r" onclick="setWR(5.0)"></span><span class="hs-glyph">★</span></span>
+                    </div>
+                    <div class="hs-val" id="hs-val">— / 5.0</div>
+                    <div class="wp-label">COMMENT (optional)</div>
+                    <textarea class="wp-textarea" id="wp-comment" rows="3" placeholder="一言コメント..."></textarea>
+                    <div class="wp-btns">
+                        <button class="wp-confirm" id="wp-confirm-btn" onclick="confirmWatched()">✓ CONFIRM WATCHED</button>
+                        <button class="wp-cancel" onclick="cancelWatchPanel()">CANCEL</button>
+                    </div>
                 </div>
 
                 <!-- シネマチケット -->
@@ -698,16 +736,94 @@
             });
         }
 
+        let watchRating = 0;
+
         function markAsWatched() {
             if (!activeMovie) return;
+            // パネルをリセットして表示
+            watchRating = 0;
+            updateWatchStars();
+            document.getElementById('wp-comment').value = '';
+            document.getElementById('wp-confirm-btn').textContent = '✓ CONFIRM WATCHED';
+            document.getElementById('watched-btn').style.display = 'none';
+            document.getElementById('watch-panel').style.display = '';
+        }
+
+        function setWR(val) {
+            watchRating = val;
+            updateWatchStars();
+        }
+
+        function updateWatchStars() {
+            for (let i = 1; i <= 5; i++) {
+                const el = document.getElementById('hs' + i);
+                el.classList.remove('hs-full', 'hs-half');
+                if (watchRating >= i) el.classList.add('hs-full');
+                else if (watchRating >= i - 0.5) el.classList.add('hs-half');
+            }
+            const val = document.getElementById('hs-val');
+            val.textContent = watchRating > 0 ? watchRating.toFixed(1) + ' / 5.0' : '— / 5.0';
+        }
+
+        function cancelWatchPanel() {
+            document.getElementById('watch-panel').style.display = 'none';
+            document.getElementById('watched-btn').style.display = '';
+        }
+
+        async function confirmWatched() {
+            if (!activeMovie) return;
+            const comment = document.getElementById('wp-comment').value.trim();
+            const score   = watchRating;
+
+            const btn = document.getElementById('wp-confirm-btn');
+            btn.textContent = 'SAVING...';
+
+            // ローカルに保存
             statusOverrides[activeMovie.id] = 'watched';
             localStorage.setItem('o24-overrides', JSON.stringify(statusOverrides));
-            document.getElementById('watched-btn').style.display = 'none';
+            if (score > 0 || comment) {
+                reviews[activeMovie.id] = { rating: score, memo: comment };
+                localStorage.setItem('o24-reviews', JSON.stringify(reviews));
+            }
+
+            // UIを更新
+            document.getElementById('watch-panel').style.display = 'none';
             document.getElementById('review-tab-btn').style.display = '';
             renderTicket(activeMovie);
             renderAll();
-            const btn = document.getElementById('watched-btn');
-            btn.textContent = '✓ WATCHED';
+
+            // Filmarksに登録
+            btn.textContent = 'POSTING TO FILMARKS...';
+            try {
+                const res = await fetch('https://o24-filmarks.onrender.com/mark-movie', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token:   'o24-secret-2026',
+                        title:   activeMovie.title,
+                        score:   score > 0 ? score : '',
+                        comment: comment
+                    })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    // filmarksUrlをメモリとlocalStorageに保存
+                    if (data.movieUrl) {
+                        activeMovie.filmarksUrl = data.movieUrl;
+                        if (reviews[activeMovie.id]) {
+                            reviews[activeMovie.id].filmarksUrl = data.movieUrl;
+                        } else {
+                            reviews[activeMovie.id] = { rating: score, memo: comment, filmarksUrl: data.movieUrl };
+                        }
+                        localStorage.setItem('o24-reviews', JSON.stringify(reviews));
+                    }
+                    console.log('Filmarks登録完了:', data.movieUrl);
+                } else {
+                    console.warn('Filmarks登録失敗:', data.error);
+                }
+            } catch(e) {
+                console.warn('Filmarksサーバーエラー:', e.message);
+            }
         }
 
         function switchModalTab(tab, btn) {
