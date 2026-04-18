@@ -3,692 +3,774 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>チョコの部屋 ☆ CHOCO'S ROOM ☆</title>
+<title>チョコの部屋 — CHOCO'S ROOM</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=VT323&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-/* ───── STARFIELD ───── */
-@keyframes twinkle {
-  0%,100% { opacity: 0.2; transform: scale(0.8); }
-  50%      { opacity: 1;   transform: scale(1.2); }
-}
-@keyframes scroll-up {
-  from { transform: translateY(100vh); }
-  to   { transform: translateY(-200px); }
-}
-@keyframes blink {
-  0%,49% { opacity: 1; }
-  50%,100% { opacity: 0; }
-}
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-@keyframes float {
-  0%,100% { transform: translateY(0px); }
-  50%      { transform: translateY(-8px); }
-}
-@keyframes marquee {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(-100%); }
-}
-@keyframes glitch {
-  0%   { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
-  25%  { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
-  50%  { text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff; }
-  75%  { text-shadow: 0 0 0; }
-  100% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
+:root {
+  --bg:     #faf8f4;
+  --paper:  #ffffff;
+  --ink:    #1a1714;
+  --brown:  #7a4e2d;
+  --soft:   #c8956a;
+  --rule:   #e8e2d8;
+  --dim:    #9a9188;
+  --warm:   #f2ede4;
+  --cream:  #fdf9f3;
 }
 
-html, body {
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
-  background: #000010;
-  color: #e8c8f8;
-  font-family: 'DotGothic16', 'MS Gothic', monospace;
   overflow-x: hidden;
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ctext y='18' font-size='18'%3E✦%3C/text%3E%3C/svg%3E") 12 12, auto;
 }
 
-/* ───── STAR CANVAS ───── */
-#starfield {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
+/* ── PROGRESS ── */
+#read-progress {
+  position: fixed; top: 0; left: 0;
+  height: 2px; background: var(--soft);
+  z-index: 9999; width: 0%;
+  transition: width 0.08s linear;
   pointer-events: none;
 }
-.star {
-  position: absolute;
-  width: 2px; height: 2px;
-  background: #fff;
-  border-radius: 50%;
-  animation: twinkle var(--d, 2s) ease-in-out infinite;
-  animation-delay: var(--dl, 0s);
+
+/* ── NAV ── */
+#nav {
+  position: sticky; top: 0; z-index: 500;
+  background: var(--bg);
+  border-bottom: 1px solid var(--ink);
+}
+.nav-inner {
+  max-width: 900px; margin: 0 auto;
+  padding: 14px 6vw;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-back {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 2px;
+  color: var(--dim); text-decoration: none;
+  transition: color 0.15s;
+}
+.nav-back:hover { color: var(--ink); }
+.nav-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem; font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.nav-dot {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; color: var(--dim);
 }
 
-/* ───── LAYOUT ───── */
-#wrapper {
-  position: relative;
-  z-index: 1;
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 20px 12px 60px;
-}
-
-/* ───── TICKER TAPE ───── */
-#ticker {
-  background: #1a0033;
-  border-top: 2px solid #cc44ff;
-  border-bottom: 2px solid #cc44ff;
-  padding: 6px 0;
-  overflow: hidden;
-  white-space: nowrap;
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 999;
-}
-#ticker-inner {
-  display: inline-block;
-  animation: marquee 18s linear infinite;
-  font-size: 11px;
-  letter-spacing: 2px;
-  color: #ff88ff;
-}
-#ticker-inner span { margin: 0 28px; }
-
-/* ───── HEADER ───── */
-#header {
-  margin-top: 42px;
-  text-align: center;
-  padding: 30px 0 20px;
-  border: 2px solid #aa22dd;
-  background: linear-gradient(180deg, #0a0015 0%, #120025 100%);
-  position: relative;
-  overflow: hidden;
-}
-#header::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 50% 0%, rgba(180,0,255,0.15) 0%, transparent 70%);
-}
-.header-deco {
-  font-size: 22px;
-  letter-spacing: 8px;
-  animation: float 3s ease-in-out infinite;
-  display: block;
-  margin-bottom: 8px;
-}
-#header h1 {
-  font-family: 'VT323', monospace;
-  font-size: clamp(2.4rem, 8vw, 4.5rem);
-  color: #ff88ff;
-  text-shadow: 0 0 20px #ff00ff, 0 0 40px #8800ff;
-  animation: glitch 4s ease-in-out infinite;
-  letter-spacing: 4px;
-  line-height: 1.1;
-}
-#header .sub {
-  font-size: 11px;
-  color: #aa66cc;
-  letter-spacing: 4px;
-  margin-top: 8px;
-  animation: blink 1.4s step-end infinite;
-}
-.star-row {
-  font-size: 18px;
-  letter-spacing: 4px;
-  margin-top: 10px;
-  color: #dd88ff;
-}
-
-/* ───── WELCOME BOX ───── */
-.window {
-  border: 2px solid #882299;
-  margin-top: 18px;
-  background: #0d0020;
-}
-.window-bar {
-  background: linear-gradient(90deg, #440088, #882299);
-  padding: 4px 10px;
-  font-size: 11px;
-  color: #ffddff;
-  letter-spacing: 2px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.window-bar .dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #ff4488;
-  display: inline-block;
-}
-.window-content {
-  padding: 16px 18px;
-  font-size: 13px;
-  line-height: 2;
-  color: #ddaaff;
-}
-.window-content p { margin-bottom: 8px; }
-.window-content a {
-  color: #ff88ff;
-  text-shadow: 0 0 8px #ff44ff;
-}
-
-/* ───── PHOTO / AVATAR AREA ───── */
-#profile-area {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  margin-top: 18px;
-}
-#avatar-box {
-  flex: 0 0 140px;
-  text-align: center;
-}
-.avatar-frame {
-  width: 120px;
-  height: 120px;
-  border: 3px solid #cc44ff;
-  background: #1a0030;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 64px;
-  margin: 0 auto;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 0 20px #8800ff;
-  animation: float 4s ease-in-out infinite;
-}
-.avatar-frame::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 60%);
-}
-.avatar-name {
-  font-size: 10px;
-  color: #ff88ff;
-  letter-spacing: 3px;
-  margin-top: 6px;
-  animation: blink 2s step-end infinite;
-}
-#profile-stats {
-  flex: 1;
-  min-width: 200px;
-}
-.stat-row {
-  display: flex;
-  gap: 8px;
-  font-size: 11px;
-  border-bottom: 1px dotted #440066;
-  padding: 5px 2px;
-  color: #ccaaee;
-}
-.stat-key {
-  color: #ff88ff;
-  min-width: 80px;
-  flex-shrink: 0;
-}
-
-/* ───── DIARY SECTION ───── */
-.section-title {
-  font-family: 'VT323', monospace;
-  font-size: 1.6rem;
-  color: #ff88ff;
-  letter-spacing: 4px;
-  border-bottom: 1px solid #660099;
-  padding-bottom: 4px;
-  margin-bottom: 12px;
-  text-shadow: 0 0 12px #ff00ff;
-}
-.section-title::before { content: '✦ '; }
-.section-title::after  { content: ' ✦'; }
-
-.diary-entry {
-  margin-bottom: 16px;
-  padding: 12px 14px;
-  background: #0a001a;
-  border-left: 3px solid #8800ff;
-  position: relative;
-}
-.diary-date {
-  font-size: 9px;
-  color: #884499;
-  letter-spacing: 3px;
-  margin-bottom: 6px;
-}
-.diary-text {
-  font-size: 12px;
-  line-height: 1.9;
-  color: #ddaaff;
-}
-.diary-mood {
-  position: absolute;
-  top: 10px; right: 12px;
-  font-size: 18px;
-  opacity: 0.7;
-}
-
-/* ───── FAVORITES ───── */
-.fav-grid {
+/* ── HERO ── */
+#hero {
+  max-width: 900px; margin: 0 auto;
+  padding: 64px 6vw 52px;
+  border-bottom: 1px solid var(--rule);
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 10px;
-  margin-bottom: 16px;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
 }
-.fav-item {
-  background: #0d0022;
-  border: 1px solid #660099;
-  padding: 10px 8px;
-  text-align: center;
-  font-size: 11px;
-  color: #cc88ee;
-  transition: border-color 0.2s, background 0.2s;
+.hero-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 4px;
+  color: var(--soft); margin-bottom: 18px;
+  display: flex; align-items: center; gap: 12px;
 }
-.fav-item:hover {
-  border-color: #cc44ff;
-  background: #180035;
+.hero-label::before {
+  content: ''; display: inline-block;
+  width: 28px; height: 1px; background: var(--soft);
 }
-.fav-item .emoji { font-size: 26px; display: block; margin-bottom: 4px; }
-.fav-item .label { font-size: 9px; color: #aa66cc; letter-spacing: 1px; }
+.hero-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+.hero-name em {
+  font-style: italic;
+  color: var(--brown);
+}
+.hero-desc {
+  font-size: 0.9rem;
+  line-height: 1.85;
+  color: var(--dim);
+  font-weight: 300;
+  max-width: 320px;
+}
 
-/* ───── GUESTBOOK ───── */
-#guestbook-form {
+/* ── PHOTO PLACEHOLDER ── */
+.hero-photo {
+  aspect-ratio: 4/5;
+  background: var(--warm);
+  border: 1px solid var(--rule);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
 }
-#guestbook-form input,
-#guestbook-form textarea {
-  background: #06000f;
-  border: 1px solid #660099;
-  color: #ddaaff;
-  font-family: 'DotGothic16', monospace;
-  font-size: 12px;
+.hero-photo img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.hero-photo-placeholder {
+  text-align: center;
+  pointer-events: none;
+}
+.hero-photo-placeholder .paw { font-size: 3rem; opacity: 0.25; }
+.hero-photo-placeholder .ph-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px; letter-spacing: 3px;
+  color: var(--dim); margin-top: 8px;
+}
+.photo-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(250,248,244,0.9);
+  padding: 8px 12px;
+  font-family: 'Space Mono', monospace;
+  font-size: 8px; letter-spacing: 2px; color: var(--dim);
+  border-top: 1px solid var(--rule);
+  display: none;
+}
+.hero-photo img ~ .photo-caption { display: block; }
+
+/* ── PROFILE STRIP ── */
+#profile {
+  max-width: 900px; margin: 0 auto;
+  padding: 40px 6vw;
+  border-bottom: 1px solid var(--rule);
+  display: flex; gap: 0;
+}
+.profile-item {
+  flex: 1;
+  padding: 0 28px 0 0;
+  border-right: 1px solid var(--rule);
+  margin-right: 28px;
+}
+.profile-item:last-child {
+  border-right: none; margin-right: 0;
+}
+.profile-key {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px; letter-spacing: 3px; color: var(--soft);
+  margin-bottom: 5px;
+}
+.profile-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem; font-weight: 600;
+  color: var(--ink);
+}
+.profile-sub {
+  font-size: 0.72rem; color: var(--dim); margin-top: 2px;
+}
+
+/* ── SECTION HEADER ── */
+.sec-wrap { max-width: 900px; margin: 0 auto; padding: 0 6vw; }
+.sec-header {
+  display: flex; align-items: baseline; gap: 16px;
+  padding: 52px 0 28px;
+}
+.sec-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.65rem; font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.sec-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 3px; color: var(--dim);
+}
+
+/* ── PHOTO GRID ── */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin-bottom: 2px;
+}
+.photo-grid-item {
+  aspect-ratio: 1;
+  background: var(--warm);
+  border: 1px solid var(--rule);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: opacity 0.2s;
+}
+.photo-grid-item:hover { opacity: 0.88; }
+.photo-grid-item img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.photo-grid-item.empty {
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 6px; cursor: default;
+}
+.photo-grid-item.empty:hover { opacity: 1; }
+.empty-paw { font-size: 1.6rem; opacity: 0.18; }
+.empty-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 7px; letter-spacing: 2px; color: var(--rule);
+}
+.photo-grid-item .photo-overlay {
+  position: absolute; inset: 0;
+  background: rgba(26,23,20,0);
+  transition: background 0.2s;
+  display: flex; align-items: flex-end;
+}
+.photo-grid-item:hover .photo-overlay { background: rgba(26,23,20,0.12); }
+.photo-overlay-cap {
   padding: 8px 10px;
+  font-family: 'Space Mono', monospace;
+  font-size: 7px; letter-spacing: 1px; color: #fff;
+  opacity: 0; transition: opacity 0.2s;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+.photo-grid-item:hover .photo-overlay-cap { opacity: 1; }
+
+/* ── UPLOAD HINT ── */
+.upload-hint {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px; letter-spacing: 2px; color: var(--dim);
+  text-align: center; padding: 14px;
+  border: 1px dashed var(--rule);
+  margin-top: 10px;
+}
+
+/* ── DIARY ── */
+.diary-list { margin-bottom: 40px; }
+.diary-entry {
+  border-top: 1px solid var(--rule);
+  padding: 28px 0;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 32px;
+}
+.diary-entry:first-child { border-top: 1px solid var(--ink); }
+.diary-meta { padding-top: 2px; }
+.diary-date {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; color: var(--brown);
+  margin-bottom: 4px;
+}
+.diary-day {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px; letter-spacing: 1px; color: var(--dim);
+}
+.diary-mood {
+  margin-top: 12px;
+  font-size: 1.3rem;
+}
+.diary-body h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem; font-weight: 700;
+  letter-spacing: -0.01em; margin-bottom: 10px;
+  line-height: 1.3;
+}
+.diary-body p {
+  font-size: 0.875rem; line-height: 1.9; color: #3a3530;
+  font-weight: 300; margin-bottom: 8px;
+}
+.diary-body p:last-child { margin-bottom: 0; }
+.diary-tag {
+  display: inline-block;
+  font-family: 'Space Mono', monospace;
+  font-size: 7px; letter-spacing: 2px;
+  color: var(--soft);
+  border: 1px solid rgba(200,149,106,0.3);
+  padding: 2px 8px;
+  margin-top: 10px; margin-right: 4px;
+}
+
+/* ── NEW ENTRY FORM ── */
+#new-entry-toggle {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; padding: 16px;
+  border: 1px dashed var(--rule);
+  cursor: pointer; transition: background 0.18s;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 3px; color: var(--dim);
+  background: var(--bg);
+  margin-bottom: 40px;
+}
+#new-entry-toggle:hover { background: var(--warm); }
+#new-entry-form {
+  display: none;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  padding: 24px;
+  margin-bottom: 32px;
+}
+#new-entry-form.open { display: block; }
+.form-row { margin-bottom: 14px; }
+.form-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px; letter-spacing: 2px; color: var(--dim);
+  display: block; margin-bottom: 5px;
+}
+.form-row input,
+.form-row textarea,
+.form-row select {
+  width: 100%;
+  background: var(--cream);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem;
+  padding: 10px 12px;
   outline: none;
   resize: vertical;
   transition: border-color 0.2s;
 }
-#guestbook-form input:focus,
-#guestbook-form textarea:focus { border-color: #cc44ff; }
-#guestbook-form input::placeholder,
-#guestbook-form textarea::placeholder { color: #553366; }
-#gb-submit {
-  background: #440088;
-  border: 2px solid #cc44ff;
-  color: #ffddff;
-  font-family: 'DotGothic16', monospace;
-  font-size: 12px;
-  letter-spacing: 3px;
-  padding: 8px 20px;
-  cursor: pointer;
-  align-self: flex-start;
-  transition: background 0.2s, box-shadow 0.2s;
+.form-row input:focus,
+.form-row textarea:focus { border-color: var(--brown); }
+.form-row textarea { min-height: 100px; }
+.form-row select { background: var(--cream); cursor: pointer; }
+.form-submit {
+  background: var(--ink); color: var(--bg);
+  border: none;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 3px;
+  padding: 11px 22px; cursor: pointer;
+  transition: opacity 0.18s;
 }
-#gb-submit:hover {
-  background: #660099;
-  box-shadow: 0 0 12px #cc44ff;
-}
-.gb-entry {
-  padding: 10px 12px;
-  background: #080018;
-  border-left: 2px solid #550088;
-  margin-bottom: 8px;
-  font-size: 11px;
-}
-.gb-name {
-  color: #ff88ff;
-  font-size: 10px;
-  letter-spacing: 2px;
-  margin-bottom: 4px;
-}
-.gb-msg { color: #ccaaee; line-height: 1.7; }
-.gb-time { font-size: 9px; color: #553366; margin-top: 4px; }
+.form-submit:hover { opacity: 0.75; }
+.form-row-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-/* ───── HIT COUNTER ───── */
-#counter-area {
+/* ── STATS ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  margin-bottom: 52px;
+}
+.stat-box {
+  background: var(--paper);
+  padding: 24px 20px;
   text-align: center;
-  padding: 14px;
-  margin-top: 18px;
-  border: 1px dashed #660099;
 }
-.counter-label {
-  font-size: 9px;
-  letter-spacing: 3px;
-  color: #884499;
-  margin-bottom: 6px;
+.stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.4rem; font-weight: 700;
+  color: var(--brown); letter-spacing: -0.03em;
 }
-.counter-digits {
-  font-family: 'VT323', monospace;
-  font-size: 2.2rem;
-  color: #ff44ff;
-  text-shadow: 0 0 10px #ff00ff;
-  letter-spacing: 6px;
+.stat-unit {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px; letter-spacing: 2px; color: var(--dim);
+  margin-left: 2px;
 }
-
-/* ───── FOOTER BAR ───── */
-#page-footer {
-  margin-top: 30px;
-  text-align: center;
-  font-size: 10px;
-  color: #553366;
-  letter-spacing: 2px;
-  border-top: 1px solid #330055;
-  padding-top: 14px;
-}
-#page-footer a {
-  color: #aa44cc;
-  text-decoration: none;
-}
-#page-footer a:hover { color: #ff88ff; }
-.footer-stars {
-  color: #660099;
-  font-size: 14px;
-  letter-spacing: 6px;
-  margin-bottom: 8px;
+.stat-lbl {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px; letter-spacing: 2px; color: var(--dim);
+  margin-top: 4px;
 }
 
-/* ───── FLOATING SPARKLES ───── */
-.sparkle {
-  position: fixed;
-  pointer-events: none;
-  z-index: 1000;
-  font-size: 16px;
-  animation: float-away 1s ease-out forwards;
+/* ── FOOTER ── */
+#footer {
+  border-top: 1px solid var(--ink);
+  max-width: 900px; margin: 0 auto;
+  padding: 20px 6vw 52px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
 }
-@keyframes float-away {
-  0%   { opacity: 1; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(-60px) scale(0.4); }
+.footer-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem; font-weight: 600;
+  font-style: italic;
+}
+.footer-links {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 2px;
+  color: var(--dim); display: flex; gap: 20px;
+}
+.footer-links a { color: var(--dim); text-decoration: none; transition: color 0.15s; }
+.footer-links a:hover { color: var(--ink); }
+
+/* ── LIGHTBOX ── */
+#lightbox {
+  position: fixed; inset: 0; z-index: 800;
+  background: rgba(250,248,244,0.96);
+  backdrop-filter: blur(8px);
+  display: none; align-items: center; justify-content: center;
+  cursor: zoom-out;
+}
+#lightbox.active { display: flex; }
+#lightbox img {
+  max-width: 88vw; max-height: 88vh;
+  object-fit: contain;
+  border: 1px solid var(--rule);
+  cursor: default;
+}
+#lb-close {
+  position: fixed; top: 24px; right: 6vw;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 3px; color: var(--dim);
+  background: transparent; border: none; cursor: pointer;
 }
 
-/* ───── SCROLLBAR ───── */
-::-webkit-scrollbar { width: 8px; background: #0a000f; }
-::-webkit-scrollbar-thumb { background: #550088; border-radius: 4px; }
+/* ── SCROLL TOP ── */
+#scroll-top {
+  position: fixed; bottom: 32px; right: 5vw;
+  width: 38px; height: 38px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; opacity: 0; transition: opacity 0.3s;
+  font-size: 12px; color: var(--dim);
+}
+#scroll-top.visible { opacity: 1; }
 
-/* ───── MOBILE ───── */
-@media (max-width: 480px) {
-  #profile-area { flex-direction: column; align-items: center; }
-  #avatar-box { flex: none; }
-  .fav-grid { grid-template-columns: repeat(3, 1fr); }
+/* ── MOBILE ── */
+@media (max-width: 620px) {
+  #hero { grid-template-columns: 1fr; gap: 32px; }
+  .hero-photo { aspect-ratio: 4/3; }
+  #profile { flex-wrap: wrap; gap: 20px; }
+  .profile-item { flex: 0 0 calc(50% - 14px); border-right: none; padding: 0; margin: 0; }
+  .diary-entry { grid-template-columns: 1fr; gap: 10px; }
+  .diary-meta { display: flex; gap: 16px; align-items: center; }
+  .diary-mood { margin-top: 0; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .photo-grid { grid-template-columns: repeat(2, 1fr); }
+  .form-row-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
-<!-- STARFIELD -->
-<div id="starfield"></div>
+<div id="read-progress"></div>
 
-<!-- TICKER -->
-<div id="ticker">
-  <span id="ticker-inner">
-    <span>✦ ようこそ チョコの部屋へ ✦</span>
-    <span>★ WELCOME TO CHOCO'S ROOM ★</span>
-    <span>✦ 遊びにきてくれてありがとう ✦</span>
-    <span>☆ チョコはここにいるよ ☆</span>
-    <span>✦ NO ENTRY WITHOUT LOVE ✦</span>
-    <span>★ 2024 ★</span>
-  </span>
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button id="lb-close">CLOSE ✕</button>
+  <img id="lb-img" src="" alt="">
 </div>
 
-<div id="wrapper">
-
-  <!-- HEADER -->
-  <div id="header">
-    <span class="header-deco">🍫 ✦ 🌙</span>
-    <h1>チョコの部屋</h1>
-    <div class="sub">▼ CHOCO'S ROOM ▼ CLICK HERE TO ENTER ▼</div>
-    <div class="star-row">★ ☆ ★ ☆ ★ ☆ ★ ☆ ★</div>
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a class="nav-back" href="index.html">← HOME</a>
+    <span class="nav-title">チョコの部屋</span>
+    <span class="nav-dot">DOG LOG</span>
   </div>
+</nav>
 
-  <!-- WELCOME WINDOW -->
-  <div class="window">
-    <div class="window-bar"><span class="dot"></span> WELCOME MESSAGE</div>
-    <div class="window-content">
-      <p>ここは <strong style="color:#ff88ff">チョコの秘密の部屋</strong> ☆</p>
-      <p>迷い込んだあなた、ようこそ。ゆっくりしていってね。</p>
-      <p>チョコのこと、少しずつ知ってもらえたら嬉しいな。</p>
-      <p style="font-size:10px; color:#884499;">※ 無断転載・コピー禁止 ／ リンクフリー ／ 相互リンク大歓迎</p>
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-label">CHOCO'S ROOM — 犬の観察日誌</div>
+    <h1 class="hero-name">チョコ<em>.</em></h1>
+    <p class="hero-desc">
+      愛犬チョコの日常を記録するページ。<br>
+      毎日の観察、かわいい瞬間、どうでもいいこと。<br>
+      全部ここに置いておく。
+    </p>
+  </div>
+  <div class="hero-photo" id="hero-photo-wrap">
+    <div class="hero-photo-placeholder">
+      <div class="paw">🐾</div>
+      <div class="ph-text">CHOCO PHOTO</div>
+    </div>
+    <div class="photo-caption">チョコ</div>
+  </div>
+</section>
+
+<!-- PROFILE STRIP -->
+<div id="profile">
+  <div class="profile-item">
+    <div class="profile-key">NAME</div>
+    <div class="profile-val">チョコ</div>
+    <div class="profile-sub">Choco</div>
+  </div>
+  <div class="profile-item">
+    <div class="profile-key">BREED</div>
+    <div class="profile-val" id="prof-breed">—</div>
+    <div class="profile-sub" id="prof-breed-en">breed</div>
+  </div>
+  <div class="profile-item">
+    <div class="profile-key">BIRTHDAY</div>
+    <div class="profile-val" id="prof-bday">—</div>
+    <div class="profile-sub" id="prof-age"></div>
+  </div>
+  <div class="profile-item">
+    <div class="profile-key">CHARACTER</div>
+    <div class="profile-val">マイペース</div>
+    <div class="profile-sub">at own pace</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="sec-wrap">
+  <div class="stats-grid">
+    <div class="stat-box">
+      <div><span class="stat-num" id="stat-posts">0</span><span class="stat-unit">件</span></div>
+      <div class="stat-lbl">TOTAL POSTS</div>
+    </div>
+    <div class="stat-box">
+      <div><span class="stat-num" id="stat-photos">0</span><span class="stat-unit">枚</span></div>
+      <div class="stat-lbl">PHOTOS</div>
+    </div>
+    <div class="stat-box">
+      <div><span class="stat-num" id="stat-days">—</span><span class="stat-unit"></span></div>
+      <div class="stat-lbl">DAYS WITH US</div>
+    </div>
+    <div class="stat-box">
+      <div><span class="stat-num" id="stat-walks">0</span><span class="stat-unit">回</span></div>
+      <div class="stat-lbl">WALKS LOGGED</div>
     </div>
   </div>
+</div>
 
-  <!-- PROFILE -->
-  <div class="window" style="margin-top:18px;">
-    <div class="window-bar"><span class="dot"></span> PROFILE</div>
-    <div class="window-content">
-      <div id="profile-area">
-        <div id="avatar-box">
-          <div class="avatar-frame">🍫</div>
-          <div class="avatar-name">★ CHOCO ★</div>
-        </div>
-        <div id="profile-stats">
-          <div class="stat-row"><span class="stat-key">なまえ</span><span>チョコ</span></div>
-          <div class="stat-row"><span class="stat-key">TYPE</span><span>ちょっと気まぐれ</span></div>
-          <div class="stat-row"><span class="stat-key">すき</span><span>チョコレート / 映画 / 夜</span></div>
-          <div class="stat-row"><span class="stat-key">きらい</span><span>うるさいところ / 朝</span></div>
-          <div class="stat-row"><span class="stat-key">いまの気分</span><span id="mood-text">★ ひみつ ★</span></div>
-          <div class="stat-row"><span class="stat-key">BGM</span><span>♪ ············</span></div>
-        </div>
+<!-- PHOTO GRID -->
+<div class="sec-wrap">
+  <div class="sec-header">
+    <h2 class="sec-title">Photos</h2>
+    <span class="sec-sub">PHOTO ARCHIVE</span>
+  </div>
+  <div class="photo-grid" id="photo-grid">
+    <div class="photo-grid-item empty"><div class="empty-paw">🐾</div><div class="empty-label">ADD PHOTO</div></div>
+    <div class="photo-grid-item empty"><div class="empty-paw">🐾</div><div class="empty-label">ADD PHOTO</div></div>
+    <div class="photo-grid-item empty"><div class="empty-paw">🐾</div><div class="empty-label">ADD PHOTO</div></div>
+    <div class="photo-grid-item empty"><div class="empty-paw">🐾</div><div class="empty-label">ADD PHOTO</div></div>
+    <div class="photo-grid-item empty"><div class="empty-paw">🐾</div><div class="empty-label">ADD PHOTO</div></div>
+    <div class="photo-grid-item empty"><div class="empty-paw">🐾</div><div class="empty-label">ADD PHOTO</div></div>
+  </div>
+  <div class="upload-hint">写真はまだありません — 観察日誌に写真URLを貼ると自動で追加されます</div>
+</div>
+
+<!-- DIARY -->
+<div class="sec-wrap">
+  <div class="sec-header">
+    <h2 class="sec-title">Diary</h2>
+    <span class="sec-sub">観察日誌</span>
+  </div>
+
+  <div id="new-entry-toggle" onclick="toggleForm()">
+    <span>＋</span><span>新しい観察を記録する</span>
+  </div>
+
+  <div id="new-entry-form">
+    <div class="form-row-grid">
+      <div class="form-row">
+        <label class="form-label">TITLE</label>
+        <input type="text" id="f-title" placeholder="今日のチョコ">
+      </div>
+      <div class="form-row">
+        <label class="form-label">TAG</label>
+        <select id="f-tag">
+          <option value="観察">観察</option>
+          <option value="散歩">散歩</option>
+          <option value="食事">食事</option>
+          <option value="睡眠">睡眠</option>
+          <option value="あそび">あそび</option>
+          <option value="病院">病院</option>
+          <option value="その他">その他</option>
+        </select>
       </div>
     </div>
-  </div>
-
-  <!-- DIARY -->
-  <div class="window" style="margin-top:18px;">
-    <div class="window-bar"><span class="dot"></span> DIARY ── チョコの日記帳</div>
-    <div class="window-content">
-      <div class="section-title">diary</div>
-
-      <div class="diary-entry">
-        <div class="diary-date">2024.11.21 ── THU</div>
-        <div class="diary-mood">🌙</div>
-        <div class="diary-text">
-          今日も映画を観た。<br>
-          部屋の電気を消して、ひとりで画面だけ光らせて観るのが好き。<br>
-          チョコをひとかけら口に入れて、溶けるのを待ちながら。<br>
-          誰にも邪魔されない時間、これが一番。
-        </div>
-      </div>
-
-      <div class="diary-entry">
-        <div class="diary-date">2024.11.08 ── FRI</div>
-        <div class="diary-mood">🍫</div>
-        <div class="diary-text">
-          お気に入りのチョコレートを見つけた。<br>
-          ちょっとビターで、でも後味に甘さが残るやつ。<br>
-          ……なんか、自分みたいだな、って思った。（うそです）
-        </div>
-      </div>
-
-      <div class="diary-entry">
-        <div class="diary-date">2024.10.31 ── THU</div>
-        <div class="diary-mood">🎃</div>
-        <div class="diary-text">
-          ハロウィン。<br>
-          特に何もしなかったけど、チョコが大量に安売りしてたので買い込んだ。<br>
-          これが本当のハロウィンだと思う。
-        </div>
-      </div>
+    <div class="form-row">
+      <label class="form-label">MEMO</label>
+      <textarea id="f-body" placeholder="今日のチョコの様子を書いてみて…"></textarea>
     </div>
-  </div>
-
-  <!-- FAVORITES -->
-  <div class="window" style="margin-top:18px;">
-    <div class="window-bar"><span class="dot"></span> MY FAVORITES</div>
-    <div class="window-content">
-      <div class="section-title">favorites</div>
-      <div class="fav-grid">
-        <div class="fav-item"><span class="emoji">🎬</span>映画<div class="label">FILM</div></div>
-        <div class="fav-item"><span class="emoji">🍫</span>チョコ<div class="label">CHOCOLATE</div></div>
-        <div class="fav-item"><span class="emoji">🌙</span>夜<div class="label">NIGHT</div></div>
-        <div class="fav-item"><span class="emoji">☕</span>コーヒー<div class="label">COFFEE</div></div>
-        <div class="fav-item"><span class="emoji">📼</span>アニメ<div class="label">ANIME</div></div>
-        <div class="fav-item"><span class="emoji">🐈</span>ねこ<div class="label">CAT</div></div>
-        <div class="fav-item"><span class="emoji">🎵</span>音楽<div class="label">MUSIC</div></div>
-        <div class="fav-item"><span class="emoji">✦</span>ひみつ<div class="label">SECRET</div></div>
-      </div>
+    <div class="form-row">
+      <label class="form-label">PHOTO URL (任意)</label>
+      <input type="url" id="f-photo" placeholder="https://...">
     </div>
+    <button class="form-submit" onclick="addEntry()">記録する →</button>
   </div>
 
-  <!-- GUESTBOOK -->
-  <div class="window" style="margin-top:18px;">
-    <div class="window-bar"><span class="dot"></span> GUESTBOOK ── 足あと帳</div>
-    <div class="window-content">
-      <div class="section-title">guestbook</div>
-      <form id="guestbook-form" onsubmit="submitGuest(event)">
-        <input type="text" id="gb-name" placeholder="なまえ (ニックネームOK)" maxlength="30">
-        <textarea id="gb-msg" rows="3" placeholder="チョコへのメッセージ ✦" maxlength="200"></textarea>
-        <button type="submit" id="gb-submit">✦ 書き込む ✦</button>
-      </form>
-      <div id="gb-list"></div>
-    </div>
-  </div>
+  <div class="diary-list" id="diary-list"></div>
+</div>
 
-  <!-- HIT COUNTER -->
-  <div id="counter-area">
-    <div class="counter-label">YOU ARE VISITOR NO.</div>
-    <div class="counter-digits" id="hit-counter">000000</div>
-  </div>
-
-  <!-- FOOTER -->
-  <div id="page-footer">
-    <div class="footer-stars">✦ ☆ ✦ ☆ ✦ ☆ ✦</div>
-    <div>
-      <a href="index.html">← HOME</a>
-      &nbsp;|&nbsp;
-      <a href="archive.html">FILM ARCHIVE</a>
-      &nbsp;|&nbsp;
+<!-- FOOTER -->
+<footer>
+  <div id="footer">
+    <span class="footer-brand">チョコの部屋</span>
+    <div class="footer-links">
+      <a href="index.html">HOME</a>
+      <a href="archive.html">FILM</a>
       <a href="music.html">MUSIC</a>
     </div>
-    <div style="margin-top:8px;">© CHOCO'S ROOM — since 2024 ✦ best viewed in the dark</div>
   </div>
+</footer>
 
-</div><!-- /wrapper -->
+<button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <script>
-// ── STARFIELD ──
-(function() {
-  const sf = document.getElementById('starfield');
-  for (let i = 0; i < 120; i++) {
-    const s = document.createElement('div');
-    s.className = 'star';
-    s.style.cssText = `
-      left:${Math.random()*100}%;
-      top:${Math.random()*100}%;
-      --d:${1.2 + Math.random()*3}s;
-      --dl:${Math.random()*4}s;
-      width:${Math.random()<0.2 ? 3 : 2}px;
-      height:${Math.random()<0.2 ? 3 : 2}px;
-      opacity:${0.3 + Math.random()*0.7};
-    `;
-    sf.appendChild(s);
+// ── STORAGE ──
+const KEY = 'choco-diary-v2';
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY) || '{"entries":[],"profile":{}}'); }
+  catch { return {entries:[], profile:{}}; }
+}
+function save(data) { localStorage.setItem(KEY, JSON.stringify(data)); }
+
+// ── RENDER ENTRIES ──
+function renderEntries() {
+  const data = load();
+  const list = document.getElementById('diary-list');
+  const entries = [...data.entries].reverse();
+
+  if (entries.length === 0) {
+    list.innerHTML = `
+      <div style="border-top:1px solid var(--ink);padding:40px 0;text-align:center;
+        font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--dim);">
+        まだ記録がありません — チョコの観察を始めよう 🐾
+      </div>`;
+  } else {
+    list.innerHTML = entries.map((e, i) => {
+      const d = new Date(e.date);
+      const days = ['日','月','火','水','木','金','土'];
+      const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+      const dayStr  = days[d.getDay()] + '曜日';
+      return `
+        <div class="diary-entry">
+          <div class="diary-meta">
+            <div class="diary-date">${dateStr}</div>
+            <div class="diary-day">${dayStr}</div>
+            <div class="diary-mood">${moodEmoji(e.tag)}</div>
+          </div>
+          <div class="diary-body">
+            <h3>${esc(e.title)}</h3>
+            ${e.body ? `<p>${esc(e.body).replace(/\n/g,'<br>')}</p>` : ''}
+            ${e.photo ? `<div style="margin-top:12px;"><img src="${esc(e.photo)}" alt="" style="max-width:280px;max-height:200px;object-fit:cover;border:1px solid var(--rule);cursor:zoom-in;" onclick="openLb('${esc(e.photo)}')"></div>` : ''}
+            <div>
+              <span class="diary-tag">${esc(e.tag)}</span>
+              <button onclick="deleteEntry(${entries.length-1-i})" style="background:transparent;border:none;cursor:pointer;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--rule);margin-left:8px;transition:color 0.15s;" onmouseover="this.style.color='var(--dim)'" onmouseout="this.style.color='var(--rule)'">DELETE</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
   }
+
+  // stats
+  document.getElementById('stat-posts').textContent = data.entries.length;
+  const photos = data.entries.filter(e => e.photo).length;
+  document.getElementById('stat-photos').textContent = photos;
+  const walks = data.entries.filter(e => e.tag === '散歩').length;
+  document.getElementById('stat-walks').textContent = walks;
+
+  // photo grid
+  renderPhotoGrid(data.entries);
+}
+
+function moodEmoji(tag) {
+  const map = {散歩:'🐾',食事:'🍖',睡眠:'😴',あそび:'🎾',病院:'💉',観察:'👀',その他:'🍫'};
+  return map[tag] || '🐾';
+}
+
+function renderPhotoGrid(entries) {
+  const grid = document.getElementById('photo-grid');
+  const photos = entries.filter(e => e.photo).slice(-6).reverse();
+  const slots = 6;
+  let html = '';
+  for (let i = 0; i < slots; i++) {
+    if (photos[i]) {
+      html += `<div class="photo-grid-item" onclick="openLb('${esc(photos[i].photo)}')">
+        <img src="${esc(photos[i].photo)}" alt="${esc(photos[i].title)}" loading="lazy">
+        <div class="photo-overlay"><div class="photo-overlay-cap">${esc(photos[i].title)}</div></div>
+      </div>`;
+    } else {
+      html += `<div class="photo-grid-item empty"><div class="empty-paw">🐾</div><div class="empty-label">ADD PHOTO</div></div>`;
+    }
+  }
+  grid.innerHTML = html;
+  const hint = document.querySelector('.upload-hint');
+  if (hint) hint.style.display = photos.length > 0 ? 'none' : 'block';
+}
+
+// ── ADD / DELETE ──
+function addEntry() {
+  const title = document.getElementById('f-title').value.trim() || '今日のチョコ';
+  const body  = document.getElementById('f-body').value.trim();
+  const tag   = document.getElementById('f-tag').value;
+  const photo = document.getElementById('f-photo').value.trim();
+
+  const data = load();
+  data.entries.push({ title, body, tag, photo, date: new Date().toISOString() });
+  save(data);
+
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-body').value = '';
+  document.getElementById('f-photo').value = '';
+  document.getElementById('new-entry-form').classList.remove('open');
+  renderEntries();
+}
+
+function deleteEntry(idx) {
+  if (!confirm('この記録を削除しますか？')) return;
+  const data = load();
+  data.entries.splice(idx, 1);
+  save(data);
+  renderEntries();
+}
+
+// ── FORM TOGGLE ──
+function toggleForm() {
+  document.getElementById('new-entry-form').classList.toggle('open');
+}
+
+// ── PROFILE / BIRTHDAY ──
+(function() {
+  // Change these values to match Choco's actual info
+  const birthday = null; // 例: '2020-05-15'
+  const breed    = null; // 例: 'トイプードル'
+  const breedEn  = null; // 例: 'Toy Poodle'
+
+  if (birthday) {
+    const b = new Date(birthday);
+    document.getElementById('prof-bday').textContent =
+      `${b.getFullYear()}.${String(b.getMonth()+1).padStart(2,'0')}.${String(b.getDate()).padStart(2,'0')}`;
+    const ms   = Date.now() - b.getTime();
+    const days = Math.floor(ms / 86400000);
+    const yrs  = Math.floor(days / 365);
+    document.getElementById('prof-age').textContent = `${yrs}歳 (${days}日)`;
+    document.getElementById('stat-days').textContent = days;
+  }
+  if (breed)   document.getElementById('prof-breed').textContent   = breed;
+  if (breedEn) document.getElementById('prof-breed-en').textContent = breedEn;
 })();
 
-// ── HIT COUNTER ──
-(function() {
-  let count = parseInt(localStorage.getItem('choco-hits') || '0') + 1;
-  localStorage.setItem('choco-hits', count);
-  document.getElementById('hit-counter').textContent =
-    String(count).padStart(6, '0');
-})();
-
-// ── GUESTBOOK ──
-const STORAGE_KEY = 'choco-guestbook';
-
-function loadGuests() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-  catch { return []; }
+// ── LIGHTBOX ──
+function openLb(src) {
+  document.getElementById('lb-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
 }
-
-function saveGuests(guests) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(guests));
-}
-
-function renderGuests() {
-  const list = document.getElementById('gb-list');
-  const guests = loadGuests().slice(-20).reverse();
-  if (guests.length === 0) {
-    list.innerHTML = '<div style="font-size:11px;color:#553366;padding:8px 0;">まだ足あとがないよ…最初に書いてみて ✦</div>';
-    return;
-  }
-  list.innerHTML = guests.map(g => `
-    <div class="gb-entry">
-      <div class="gb-name">✦ ${escHtml(g.name)}</div>
-      <div class="gb-msg">${escHtml(g.msg)}</div>
-      <div class="gb-time">${g.time}</div>
-    </div>
-  `).join('');
-}
-
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function submitGuest(e) {
-  e.preventDefault();
-  const name = document.getElementById('gb-name').value.trim() || '匿名';
-  const msg  = document.getElementById('gb-msg').value.trim();
-  if (!msg) return;
-  const guests = loadGuests();
-  const now = new Date();
-  guests.push({
-    name,
-    msg,
-    time: now.toLocaleDateString('ja-JP') + ' ' + now.toLocaleTimeString('ja-JP', {hour:'2-digit',minute:'2-digit'})
-  });
-  saveGuests(guests);
-  document.getElementById('gb-name').value = '';
-  document.getElementById('gb-msg').value = '';
-  renderGuests();
-  spawnSparkles(document.getElementById('gb-submit'));
-}
-
-renderGuests();
-
-// ── SPARKLES ON CLICK ──
-document.addEventListener('click', function(e) {
-  spawnSparkles(null, e.clientX, e.clientY);
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target !== document.getElementById('lb-img'))
+    this.classList.remove('active');
+});
+document.getElementById('lb-close').addEventListener('click', function() {
+  document.getElementById('lightbox').classList.remove('active');
 });
 
-function spawnSparkles(el, x, y) {
-  const symbols = ['✦','★','☆','✿','♡','🍫'];
-  const count = 4;
-  let cx, cy;
-  if (el) {
-    const r = el.getBoundingClientRect();
-    cx = r.left + r.width / 2;
-    cy = r.top + r.height / 2;
-  } else {
-    cx = x; cy = y;
-  }
-  for (let i = 0; i < count; i++) {
-    const sp = document.createElement('span');
-    sp.className = 'sparkle';
-    sp.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-    const angle = (Math.PI * 2 / count) * i;
-    const dist = 20 + Math.random() * 20;
-    sp.style.cssText = `
-      left:${cx + Math.cos(angle) * dist - 8}px;
-      top:${cy + Math.sin(angle) * dist - 8}px;
-      color:#ff88ff;
-      animation-delay:${i * 0.05}s;
-    `;
-    document.body.appendChild(sp);
-    setTimeout(() => sp.remove(), 1100);
-  }
+// ── SCROLL ──
+window.addEventListener('scroll', function() {
+  const p = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+  document.getElementById('read-progress').style.width = (p*100) + '%';
+  document.getElementById('scroll-top').classList.toggle('visible', window.scrollY > 400);
+});
+
+// ── ESC UTIL ──
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── MOOD ROTATION ──
-const moods = ['★ 謎 ★', '♡ ふつう ♡', '☆ ねむい ☆', '✦ ひみつ ✦', '🍫 チョコ食べたい', '🌙 夜型 🌙'];
-document.getElementById('mood-text').textContent = moods[Math.floor(Math.random() * moods.length)];
+renderEntries();
 </script>
 </body>
 </html>
