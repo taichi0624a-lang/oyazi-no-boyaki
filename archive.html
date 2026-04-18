@@ -882,15 +882,31 @@
 
         let watchRating = 0;
 
-        function markAsWatched() {
+        async function markAsWatched() {
             if (!activeMovie) return;
-            watchRating = 0;
+            // 即座にWATCHEDに移動
+            statusOverrides[activeMovie.id] = 'watched';
+            localStorage.setItem('o24-overrides', JSON.stringify(statusOverrides));
             document.getElementById('watched-btn').style.display = 'none';
-            const panel = document.getElementById('watch-panel');
-            panel.style.display = 'block';
-            document.getElementById('wp-comment').value = '';
-            document.getElementById('wp-confirm-btn').textContent = '✓ CONFIRM WATCHED';
-            updateWatchStars();
+            document.getElementById('review-tab-btn').style.display = '';
+            renderTicket(activeMovie);
+            renderAll();
+
+            // Filmarksに「観た」だけ登録（スコア・コメントなし）
+            try {
+                fetch('https://o24-filmarks.onrender.com/mark-movie', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: 'o24-secret-2026', title: activeMovie.title, score: '', comment: '' })
+                }).then(r => r.json()).then(d => {
+                    if (d.ok && d.movieUrl) {
+                        activeMovie.filmarksUrl = d.movieUrl;
+                        if (!reviews[activeMovie.id]) reviews[activeMovie.id] = {};
+                        reviews[activeMovie.id].filmarksUrl = d.movieUrl;
+                        localStorage.setItem('o24-reviews', JSON.stringify(reviews));
+                    }
+                }).catch(()=>{});
+            } catch(e) {}
         }
 
         function setWR(val) {
@@ -1057,14 +1073,18 @@
 
             const btn = document.getElementById('save-btn');
 
-            // Filmarksにも投稿（サーバーが起動していれば）
-            if (memo && activeMovie.filmarksUrl) {
+            if (memo || currentRating > 0) {
                 btn.textContent = 'POSTING...';
                 try {
-                    const res = await fetch('https://o24-filmarks.onrender.com/post-comment', {
+                    const res = await fetch('https://o24-filmarks.onrender.com/mark-movie', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ markUrl: activeMovie.filmarksUrl, comment: memo, token: 'o24-secret-2026' })
+                        body: JSON.stringify({
+                            token: 'o24-secret-2026',
+                            title: activeMovie.title,
+                            score: currentRating > 0 ? currentRating : '',
+                            comment: memo
+                        })
                     });
                     const data = await res.json();
                     if (data.ok) {
@@ -1075,7 +1095,6 @@
                     }
                 } catch (e) {
                     btn.textContent = '✓ SAVED (local only)';
-                    console.warn('サーバー未起動:', e.message);
                 }
             } else {
                 btn.textContent = 'SAVED ✓';
