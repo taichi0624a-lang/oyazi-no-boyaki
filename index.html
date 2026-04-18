@@ -707,96 +707,63 @@ body {
 /* ─── STUDIO LOADER ─── */
 #noise-loader {
     position: fixed; inset: 0; z-index: 99999;
-    background: #0c0c0c;
-    display: flex; align-items: center; justify-content: center;
+    background: transparent;
     pointer-events: all;
-    transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1);
 }
-#noise-loader.fade-out { opacity: 0; pointer-events: none; }
+#noise-loader.done { display: none; }
 
-.sl-inner {
-    display: flex; flex-direction: column; align-items: center; gap: 0;
+/* 背景（最初の暗幕） */
+.sl-backdrop {
+    position: absolute; inset: 0;
+    background: #0c0c0c;
 }
 
-.sl-logo-wrap {
-    position: relative; width: 130px; height: 130px;
+/* ターコイズのアイリス */
+.sl-turq {
+    position: absolute; inset: 0;
+    background: #45b5aa;
+    clip-path: circle(0% at 50% 50%);
+    animation: irisOpen 0.7s cubic-bezier(0.76,0,0.24,1) 0.15s forwards;
+}
+@keyframes irisOpen { to { clip-path: circle(150% at 50% 50%); } }
+
+/* 中央のマーク（ターコイズ上に白） */
+.sl-mark {
+    position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
+    z-index: 2; opacity: 0;
+    animation: markIn 0.45s ease 0.75s forwards;
+}
+@keyframes markIn { to { opacity: 1; } }
+
+.sl-mark svg { width: 90px; height: 90px; }
+
+.sl-ring-path {
+    fill: none; stroke: rgba(255,255,255,0.95); stroke-width: 1.2;
+    stroke-dasharray: 283; stroke-dashoffset: 283;
+    transform-origin: 45px 45px; transform: rotate(-90deg);
+    animation: ringDraw 0.6s cubic-bezier(0.65,0,0.35,1) 0.85s forwards;
+}
+@keyframes ringDraw { to { stroke-dashoffset: 0; } }
+
+.sl-dot-inner {
+    fill: white; opacity: 0;
+    animation: dotIn 0.3s cubic-bezier(0.2,1.5,0.4,1) 1.4s forwards;
+}
+@keyframes dotIn {
+    from { opacity: 0; r: 0; }
+    to   { opacity: 1; r: 7; }
 }
 
-.sl-ring {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    overflow: visible;
+/* 閉じる暗幕アイリス */
+.sl-dark {
+    position: absolute; inset: 0;
+    background: #0c0c0c;
+    clip-path: circle(0% at 50% 50%);
+    z-index: 3;
+    animation: irisClose 0.75s cubic-bezier(0.76,0,0.24,1) 2.0s forwards;
 }
-
-.sl-circle {
-    fill: none;
-    stroke: rgba(255,255,255,0.85);
-    stroke-width: 1;
-    stroke-dasharray: 345;
-    stroke-dashoffset: 345;
-    transform-origin: 65px 65px;
-    transform: rotate(-90deg);
-    animation: drawRing 1.1s cubic-bezier(0.65,0,0.35,1) 0.2s forwards;
-}
-
-@keyframes drawRing {
-    to { stroke-dashoffset: 0; }
-}
-
-.sl-dot {
-    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
-    width: 5px; height: 5px; border-radius: 50%;
-    background: #aa2020;
-    opacity: 0;
-    animation: dotPop 0.3s cubic-bezier(0.2,1.5,0.4,1) 1.1s forwards;
-}
-@keyframes dotPop {
-    from { opacity: 0; transform: translateX(-50%) scale(0); }
-    to   { opacity: 1; transform: translateX(-50%) scale(1); }
-}
-
-.sl-char {
-    position: relative; z-index: 2;
-    font-family: 'Cormorant Garamond', 'Playfair Display', serif;
-    font-size: 3.2rem; font-weight: 300;
-    color: #fff; line-height: 1;
-    opacity: 0;
-    letter-spacing: 0.05em;
-    animation: charIn 0.7s cubic-bezier(0.2,1,0.3,1) 0.9s forwards;
-}
-@keyframes charIn {
-    from { opacity: 0; transform: scale(0.88); }
-    to   { opacity: 1; transform: scale(1); }
-}
-
-.sl-rule {
-    width: 1px; height: 28px;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
-    margin-top: 20px;
-    opacity: 0;
-    animation: fadeUp 0.5s ease 1.4s forwards;
-}
-
-.sl-title {
-    font-size: 0.55rem;
-    letter-spacing: 5px;
-    color: rgba(255,255,255,0.5);
-    margin-top: 14px; white-space: nowrap;
-    opacity: 0;
-    animation: fadeUp 0.7s ease 1.5s forwards;
-}
-.sl-sub {
-    font-size: 0.45rem;
-    letter-spacing: 4px;
-    color: rgba(255,255,255,0.2);
-    margin-top: 6px;
-    opacity: 0;
-    animation: fadeUp 0.5s ease 1.7s forwards;
-}
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
+@keyframes irisClose { to { clip-path: circle(150% at 50% 50%); } }
 
 /* ─── KONAMI EFFECT ─── */
 #konami-overlay {
@@ -1032,18 +999,15 @@ body {
 
 <!-- STUDIO LOADER -->
 <div id="noise-loader">
-    <div class="sl-inner">
-        <div class="sl-logo-wrap">
-            <svg class="sl-ring" viewBox="0 0 130 130">
-                <circle class="sl-circle" cx="65" cy="65" r="55"/>
-            </svg>
-            <div class="sl-dot"></div>
-            <div class="sl-char">子</div>
-        </div>
-        <div class="sl-rule"></div>
-        <div class="sl-title">親父より親父な子供のぼやき</div>
-        <div class="sl-sub">PERSONAL DIARY — ISSUE No. 001</div>
+    <div class="sl-backdrop"></div>
+    <div class="sl-turq"></div>
+    <div class="sl-mark">
+        <svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+            <circle class="sl-ring-path" cx="45" cy="45" r="45"/>
+            <circle class="sl-dot-inner" cx="45" cy="45" r="0"/>
+        </svg>
     </div>
+    <div class="sl-dark"></div>
 </div>
 
 <!-- ══════════ MASTHEAD ══════════ -->
@@ -1815,10 +1779,7 @@ onValue(lastReadRef, snap => {
 // ── STUDIO LOADER ──
 (function() {
     const loader = document.getElementById('noise-loader');
-    setTimeout(() => {
-        loader.classList.add('fade-out');
-        setTimeout(() => { loader.style.display = 'none'; }, 900);
-    }, 2600);
+    setTimeout(() => { loader.classList.add('done'); }, 2800);
 })();
 
 // ── THEME ──
