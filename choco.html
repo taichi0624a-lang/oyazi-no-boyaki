@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>チョコの部屋 ☆ CHOCO'S ROOM ☆</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=VT323&family=Share+Tech+Mono&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ───── STARFIELD ───── */
+@keyframes twinkle {
+  0%,100% { opacity: 0.2; transform: scale(0.8); }
+  50%      { opacity: 1;   transform: scale(1.2); }
+}
+@keyframes scroll-up {
+  from { transform: translateY(100vh); }
+  to   { transform: translateY(-200px); }
+}
+@keyframes blink {
+  0%,49% { opacity: 1; }
+  50%,100% { opacity: 0; }
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes float {
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes marquee {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(-100%); }
+}
+@keyframes glitch {
+  0%   { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
+  25%  { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
+  50%  { text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff; }
+  75%  { text-shadow: 0 0 0; }
+  100% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
+}
+
+html, body {
+  min-height: 100vh;
+  background: #000010;
+  color: #e8c8f8;
+  font-family: 'DotGothic16', 'MS Gothic', monospace;
+  overflow-x: hidden;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ctext y='18' font-size='18'%3E✦%3C/text%3E%3C/svg%3E") 12 12, auto;
+}
+
+/* ───── STAR CANVAS ───── */
+#starfield {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.star {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: #fff;
+  border-radius: 50%;
+  animation: twinkle var(--d, 2s) ease-in-out infinite;
+  animation-delay: var(--dl, 0s);
+}
+
+/* ───── LAYOUT ───── */
+#wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 12px 60px;
+}
+
+/* ───── TICKER TAPE ───── */
+#ticker {
+  background: #1a0033;
+  border-top: 2px solid #cc44ff;
+  border-bottom: 2px solid #cc44ff;
+  padding: 6px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 999;
+}
+#ticker-inner {
+  display: inline-block;
+  animation: marquee 18s linear infinite;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #ff88ff;
+}
+#ticker-inner span { margin: 0 28px; }
+
+/* ───── HEADER ───── */
+#header {
+  margin-top: 42px;
+  text-align: center;
+  padding: 30px 0 20px;
+  border: 2px solid #aa22dd;
+  background: linear-gradient(180deg, #0a0015 0%, #120025 100%);
+  position: relative;
+  overflow: hidden;
+}
+#header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(180,0,255,0.15) 0%, transparent 70%);
+}
+.header-deco {
+  font-size: 22px;
+  letter-spacing: 8px;
+  animation: float 3s ease-in-out infinite;
+  display: block;
+  margin-bottom: 8px;
+}
+#header h1 {
+  font-family: 'VT323', monospace;
+  font-size: clamp(2.4rem, 8vw, 4.5rem);
+  color: #ff88ff;
+  text-shadow: 0 0 20px #ff00ff, 0 0 40px #8800ff;
+  animation: glitch 4s ease-in-out infinite;
+  letter-spacing: 4px;
+  line-height: 1.1;
+}
+#header .sub {
+  font-size: 11px;
+  color: #aa66cc;
+  letter-spacing: 4px;
+  margin-top: 8px;
+  animation: blink 1.4s step-end infinite;
+}
+.star-row {
+  font-size: 18px;
+  letter-spacing: 4px;
+  margin-top: 10px;
+  color: #dd88ff;
+}
+
+/* ───── WELCOME BOX ───── */
+.window {
+  border: 2px solid #882299;
+  margin-top: 18px;
+  background: #0d0020;
+}
+.window-bar {
+  background: linear-gradient(90deg, #440088, #882299);
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #ffddff;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.window-bar .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #ff4488;
+  display: inline-block;
+}
+.window-content {
+  padding: 16px 18px;
+  font-size: 13px;
+  line-height: 2;
+  color: #ddaaff;
+}
+.window-content p { margin-bottom: 8px; }
+.window-content a {
+  color: #ff88ff;
+  text-shadow: 0 0 8px #ff44ff;
+}
+
+/* ───── PHOTO / AVATAR AREA ───── */
+#profile-area {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+#avatar-box {
+  flex: 0 0 140px;
+  text-align: center;
+}
+.avatar-frame {
+  width: 120px;
+  height: 120px;
+  border: 3px solid #cc44ff;
+  background: #1a0030;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 20px #8800ff;
+  animation: float 4s ease-in-out infinite;
+}
+.avatar-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 60%);
+}
+.avatar-name {
+  font-size: 10px;
+  color: #ff88ff;
+  letter-spacing: 3px;
+  margin-top: 6px;
+  animation: blink 2s step-end infinite;
+}
+#profile-stats {
+  flex: 1;
+  min-width: 200px;
+}
+.stat-row {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  border-bottom: 1px dotted #440066;
+  padding: 5px 2px;
+  color: #ccaaee;
+}
+.stat-key {
+  color: #ff88ff;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+/* ───── DIARY SECTION ───── */
+.section-title {
+  font-family: 'VT323', monospace;
+  font-size: 1.6rem;
+  color: #ff88ff;
+  letter-spacing: 4px;
+  border-bottom: 1px solid #660099;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+  text-shadow: 0 0 12px #ff00ff;
+}
+.section-title::before { content: '✦ '; }
+.section-title::after  { content: ' ✦'; }
+
+.diary-entry {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  background: #0a001a;
+  border-left: 3px solid #8800ff;
+  position: relative;
+}
+.diary-date {
+  font-size: 9px;
+  color: #884499;
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+}
+.diary-text {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #ddaaff;
+}
+.diary-mood {
+  position: absolute;
+  top: 10px; right: 12px;
+  font-size: 18px;
+  opacity: 0.7;
+}
+
+/* ───── FAVORITES ───── */
+.fav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.fav-item {
+  background: #0d0022;
+  border: 1px solid #660099;
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 11px;
+  color: #cc88ee;
+  transition: border-color 0.2s, background 0.2s;
+}
+.fav-item:hover {
+  border-color: #cc44ff;
+  background: #180035;
+}
+.fav-item .emoji { font-size: 26px; display: block; margin-bottom: 4px; }
+.fav-item .label { font-size: 9px; color: #aa66cc; letter-spacing: 1px; }
+
+/* ───── GUESTBOOK ───── */
+#guestbook-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+#guestbook-form input,
+#guestbook-form textarea {
+  background: #06000f;
+  border: 1px solid #660099;
+  color: #ddaaff;
+  font-family: 'DotGothic16', monospace;
+  font-size: 12px;
+  padding: 8px 10px;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+#guestbook-form input:focus,
+#guestbook-form textarea:focus { border-color: #cc44ff; }
+#guestbook-form input::placeholder,
+#guestbook-form textarea::placeholder { color: #553366; }
+#gb-submit {
+  background: #440088;
+  border: 2px solid #cc44ff;
+  color: #ffddff;
+  font-family: 'DotGothic16', monospace;
+  font-size: 12px;
+  letter-spacing: 3px;
+  padding: 8px 20px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+#gb-submit:hover {
+  background: #660099;
+  box-shadow: 0 0 12px #cc44ff;
+}
+.gb-entry {
+  padding: 10px 12px;
+  background: #080018;
+  border-left: 2px solid #550088;
+  margin-bottom: 8px;
+  font-size: 11px;
+}
+.gb-name {
+  color: #ff88ff;
+  font-size: 10px;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+.gb-msg { color: #ccaaee; line-height: 1.7; }
+.gb-time { font-size: 9px; color: #553366; margin-top: 4px; }
+
+/* ───── HIT COUNTER ───── */
+#counter-area {
+  text-align: center;
+  padding: 14px;
+  margin-top: 18px;
+  border: 1px dashed #660099;
+}
+.counter-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: #884499;
+  margin-bottom: 6px;
+}
+.counter-digits {
+  font-family: 'VT323', monospace;
+  font-size: 2.2rem;
+  color: #ff44ff;
+  text-shadow: 0 0 10px #ff00ff;
+  letter-spacing: 6px;
+}
+
+/* ───── FOOTER BAR ───── */
+#page-footer {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 10px;
+  color: #553366;
+  letter-spacing: 2px;
+  border-top: 1px solid #330055;
+  padding-top: 14px;
+}
+#page-footer a {
+  color: #aa44cc;
+  text-decoration: none;
+}
+#page-footer a:hover { color: #ff88ff; }
+.footer-stars {
+  color: #660099;
+  font-size: 14px;
+  letter-spacing: 6px;
+  margin-bottom: 8px;
+}
+
+/* ───── FLOATING SPARKLES ───── */
+.sparkle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  font-size: 16px;
+  animation: float-away 1s ease-out forwards;
+}
+@keyframes float-away {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-60px) scale(0.4); }
+}
+
+/* ───── SCROLLBAR ───── */
+::-webkit-scrollbar { width: 8px; background: #0a000f; }
+::-webkit-scrollbar-thumb { background: #550088; border-radius: 4px; }
+
+/* ───── MOBILE ───── */
+@media (max-width: 480px) {
+  #profile-area { flex-direction: column; align-items: center; }
+  #avatar-box { flex: none; }
+  .fav-grid { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- STARFIELD -->
+<div id="starfield"></div>
+
+<!-- TICKER -->
+<div id="ticker">
+  <span id="ticker-inner">
+    <span>✦ ようこそ チョコの部屋へ ✦</span>
+    <span>★ WELCOME TO CHOCO'S ROOM ★</span>
+    <span>✦ 遊びにきてくれてありがとう ✦</span>
+    <span>☆ チョコはここにいるよ ☆</span>
+    <span>✦ NO ENTRY WITHOUT LOVE ✦</span>
+    <span>★ 2024 ★</span>
+  </span>
+</div>
+
+<div id="wrapper">
+
+  <!-- HEADER -->
+  <div id="header">
+    <span class="header-deco">🍫 ✦ 🌙</span>
+    <h1>チョコの部屋</h1>
+    <div class="sub">▼ CHOCO'S ROOM ▼ CLICK HERE TO ENTER ▼</div>
+    <div class="star-row">★ ☆ ★ ☆ ★ ☆ ★ ☆ ★</div>
+  </div>
+
+  <!-- WELCOME WINDOW -->
+  <div class="window">
+    <div class="window-bar"><span class="dot"></span> WELCOME MESSAGE</div>
+    <div class="window-content">
+      <p>ここは <strong style="color:#ff88ff">チョコの秘密の部屋</strong> ☆</p>
+      <p>迷い込んだあなた、ようこそ。ゆっくりしていってね。</p>
+      <p>チョコのこと、少しずつ知ってもらえたら嬉しいな。</p>
+      <p style="font-size:10px; color:#884499;">※ 無断転載・コピー禁止 ／ リンクフリー ／ 相互リンク大歓迎</p>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="window" style="margin-top:18px;">
+    <div class="window-bar"><span class="dot"></span> PROFILE</div>
+    <div class="window-content">
+      <div id="profile-area">
+        <div id="avatar-box">
+          <div class="avatar-frame">🍫</div>
+          <div class="avatar-name">★ CHOCO ★</div>
+        </div>
+        <div id="profile-stats">
+          <div class="stat-row"><span class="stat-key">なまえ</span><span>チョコ</span></div>
+          <div class="stat-row"><span class="stat-key">TYPE</span><span>ちょっと気まぐれ</span></div>
+          <div class="stat-row"><span class="stat-key">すき</span><span>チョコレート / 映画 / 夜</span></div>
+          <div class="stat-row"><span class="stat-key">きらい</span><span>うるさいところ / 朝</span></div>
+          <div class="stat-row"><span class="stat-key">いまの気分</span><span id="mood-text">★ ひみつ ★</span></div>
+          <div class="stat-row"><span class="stat-key">BGM</span><span>♪ ············</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIARY -->
+  <div class="window" style="margin-top:18px;">
+    <div class="window-bar"><span class="dot"></span> DIARY ── チョコの日記帳</div>
+    <div class="window-content">
+      <div class="section-title">diary</div>
+
+      <div class="diary-entry">
+        <div class="diary-date">2024.11.21 ── THU</div>
+        <div class="diary-mood">🌙</div>
+        <div class="diary-text">
+          今日も映画を観た。<br>
+          部屋の電気を消して、ひとりで画面だけ光らせて観るのが好き。<br>
+          チョコをひとかけら口に入れて、溶けるのを待ちながら。<br>
+          誰にも邪魔されない時間、これが一番。
+        </div>
+      </div>
+
+      <div class="diary-entry">
+        <div class="diary-date">2024.11.08 ── FRI</div>
+        <div class="diary-mood">🍫</div>
+        <div class="diary-text">
+          お気に入りのチョコレートを見つけた。<br>
+          ちょっとビターで、でも後味に甘さが残るやつ。<br>
+          ……なんか、自分みたいだな、って思った。（うそです）
+        </div>
+      </div>
+
+      <div class="diary-entry">
+        <div class="diary-date">2024.10.31 ── THU</div>
+        <div class="diary-mood">🎃</div>
+        <div class="diary-text">
+          ハロウィン。<br>
+          特に何もしなかったけど、チョコが大量に安売りしてたので買い込んだ。<br>
+          これが本当のハロウィンだと思う。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAVORITES -->
+  <div class="window" style="margin-top:18px;">
+    <div class="window-bar"><span class="dot"></span> MY FAVORITES</div>
+    <div class="window-content">
+      <div class="section-title">favorites</div>
+      <div class="fav-grid">
+        <div class="fav-item"><span class="emoji">🎬</span>映画<div class="label">FILM</div></div>
+        <div class="fav-item"><span class="emoji">🍫</span>チョコ<div class="label">CHOCOLATE</div></div>
+        <div class="fav-item"><span class="emoji">🌙</span>夜<div class="label">NIGHT</div></div>
+        <div class="fav-item"><span class="emoji">☕</span>コーヒー<div class="label">COFFEE</div></div>
+        <div class="fav-item"><span class="emoji">📼</span>アニメ<div class="label">ANIME</div></div>
+        <div class="fav-item"><span class="emoji">🐈</span>ねこ<div class="label">CAT</div></div>
+        <div class="fav-item"><span class="emoji">🎵</span>音楽<div class="label">MUSIC</div></div>
+        <div class="fav-item"><span class="emoji">✦</span>ひみつ<div class="label">SECRET</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GUESTBOOK -->
+  <div class="window" style="margin-top:18px;">
+    <div class="window-bar"><span class="dot"></span> GUESTBOOK ── 足あと帳</div>
+    <div class="window-content">
+      <div class="section-title">guestbook</div>
+      <form id="guestbook-form" onsubmit="submitGuest(event)">
+        <input type="text" id="gb-name" placeholder="なまえ (ニックネームOK)" maxlength="30">
+        <textarea id="gb-msg" rows="3" placeholder="チョコへのメッセージ ✦" maxlength="200"></textarea>
+        <button type="submit" id="gb-submit">✦ 書き込む ✦</button>
+      </form>
+      <div id="gb-list"></div>
+    </div>
+  </div>
+
+  <!-- HIT COUNTER -->
+  <div id="counter-area">
+    <div class="counter-label">YOU ARE VISITOR NO.</div>
+    <div class="counter-digits" id="hit-counter">000000</div>
+  </div>
+
+  <!-- FOOTER -->
+  <div id="page-footer">
+    <div class="footer-stars">✦ ☆ ✦ ☆ ✦ ☆ ✦</div>
+    <div>
+      <a href="index.html">← HOME</a>
+      &nbsp;|&nbsp;
+      <a href="archive.html">FILM ARCHIVE</a>
+      &nbsp;|&nbsp;
+      <a href="music.html">MUSIC</a>
+    </div>
+    <div style="margin-top:8px;">© CHOCO'S ROOM — since 2024 ✦ best viewed in the dark</div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+// ── STARFIELD ──
+(function() {
+  const sf = document.getElementById('starfield');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      --d:${1.2 + Math.random()*3}s;
+      --dl:${Math.random()*4}s;
+      width:${Math.random()<0.2 ? 3 : 2}px;
+      height:${Math.random()<0.2 ? 3 : 2}px;
+      opacity:${0.3 + Math.random()*0.7};
+    `;
+    sf.appendChild(s);
+  }
+})();
+
+// ── HIT COUNTER ──
+(function() {
+  let count = parseInt(localStorage.getItem('choco-hits') || '0') + 1;
+  localStorage.setItem('choco-hits', count);
+  document.getElementById('hit-counter').textContent =
+    String(count).padStart(6, '0');
+})();
+
+// ── GUESTBOOK ──
+const STORAGE_KEY = 'choco-guestbook';
+
+function loadGuests() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function saveGuests(guests) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(guests));
+}
+
+function renderGuests() {
+  const list = document.getElementById('gb-list');
+  const guests = loadGuests().slice(-20).reverse();
+  if (guests.length === 0) {
+    list.innerHTML = '<div style="font-size:11px;color:#553366;padding:8px 0;">まだ足あとがないよ…最初に書いてみて ✦</div>';
+    return;
+  }
+  list.innerHTML = guests.map(g => `
+    <div class="gb-entry">
+      <div class="gb-name">✦ ${escHtml(g.name)}</div>
+      <div class="gb-msg">${escHtml(g.msg)}</div>
+      <div class="gb-time">${g.time}</div>
+    </div>
+  `).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function submitGuest(e) {
+  e.preventDefault();
+  const name = document.getElementById('gb-name').value.trim() || '匿名';
+  const msg  = document.getElementById('gb-msg').value.trim();
+  if (!msg) return;
+  const guests = loadGuests();
+  const now = new Date();
+  guests.push({
+    name,
+    msg,
+    time: now.toLocaleDateString('ja-JP') + ' ' + now.toLocaleTimeString('ja-JP', {hour:'2-digit',minute:'2-digit'})
+  });
+  saveGuests(guests);
+  document.getElementById('gb-name').value = '';
+  document.getElementById('gb-msg').value = '';
+  renderGuests();
+  spawnSparkles(document.getElementById('gb-submit'));
+}
+
+renderGuests();
+
+// ── SPARKLES ON CLICK ──
+document.addEventListener('click', function(e) {
+  spawnSparkles(null, e.clientX, e.clientY);
+});
+
+function spawnSparkles(el, x, y) {
+  const symbols = ['✦','★','☆','✿','♡','🍫'];
+  const count = 4;
+  let cx, cy;
+  if (el) {
+    const r = el.getBoundingClientRect();
+    cx = r.left + r.width / 2;
+    cy = r.top + r.height / 2;
+  } else {
+    cx = x; cy = y;
+  }
+  for (let i = 0; i < count; i++) {
+    const sp = document.createElement('span');
+    sp.className = 'sparkle';
+    sp.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    const angle = (Math.PI * 2 / count) * i;
+    const dist = 20 + Math.random() * 20;
+    sp.style.cssText = `
+      left:${cx + Math.cos(angle) * dist - 8}px;
+      top:${cy + Math.sin(angle) * dist - 8}px;
+      color:#ff88ff;
+      animation-delay:${i * 0.05}s;
+    `;
+    document.body.appendChild(sp);
+    setTimeout(() => sp.remove(), 1100);
+  }
+}
+
+// ── MOOD ROTATION ──
+const moods = ['★ 謎 ★', '♡ ふつう ♡', '☆ ねむい ☆', '✦ ひみつ ✦', '🍫 チョコ食べたい', '🌙 夜型 🌙'];
+document.getElementById('mood-text').textContent = moods[Math.floor(Math.random() * moods.length)];
+</script>
+</body>
+</html>
