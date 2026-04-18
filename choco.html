@@ -316,6 +316,75 @@ body.admin-mode #admin-badge { opacity: 1; }
 .fl2 a { color:#c08090; text-decoration:none; transition:color 0.15s; }
 .fl2 a:hover { color:#6b2030; }
 
+/* ── OP ANIMATION ── */
+#op-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #2c1208;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 24px;
+  transition: opacity 0.8s ease;
+}
+#op-overlay.fade-out { opacity: 0; pointer-events: none; }
+
+#paw-stage {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.paw {
+  position: absolute;
+  font-size: 2.4rem;
+  opacity: 0;
+  transform: scale(0.2) rotate(var(--rot, 0deg));
+  animation: paw-stamp 0.35s ease-out forwards;
+  animation-delay: var(--delay, 0s);
+  filter: drop-shadow(0 0 8px rgba(180,80,20,0.5));
+}
+@keyframes paw-stamp {
+  0%   { opacity: 0; transform: scale(0.2) rotate(var(--rot,0deg)); }
+  50%  { opacity: 1; transform: scale(1.15) rotate(var(--rot,0deg)); }
+  70%  { transform: scale(0.92) rotate(var(--rot,0deg)); }
+  100% { opacity: 0.75; transform: scale(1) rotate(var(--rot,0deg)); }
+}
+
+#op-title {
+  position: relative; z-index: 1;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: op-fadein 0.7s ease-out 2.2s forwards;
+}
+@keyframes op-fadein {
+  to { opacity: 1; transform: translateY(0); }
+}
+#op-title .op-welcome {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  color: #c8845a;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+#op-title .op-name {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 900;
+  font-size: clamp(2.4rem, 8vw, 4rem);
+  color: #f5e0d0;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 30px rgba(200,120,60,0.5);
+}
+#op-skip {
+  position: absolute; bottom: 24px; right: 24px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; color: #6b3a20;
+  background: transparent; border: 1px solid #4a2010;
+  padding: 6px 14px; cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  animation: op-fadein 0.5s ease-out 0.5s both;
+}
+#op-skip:hover { color: #c8845a; border-color: #c8845a; }
+
 /* ── LIGHTBOX ── */
 #lb { position:fixed; inset:0; z-index:900; background:rgba(249,238,242,0.95); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; cursor:zoom-out; }
 #lb.on { display:flex; }
@@ -475,12 +544,68 @@ body.admin-mode #admin-badge { opacity: 1; }
 
 </div>
 
+<!-- OP OVERLAY -->
+<div id="op-overlay">
+  <div id="paw-stage"></div>
+  <div id="op-title">
+    <div class="op-welcome">Welcome to</div>
+    <div class="op-name">チョコの部屋</div>
+  </div>
+  <button id="op-skip" onclick="skipOp()">SKIP →</button>
+</div>
+
 <div id="admin-badge">ADMIN MODE</div>
 
 <script>
 const KEY  = 'choco-v4';
 const MKEY = 'choco-mainimg';
 const MOODS = {散歩:'🌿',食事:'🍖',睡眠:'😴',あそび:'🎾',病院:'💉',観察:'🐾','その他':'♥'};
+
+// ── OP ANIMATION ──
+(function() {
+  const overlay = document.getElementById('op-overlay');
+  const stage   = document.getElementById('paw-stage');
+
+  // 歩くパスを生成（左右の足を交互に、斜め上へ進む）
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const steps = 10;
+  // 左下から右上へ斜めに歩く
+  const startX = W * 0.08;
+  const startY = H * 0.82;
+  const endX   = W * 0.92;
+  const endY   = H * 0.22;
+
+  for (let i = 0; i < steps; i++) {
+    const t = i / (steps - 1);
+    const cx = startX + (endX - startX) * t;
+    const cy = startY + (endY - startY) * t;
+    // 左右交互にオフセット
+    const side = i % 2 === 0 ? -1 : 1;
+    const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+    const perpAngle = angle + 90;
+    const offset = 22;
+    const px = cx + Math.cos(perpAngle * Math.PI / 180) * offset * side;
+    const py = cy + Math.sin(perpAngle * Math.PI / 180) * offset * side;
+
+    const el = document.createElement('div');
+    el.className = 'paw';
+    el.textContent = '🐾';
+    // 進行方向に向くように回転
+    const rot = angle + 90 + (side > 0 ? 15 : -15);
+    el.style.cssText = `left:${px}px; top:${py}px; --delay:${0.18 * i}s; --rot:${rot}deg;`;
+    stage.appendChild(el);
+  }
+
+  // タイトル表示後、自動でフェードアウト
+  setTimeout(finishOp, 3600);
+
+  function finishOp() {
+    overlay.classList.add('fade-out');
+    setTimeout(() => overlay.remove(), 900);
+  }
+  window.skipOp = finishOp;
+})();
 
 // ── ADMIN MODE (Konami: ↑↑↓↓←→←→BA) ──
 let adminMode = false;
