@@ -306,19 +306,22 @@
             </select>
             <select id="filter-genre" class="filter-select" onchange="applyFilters()">
                 <option value="">ALL GENRES</option>
-                <option value="Action">ACTION</option>
-                <option value="Adventure">ADVENTURE</option>
-                <option value="Animation">ANIMATION</option>
-                <option value="Comedy">COMEDY</option>
-                <option value="Crime">CRIME</option>
-                <option value="Drama">DRAMA</option>
-                <option value="Fantasy">FANTASY</option>
-                <option value="Horror">HORROR</option>
-                <option value="Mystery">MYSTERY</option>
-                <option value="Romance">ROMANCE</option>
-                <option value="Sci-Fi">SCI-FI</option>
-                <option value="Thriller">THRILLER</option>
-                <option value="War">WAR</option>
+                <option value="アクション">ACTION</option>
+                <option value="アドベンチャー">ADVENTURE</option>
+                <option value="アニメーション">ANIMATION</option>
+                <option value="コメディ">COMEDY</option>
+                <option value="犯罪">CRIME</option>
+                <option value="ドキュメンタリー">DOCUMENTARY</option>
+                <option value="ドラマ">DRAMA</option>
+                <option value="ファミリー">FAMILY</option>
+                <option value="ファンタジー">FANTASY</option>
+                <option value="歴史">HISTORY</option>
+                <option value="ホラー">HORROR</option>
+                <option value="音楽">MUSIC</option>
+                <option value="ロマンス">ROMANCE</option>
+                <option value="サイエンスフィクション">SCI-FI</option>
+                <option value="スリラー">THRILLER</option>
+                <option value="戦争">WAR</option>
             </select>
             <select id="sort-by" class="filter-select" onchange="applyFilters()">
                 <option value="added">ADDED ORDER</option>
@@ -591,13 +594,16 @@
                 if (c[0]) promises.push(fetchMovieData({
                     title: c[0].trim(),
                     status,
-                    filmarksYear: c[1]?.trim() || '',
-                    filmarksScore: c[2]?.trim() || '',
+                    filmarksYear:    c[1]?.trim() || '',
+                    filmarksScore:   c[2]?.trim() || '',
                     filmarksComment: c[3]?.trim() || '',
-                    filmarksUrl: c[4]?.trim() || '',
-                    director: c[5]?.trim() || '',
-                    country: c[6]?.trim() || '',
-                    runtime: c[7]?.trim() || ''
+                    filmarksUrl:     c[4]?.trim() || '',
+                    director:        c[5]?.trim() || '',
+                    country:         c[6]?.trim() || '',
+                    runtime:         c[7]?.trim() || '',
+                    genre:           c[8]?.trim() || '',
+                    tmdbId:          c[9]?.trim() || '',
+                    posterPath:      c[10]?.trim() || ''
                 }));
             }
             return promises;
@@ -639,23 +645,52 @@
 
         async function fetchMovieData(sheetData) {
             try {
-                const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&language=ja-JP&query=${encodeURIComponent(sheetData.title)}`);
-                const data = await res.json();
-                if (data.results?.[0]) {
-                    const movie = data.results[0];
-                    movie.appStatus = sheetData.status;
-                    movie.appCountry = sheetData.country || '';
-                    movie.appDirector = sheetData.director || '';
-                    movie.appRuntime = sheetData.runtime || '';
-                    movie.appGenre = (movie.genre_ids || []).map(id => TMDB_GENRE_MAP[id]).filter(Boolean).join(', ');
-                    movie.filmarksScore = sheetData.filmarksScore || '';
+                let movie = null;
+
+                if (sheetData.tmdbId) {
+                    // シートにTMDb_IDがある → 検索不要、直接構築
+                    movie = {
+                        id: parseInt(sheetData.tmdbId),
+                        title: sheetData.title,
+                        poster_path: sheetData.posterPath || null,
+                        backdrop_path: sheetData.posterPath || null,
+                        overview: '',
+                        genre_ids: [],
+                        release_date: sheetData.filmarksYear ? `${sheetData.filmarksYear}-01-01` : ''
+                    };
+                    // overviewとbackdropは非同期で補完
+                    fetch(`https://api.themoviedb.org/3/movie/${movie.id}?api_key=${API_KEY}&language=ja-JP`)
+                        .then(r => r.json()).then(d => {
+                            movie.overview    = d.overview || '';
+                            movie.backdrop_path = d.backdrop_path || movie.poster_path;
+                        }).catch(()=>{});
+                } else {
+                    const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&language=ja-JP&query=${encodeURIComponent(sheetData.title)}`);
+                    const data = await res.json();
+                    movie = data.results?.[0] || null;
+                }
+
+                if (movie) {
+                    movie.appStatus      = sheetData.status;
+                    movie.appCountry     = sheetData.country || '';
+                    movie.appDirector    = sheetData.director || '';
+                    movie.appRuntime     = sheetData.runtime || '';
+                    // シートのジャンル優先、なければgenre_idsから生成
+                    movie.appGenre       = sheetData.genre || (movie.genre_ids || []).map(id => TMDB_GENRE_MAP[id]).filter(Boolean).join(', ');
+                    movie.filmarksScore   = sheetData.filmarksScore || '';
                     movie.filmarksComment = sheetData.filmarksComment || '';
-                    movie.filmarksUrl = sheetData.filmarksUrl || '';
-                    movie.filmarksYear = sheetData.filmarksYear || '';
+                    movie.filmarksUrl     = sheetData.filmarksUrl || '';
+                    movie.filmarksYear    = sheetData.filmarksYear || '';
                     movie.year = sheetData.filmarksYear || (movie.release_date ? movie.release_date.split('-')[0] : '');
-                    const imgRes = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}/images?api_key=${API_KEY}&include_image_language=en,null`);
-                    const imgData = await imgRes.json();
-                    if (imgData.posters?.length > 0) movie.poster_path = imgData.posters[0].file_path;
+
+                    // posterPathがシートにあればそのまま使う、なければ画像API
+                    if (sheetData.posterPath) {
+                        movie.poster_path = sheetData.posterPath;
+                    } else {
+                        const imgRes = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}/images?api_key=${API_KEY}&include_image_language=en,null`);
+                        const imgData = await imgRes.json();
+                        if (imgData.posters?.length > 0) movie.poster_path = imgData.posters[0].file_path;
+                    }
                     allMovies.push(movie);
                 }
             } catch(e) { console.error(e); }
