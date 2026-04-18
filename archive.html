@@ -447,6 +447,7 @@
         let isLightMode = localStorage.getItem('o24-theme') === 'light';
         let theaterMode = false;
         let watchProvidersCache = JSON.parse(localStorage.getItem('o24-providers') || '{}');
+        let adminMode = false;
         const PROVIDERS_TTL = 86400000; // 24時間キャッシュ
 
         async function fetchWatchProviders(movieId, forceRefresh = false) {
@@ -777,8 +778,8 @@
             if (movie.appDirector) metaHtml += ` / <span class="director-link" onclick="openDirectorPanel('${movie.appDirector.replace(/'/g,"\\'")}')">DIR: ${movie.appDirector}</span>`;
             document.getElementById('i-meta').innerHTML = metaHtml;
 
-            // MARK AS WATCHED ボタン
-            document.getElementById('watched-btn').style.display = status === 'towatch' ? '' : 'none';
+            // MARK AS WATCHED ボタン（管理者モードのみ表示）
+            document.getElementById('watched-btn').style.display = (status === 'towatch' && adminMode) ? '' : 'none';
 
             // MY REVIEWタブ
             document.getElementById('review-tab-btn').style.display = status === 'watched' ? '' : 'none';
@@ -1129,16 +1130,21 @@
         (function() {
             const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
             let pos = 0;
-            let adminMode = false;
             document.addEventListener('keydown', e => {
                 if (e.key === KONAMI[pos]) {
                     pos++;
                     if (pos === KONAMI.length) {
                         pos = 0;
                         adminMode = !adminMode;
+                        // SAVEボタン
                         document.querySelectorAll('.save-memo-btn').forEach(btn => {
                             btn.style.display = adminMode ? 'inline-block' : 'none';
                         });
+                        // MARK AS WATCHED ボタン（モーダルが開いていてTOWATCH映画なら即反映）
+                        if (activeMovie && (statusOverrides[activeMovie.id] || activeMovie.appStatus) === 'towatch') {
+                            document.getElementById('watched-btn').style.display = adminMode ? '' : 'none';
+                            document.getElementById('watch-panel').style.display = 'none';
+                        }
                         const ind = document.getElementById('admin-indicator');
                         if (ind) {
                             ind.textContent = adminMode ? 'ADMIN MODE' : 'ADMIN OFF';
