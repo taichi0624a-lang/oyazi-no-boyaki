@@ -464,7 +464,6 @@
                     <div class="provider-logo-wrap">
                         <img class="provider-logo" src="https://image.tmdb.org/t/p/original${p.logo_path}" alt="${p.provider_name}" loading="lazy">
                     </div>
-                    <div class="provider-name">${p.provider_name.replace('Amazon ', 'Prime\n').replace(' (JP)', '')}</div>
                 </div>`).join('');
         }
 
@@ -686,9 +685,7 @@
                 const scoreHtml = movie.filmarksScore
                     ? `<div class="c-stars-display">★ ${movie.filmarksScore}</div>`
                     : '';
-                const commentHtml = movie.filmarksComment
-                    ? `<div class="c-comment">"${movie.filmarksComment}"</div>`
-                    : '';
+                const commentHtml = '';
                 const card = document.createElement('div');
                 card.className = 'c-card';
                 card.dataset.mid = movie.id;
