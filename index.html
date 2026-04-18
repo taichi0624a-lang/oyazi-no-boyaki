@@ -707,63 +707,58 @@ body {
 /* ─── STUDIO LOADER ─── */
 #noise-loader {
     position: fixed; inset: 0; z-index: 99999;
-    background: transparent;
     pointer-events: all;
 }
 #noise-loader.done { display: none; }
 
-/* 背景（最初の暗幕） */
 .sl-backdrop {
     position: absolute; inset: 0;
-    background: #0c0c0c;
+    background: #0a0a0a;
 }
 
-/* ターコイズのアイリス */
+/* 左から右へのターコイズワイプ */
 .sl-turq {
     position: absolute; inset: 0;
-    background: #45b5aa;
-    clip-path: circle(0% at 50% 50%);
-    animation: irisOpen 0.7s cubic-bezier(0.76,0,0.24,1) 0.15s forwards;
+    background: #3eb5aa;
+    clip-path: inset(0 100% 0 0);
+    animation: wipeIn 0.55s cubic-bezier(0.76,0,0.24,1) 0.1s forwards;
 }
-@keyframes irisOpen { to { clip-path: circle(150% at 50% 50%); } }
+@keyframes wipeIn { to { clip-path: inset(0 0% 0 0); } }
 
-/* 中央のマーク（ターコイズ上に白） */
+/* ターコイズ上の中央マーク */
 .sl-mark {
     position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    z-index: 2; opacity: 0;
-    animation: markIn 0.45s ease 0.75s forwards;
-}
-@keyframes markIn { to { opacity: 1; } }
-
-.sl-mark svg { width: 90px; height: 90px; }
-
-.sl-ring-path {
-    fill: none; stroke: rgba(255,255,255,0.95); stroke-width: 1.2;
-    stroke-dasharray: 283; stroke-dashoffset: 283;
-    transform-origin: 45px 45px; transform: rotate(-90deg);
-    animation: ringDraw 0.6s cubic-bezier(0.65,0,0.35,1) 0.85s forwards;
-}
-@keyframes ringDraw { to { stroke-dashoffset: 0; } }
-
-.sl-dot-inner {
-    fill: white; opacity: 0;
-    animation: dotIn 0.3s cubic-bezier(0.2,1.5,0.4,1) 1.4s forwards;
-}
-@keyframes dotIn {
-    from { opacity: 0; r: 0; }
-    to   { opacity: 1; r: 7; }
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 18px; z-index: 2;
 }
 
-/* 閉じる暗幕アイリス */
-.sl-dark {
+.sl-diamond {
+    width: 14px; height: 14px;
+    background: white;
+    transform: rotate(45deg) scale(0);
+    animation: diamondIn 0.4s cubic-bezier(0.2,1.5,0.3,1) 0.75s forwards;
+}
+@keyframes diamondIn { to { transform: rotate(45deg) scale(1); } }
+
+.sl-lines {
+    display: flex; flex-direction: column; gap: 5px; align-items: center;
+    opacity: 0;
+    animation: linesIn 0.4s ease 0.9s forwards;
+}
+.sl-line-a { width: 48px; height: 1px; background: rgba(255,255,255,0.7); }
+.sl-line-b { width: 28px; height: 1px; background: rgba(255,255,255,0.4); }
+@keyframes linesIn { to { opacity: 1; } }
+
+/* 右から左への暗幕ワイプ */
+.sl-close {
     position: absolute; inset: 0;
-    background: #0c0c0c;
-    clip-path: circle(0% at 50% 50%);
+    background: #0a0a0a;
+    clip-path: inset(0 0 0 100%);
     z-index: 3;
-    animation: irisClose 0.75s cubic-bezier(0.76,0,0.24,1) 2.0s forwards;
+    animation: wipeOut 0.55s cubic-bezier(0.76,0,0.24,1) 1.85s forwards;
 }
-@keyframes irisClose { to { clip-path: circle(150% at 50% 50%); } }
+@keyframes wipeOut { to { clip-path: inset(0 0 0 0%); } }
 
 /* ─── KONAMI EFFECT ─── */
 #konami-overlay {
@@ -1002,12 +997,13 @@ body {
     <div class="sl-backdrop"></div>
     <div class="sl-turq"></div>
     <div class="sl-mark">
-        <svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
-            <circle class="sl-ring-path" cx="45" cy="45" r="45"/>
-            <circle class="sl-dot-inner" cx="45" cy="45" r="0"/>
-        </svg>
+        <div class="sl-diamond"></div>
+        <div class="sl-lines">
+            <div class="sl-line-a"></div>
+            <div class="sl-line-b"></div>
+        </div>
     </div>
-    <div class="sl-dark"></div>
+    <div class="sl-close"></div>
 </div>
 
 <!-- ══════════ MASTHEAD ══════════ -->
@@ -1779,7 +1775,7 @@ onValue(lastReadRef, snap => {
 // ── STUDIO LOADER ──
 (function() {
     const loader = document.getElementById('noise-loader');
-    setTimeout(() => { loader.classList.add('done'); }, 2800);
+    setTimeout(() => { loader.classList.add('done'); }, 2500);
 })();
 
 // ── THEME ──
