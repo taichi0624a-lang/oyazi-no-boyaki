@@ -477,8 +477,8 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 
 // ── MAIN IMAGE ──
 (function(){
-  const url = localStorage.getItem(MKEY);
-  if (url) setImg(url);
+  const url = localStorage.getItem(MKEY) || './choco-main.jpg';
+  setImg(url);
 })();
 function setImg(url) {
   const img = document.getElementById('main-img');
