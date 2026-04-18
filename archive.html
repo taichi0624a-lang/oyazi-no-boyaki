@@ -450,14 +450,17 @@
                 for (let i = 1; i < lines.length; i++) {
                     if (!lines[i].trim()) continue;
                     const c = parseCSVRow(lines[i]);
-                    // 列: タイトル, 製作年, 評価, コメント, URL
+                    // 列: タイトル, 製作年, 評価, コメント, URL, 監督, 製作国, 上映時間
                     if (c[0]) promises.push(fetchMovieData({
                         title: c[0].trim(),
                         status: 'watched',
                         filmarksYear: c[1]?.trim() || '',
                         filmarksScore: c[2]?.trim() || '',
                         filmarksComment: c[3]?.trim() || '',
-                        filmarksUrl: c[4]?.trim() || ''
+                        filmarksUrl: c[4]?.trim() || '',
+                        director: c[5]?.trim() || '',
+                        country: c[6]?.trim() || '',
+                        runtime: c[7]?.trim() || ''
                     }));
                 }
                 await Promise.allSettled(promises);
@@ -470,6 +473,13 @@
             } catch(e) { console.error('シートの読み込みに失敗しました', e); }
         }
 
+        const TMDB_GENRE_MAP = {
+            28:'アクション',12:'アドベンチャー',16:'アニメーション',35:'コメディ',
+            80:'犯罪',99:'ドキュメンタリー',18:'ドラマ',10751:'ファミリー',
+            14:'ファンタジー',36:'歴史',27:'ホラー',10402:'音楽',9648:'ミステリー',
+            10749:'ロマンス',878:'SF',53:'スリラー',10752:'戦争',37:'西部劇'
+        };
+
         async function fetchMovieData(sheetData) {
             try {
                 const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&language=ja-JP&query=${encodeURIComponent(sheetData.title)}`);
@@ -478,13 +488,14 @@
                     const movie = data.results[0];
                     movie.appStatus = sheetData.status;
                     movie.appCountry = sheetData.country || '';
-                    movie.appGenre = sheetData.genre || '';
                     movie.appDirector = sheetData.director || '';
+                    movie.appRuntime = sheetData.runtime || '';
+                    movie.appGenre = (movie.genre_ids || []).map(id => TMDB_GENRE_MAP[id]).filter(Boolean).join(', ');
                     movie.filmarksScore = sheetData.filmarksScore || '';
                     movie.filmarksComment = sheetData.filmarksComment || '';
                     movie.filmarksUrl = sheetData.filmarksUrl || '';
                     movie.filmarksYear = sheetData.filmarksYear || '';
-                    movie.year = movie.release_date ? movie.release_date.split('-')[0] : (sheetData.filmarksYear || '');
+                    movie.year = sheetData.filmarksYear || (movie.release_date ? movie.release_date.split('-')[0] : '');
                     const imgRes = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}/images?api_key=${API_KEY}&include_image_language=en,null`);
                     const imgData = await imgRes.json();
                     if (imgData.posters?.length > 0) movie.poster_path = imgData.posters[0].file_path;
@@ -622,7 +633,7 @@
         }
 
         function renderTicket(movie) {
-            const runtime = movie.runtime ? `${movie.runtime} MIN` : '— MIN';
+            const runtime = movie.appRuntime ? movie.appRuntime.replace('分', ' MIN') : (movie.runtime ? `${movie.runtime} MIN` : '— MIN');
             document.getElementById('cinema-ticket').innerHTML = `
                 <div class="ticket-body">
                     <div class="ticket-field">
