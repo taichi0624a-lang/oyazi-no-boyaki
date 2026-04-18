@@ -704,53 +704,98 @@ body {
 }
 .w-pub:hover { opacity: 0.82; }
 
-/* ─── NOISE LOADER ─── */
+/* ─── STUDIO LOADER ─── */
 #noise-loader {
     position: fixed; inset: 0; z-index: 99999;
-    background: #0a0a0a;
+    background: #0c0c0c;
     display: flex; align-items: center; justify-content: center;
     pointer-events: all;
-    transition: opacity 0.6s ease;
+    transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1);
 }
 #noise-loader.fade-out { opacity: 0; pointer-events: none; }
-#noise-canvas {
+
+.sl-inner {
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+}
+
+.sl-logo-wrap {
+    position: relative; width: 130px; height: 130px;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.sl-ring {
     position: absolute; inset: 0; width: 100%; height: 100%;
-    opacity: 1;
+    overflow: visible;
 }
-#noise-scanlines {
-    position: absolute; inset: 0;
-    background: repeating-linear-gradient(
-        to bottom,
-        transparent 0px,
-        transparent 3px,
-        rgba(0,0,0,0.18) 3px,
-        rgba(0,0,0,0.18) 4px
-    );
-    pointer-events: none;
+
+.sl-circle {
+    fill: none;
+    stroke: rgba(255,255,255,0.85);
+    stroke-width: 1;
+    stroke-dasharray: 345;
+    stroke-dashoffset: 345;
+    transform-origin: 65px 65px;
+    transform: rotate(-90deg);
+    animation: drawRing 1.1s cubic-bezier(0.65,0,0.35,1) 0.2s forwards;
 }
-#noise-title {
-    position: relative; z-index: 2;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(1rem, 3vw, 1.6rem);
-    font-weight: 300;
-    letter-spacing: 0.3em;
-    color: #fff;
+
+@keyframes drawRing {
+    to { stroke-dashoffset: 0; }
+}
+
+.sl-dot {
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #aa2020;
     opacity: 0;
-    text-align: center;
-    text-shadow: 0 0 30px rgba(255,255,255,0.4);
-    transition: opacity 0.5s ease;
-    user-select: none;
+    animation: dotPop 0.3s cubic-bezier(0.2,1.5,0.4,1) 1.1s forwards;
 }
-#noise-title.visible { opacity: 1; }
-#noise-sub {
-    position: absolute;
-    bottom: 40px; left: 0; right: 0;
-    text-align: center;
-    font-family: 'Space Mono', monospace;
-    font-size: 8px;
+@keyframes dotPop {
+    from { opacity: 0; transform: translateX(-50%) scale(0); }
+    to   { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+.sl-char {
+    position: relative; z-index: 2;
+    font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+    font-size: 3.2rem; font-weight: 300;
+    color: #fff; line-height: 1;
+    opacity: 0;
+    letter-spacing: 0.05em;
+    animation: charIn 0.7s cubic-bezier(0.2,1,0.3,1) 0.9s forwards;
+}
+@keyframes charIn {
+    from { opacity: 0; transform: scale(0.88); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.sl-rule {
+    width: 1px; height: 28px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+    margin-top: 20px;
+    opacity: 0;
+    animation: fadeUp 0.5s ease 1.4s forwards;
+}
+
+.sl-title {
+    font-size: 0.55rem;
+    letter-spacing: 5px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 14px; white-space: nowrap;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 1.5s forwards;
+}
+.sl-sub {
+    font-size: 0.45rem;
     letter-spacing: 4px;
-    color: rgba(255,255,255,0.25);
-    z-index: 2;
+    color: rgba(255,255,255,0.2);
+    margin-top: 6px;
+    opacity: 0;
+    animation: fadeUp 0.5s ease 1.7s forwards;
+}
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ─── KONAMI EFFECT ─── */
@@ -985,11 +1030,20 @@ body {
 
 <div id="read-progress"></div>
 
-<!-- NOISE LOADER -->
+<!-- STUDIO LOADER -->
 <div id="noise-loader">
-    <canvas id="noise-canvas"></canvas>
-    <div id="noise-scanlines"></div>
-    <div id="noise-sub">LOADING</div>
+    <div class="sl-inner">
+        <div class="sl-logo-wrap">
+            <svg class="sl-ring" viewBox="0 0 130 130">
+                <circle class="sl-circle" cx="65" cy="65" r="55"/>
+            </svg>
+            <div class="sl-dot"></div>
+            <div class="sl-char">子</div>
+        </div>
+        <div class="sl-rule"></div>
+        <div class="sl-title">親父より親父な子供のぼやき</div>
+        <div class="sl-sub">PERSONAL DIARY — ISSUE No. 001</div>
+    </div>
 </div>
 
 <!-- ══════════ MASTHEAD ══════════ -->
@@ -1758,139 +1812,13 @@ onValue(lastReadRef, snap => {
     lastRead = snap.val() || null;
 });
 
-// ── NOISE LOADER (RGB Channel Split) ──
+// ── STUDIO LOADER ──
 (function() {
     const loader = document.getElementById('noise-loader');
-    const canvas = document.getElementById('noise-canvas');
-    const ctx    = canvas.getContext('2d');
-    let   rafId  = null;
-    let   started = Date.now();
-
-    const offR = document.createElement('canvas');
-    const offG = document.createElement('canvas');
-    const offB = document.createElement('canvas');
-    const ctxR = offR.getContext('2d');
-    const ctxG = offG.getContext('2d');
-    const ctxB = offB.getContext('2d');
-
-    function resize() {
-        const w = window.innerWidth, h = window.innerHeight;
-        [canvas, offR, offG, offB].forEach(c => { c.width = w; c.height = h; });
-    }
-    resize();
-    window.addEventListener('resize', resize);
-
-    function drawNoiseToCtx(c, elapsed) {
-        const w = c.canvas.width, h = c.canvas.height;
-        const img = c.createImageData(w, h);
-        const d = img.data;
-        for (let i = 0; i < d.length; i += 4) {
-            const v = Math.random() * 255 | 0;
-            d[i] = d[i+1] = d[i+2] = v;
-            d[i+3] = 255;
-        }
-        c.putImageData(img, 0, 0);
-    }
-
-    function animate() {
-        const elapsed = Date.now() - started;
-        const w = canvas.width, h = canvas.height;
-
-        // フェーズ: 0〜2600ms
-        // 0〜400ms   : RGBがバラバラにズレた強いノイズ
-        // 400〜1600ms: ズレが徐々に収束
-        // 1600〜2200ms: ノイズが消えてクリアに
-        // 2200〜2600ms: フェードアウト
-
-        let splitX = 0, splitY = 0;
-
-        if (elapsed < 400) {
-            // 最大ズレ
-            splitX = 30 + Math.sin(elapsed * 0.05) * 15;
-            splitY = 10 + Math.cos(elapsed * 0.08) * 8;
-        } else if (elapsed < 1600) {
-            // 収束
-            const t = (elapsed - 400) / 1200;
-            const ease = 1 - Math.pow(1 - t, 3);
-            splitX = (1 - ease) * (30 + Math.sin(elapsed * 0.05) * 15);
-            splitY = (1 - ease) * (10 + Math.cos(elapsed * 0.08) * 8);
-        } else if (elapsed < 2200) {
-            splitX = 0; splitY = 0;
-        } else if (elapsed < 2600) {
-            const t = (elapsed - 2200) / 400;
-            ctx.fillStyle = `rgba(10,10,10,${t})`;
-            ctx.fillRect(0, 0, w, h);
-            loader.style.opacity = String(1 - t);
-            rafId = requestAnimationFrame(animate);
-            return;
-        } else {
-            loader.style.display = 'none';
-            cancelAnimationFrame(rafId);
-            return;
-        }
-
-        // 各チャンネルにノイズ描画
-        drawNoiseToCtx(ctxR, elapsed);
-        drawNoiseToCtx(ctxG, elapsed);
-        drawNoiseToCtx(ctxB, elapsed);
-
-        // ノイズ強度
-        let noiseAlpha = 1.0;
-        if (elapsed > 1600) {
-            noiseAlpha = 1 - (elapsed - 1600) / 600;
-        }
-
-        ctx.clearRect(0, 0, w, h);
-        ctx.fillStyle = '#0a0a0a';
-        ctx.fillRect(0, 0, w, h);
-
-        // R チャンネル（左上にズレ）
-        ctx.save();
-        ctx.globalCompositeOperation = 'screen';
-        ctx.globalAlpha = noiseAlpha * 0.85;
-        ctx.drawImage(offR, -splitX, -splitY);
-        ctx.restore();
-
-        // Gチャンネル（中央）
-        ctx.save();
-        ctx.globalCompositeOperation = 'screen';
-        ctx.globalAlpha = noiseAlpha * 0.85;
-        ctx.drawImage(offG, 0, 0);
-        ctx.restore();
-
-        // Bチャンネル（右下にズレ）
-        ctx.save();
-        ctx.globalCompositeOperation = 'screen';
-        ctx.globalAlpha = noiseAlpha * 0.85;
-        ctx.drawImage(offB, splitX, splitY);
-        ctx.restore();
-
-        // RGBカラー着色
-        ctx.save();
-        ctx.globalCompositeOperation = 'multiply';
-        ctx.globalAlpha = 0.6;
-
-        // R: 赤
-        ctx.fillStyle = '#ff2200';
-        ctx.globalAlpha = 0.25 * noiseAlpha;
-        ctx.drawImage(offR, -splitX, -splitY);
-
-        ctx.restore();
-
-        // グリッチライン
-        if (Math.random() < 0.25 && elapsed < 1600) {
-            const y = Math.random() * h | 0;
-            ctx.save();
-            ctx.globalAlpha = Math.random() * 0.4;
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(0, y, w, Math.random() * 3 + 1 | 0);
-            ctx.restore();
-        }
-
-        rafId = requestAnimationFrame(animate);
-    }
-
-    animate();
+    setTimeout(() => {
+        loader.classList.add('fade-out');
+        setTimeout(() => { loader.style.display = 'none'; }, 900);
+    }, 2600);
 })();
 
 // ── THEME ──
