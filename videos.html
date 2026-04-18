@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOOST | Videos that make me feel alive</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+        :root {
+            --turq: #45b5aa;
+            --bg: #050505;
+            --text: #fff;
+            --text-sub: #888;
+            --card-bg: rgba(255,255,255,0.03);
+            --card-border: rgba(255,255,255,0.07);
+            --rule: rgba(255,255,255,0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+        /* ── LOADER ── */
+        #loader {
+            position: fixed; inset: 0; background: #0a0a0a;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; flex-direction: column; gap: 24px;
+        }
+        .loader-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(4rem, 12vw, 8rem);
+            color: #fff; letter-spacing: 20px; opacity: 0;
+        }
+        .loader-bar {
+            width: 120px; height: 1px; background: rgba(255,255,255,0.1);
+            position: relative; overflow: hidden;
+        }
+        .loader-bar::after {
+            content: ''; position: absolute; inset: 0;
+            background: var(--turq);
+            animation: barLoad 1.2s ease forwards;
+        }
+        @keyframes barLoad { from { transform: scaleX(0); transform-origin: left; } to { transform: scaleX(1); transform-origin: left; } }
+
+        /* ── HEADER ── */
+        #site-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 24px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: linear-gradient(to bottom, rgba(5,5,5,0.95) 0%, transparent 100%);
+            backdrop-filter: blur(0px);
+        }
+        .back-link {
+            font-size: 0.65rem; letter-spacing: 3px; color: var(--text-sub);
+            text-decoration: none; transition: color 0.3s;
+        }
+        .back-link:hover { color: var(--turq); }
+        .header-label {
+            font-size: 0.6rem; letter-spacing: 4px; color: var(--text-sub);
+        }
+
+        /* ── HERO ── */
+        #hero {
+            padding: 140px 40px 60px;
+            max-width: 1200px; margin: 0 auto;
+        }
+        .hero-eyebrow {
+            font-size: 0.6rem; letter-spacing: 5px; color: var(--turq);
+            margin-bottom: 20px;
+        }
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 400; line-height: 1.05;
+            color: #fff; margin-bottom: 20px;
+        }
+        .hero-title em { font-style: italic; color: var(--turq); }
+        .hero-sub {
+            font-size: 0.85rem; color: var(--text-sub); line-height: 1.8;
+            max-width: 500px;
+        }
+
+        /* ── FILTER TAGS ── */
+        #tag-bar {
+            max-width: 1200px; margin: 0 auto;
+            padding: 0 40px 50px;
+            display: flex; gap: 10px; flex-wrap: wrap;
+        }
+        .tag-btn {
+            background: transparent; border: 1px solid var(--card-border);
+            color: var(--text-sub); padding: 6px 18px; border-radius: 100px;
+            font-size: 0.65rem; letter-spacing: 2px; cursor: pointer; transition: 0.3s;
+        }
+        .tag-btn:hover, .tag-btn.active {
+            border-color: var(--turq); color: var(--turq);
+        }
+        .tag-btn.active { background: rgba(69,181,170,0.1); }
+
+        /* ── GRID ── */
+        #video-grid {
+            max-width: 1200px; margin: 0 auto;
+            padding: 0 40px 120px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 28px;
+        }
+        .v-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 8px; overflow: hidden; cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.2,1,0.3,1), border-color 0.3s, box-shadow 0.4s;
+        }
+        .v-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(69,181,170,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+        .v-thumb {
+            position: relative; width: 100%; aspect-ratio: 16/9;
+            overflow: hidden; background: #111;
+        }
+        .v-thumb img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.2,1,0.3,1), filter 0.4s;
+            filter: brightness(0.8);
+        }
+        .v-card:hover .v-thumb img { transform: scale(1.05); filter: brightness(1); }
+        .v-play {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .v-card:hover .v-play { opacity: 1; }
+        .v-play-ring {
+            width: 52px; height: 52px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.9);
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(4px); background: rgba(0,0,0,0.3);
+        }
+        .v-play-ring::after {
+            content: ''; border: 8px solid transparent;
+            border-left: 14px solid #fff; margin-left: 4px;
+        }
+        .v-tag-badge {
+            position: absolute; top: 12px; left: 12px;
+            font-size: 0.55rem; letter-spacing: 2px; color: var(--turq);
+            background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 100px;
+            backdrop-filter: blur(4px);
+        }
+        .v-info { padding: 18px 20px 20px; }
+        .v-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.05rem; color: #fff; line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .v-desc {
+            font-size: 0.72rem; color: var(--text-sub); line-height: 1.7;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .v-meta {
+            margin-top: 14px; display: flex; align-items: center; gap: 12px;
+        }
+        .v-channel {
+            font-size: 0.6rem; letter-spacing: 1px; color: #555;
+        }
+
+        /* ── MODAL ── */
+        #modal {
+            position: fixed; inset: 0; z-index: 500;
+            display: none; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.92); backdrop-filter: blur(8px);
+        }
+        #modal.open { display: flex; }
+        .modal-inner {
+            width: 90vw; max-width: 960px;
+            background: #0d0d0d; border: 1px solid var(--card-border);
+            border-radius: 12px; overflow: hidden;
+            position: relative; animation: modalIn 0.4s cubic-bezier(0.2,1,0.3,1);
+        }
+        @keyframes modalIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+        .modal-video { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; }
+        .modal-video iframe { width: 100%; height: 100%; border: none; }
+        .modal-info { padding: 24px 28px 28px; }
+        .modal-title {
+            font-family: 'Playfair Display', serif; font-size: 1.4rem;
+            color: #fff; margin-bottom: 8px;
+        }
+        .modal-desc { font-size: 0.82rem; color: var(--text-sub); line-height: 1.8; }
+        .modal-close {
+            position: absolute; top: 16px; right: 16px; z-index: 10;
+            background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+            color: #fff; width: 36px; height: 36px; border-radius: 50%;
+            cursor: pointer; font-size: 1rem; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.1); }
+
+        /* ── ADMIN ADD PANEL ── */
+        #admin-panel {
+            position: fixed; bottom: 30px; right: 30px; z-index: 200;
+            display: none;
+        }
+        #admin-panel.visible { display: block; }
+        .admin-btn {
+            background: var(--turq); color: #000; border: none;
+            padding: 12px 24px; border-radius: 100px;
+            font-size: 0.7rem; letter-spacing: 2px; cursor: pointer;
+            box-shadow: 0 8px 30px rgba(69,181,170,0.4);
+            transition: 0.3s;
+        }
+        .admin-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(69,181,170,0.5); }
+
+        #add-form {
+            position: fixed; inset: 0; z-index: 600;
+            display: none; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.92); backdrop-filter: blur(8px);
+        }
+        #add-form.open { display: flex; }
+        .form-inner {
+            background: #0d0d0d; border: 1px solid var(--card-border);
+            border-radius: 12px; padding: 36px; width: 90vw; max-width: 500px;
+        }
+        .form-title {
+            font-family: 'Playfair Display', serif; font-size: 1.4rem;
+            color: #fff; margin-bottom: 28px;
+        }
+        .form-group { margin-bottom: 18px; }
+        .form-label {
+            font-size: 0.6rem; letter-spacing: 3px; color: var(--text-sub);
+            display: block; margin-bottom: 8px;
+        }
+        .form-input, .form-select {
+            width: 100%; background: rgba(255,255,255,0.04);
+            border: 1px solid var(--card-border); color: #fff;
+            padding: 10px 14px; border-radius: 6px; font-size: 0.85rem;
+            font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.3s;
+        }
+        .form-input:focus, .form-select:focus { border-color: var(--turq); }
+        .form-select option { background: #1a1a1a; }
+        .form-actions { display: flex; gap: 12px; margin-top: 24px; }
+        .form-submit {
+            flex: 1; background: var(--turq); color: #000; border: none;
+            padding: 12px; border-radius: 6px; font-size: 0.7rem; letter-spacing: 2px;
+            cursor: pointer; transition: 0.3s;
+        }
+        .form-submit:hover { opacity: 0.85; }
+        .form-cancel {
+            background: transparent; border: 1px solid var(--card-border);
+            color: var(--text-sub); padding: 12px 20px; border-radius: 6px;
+            font-size: 0.7rem; letter-spacing: 2px; cursor: pointer; transition: 0.3s;
+        }
+        .form-cancel:hover { border-color: #fff; color: #fff; }
+
+        /* ── ADMIN INDICATOR ── */
+        #admin-indicator {
+            position: fixed; bottom: 18px; left: 18px;
+            font-size: 0.6rem; letter-spacing: 2px; color: var(--turq);
+            opacity: 0; transition: opacity 0.5s; pointer-events: none;
+        }
+        #admin-indicator.visible { opacity: 1; }
+
+        /* ── EMPTY STATE ── */
+        #empty-state {
+            display: none; text-align: center; padding: 80px 40px;
+            color: var(--text-sub);
+        }
+        #empty-state.visible { display: block; }
+        .empty-icon { font-size: 3rem; margin-bottom: 20px; opacity: 0.3; }
+        .empty-text { font-size: 0.8rem; letter-spacing: 2px; }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--rule);
+            padding: 30px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            max-width: 1200px; margin: 0 auto;
+        }
+        .footer-label { font-size: 0.6rem; letter-spacing: 3px; color: var(--text-sub); }
+
+        @media (max-width: 600px) {
+            #hero, #tag-bar, #video-grid { padding-left: 20px; padding-right: 20px; }
+            #site-header { padding: 20px; }
+            #video-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <div class="loader-title" id="loader-title">BOOST</div>
+    <div class="loader-bar"></div>
+</div>
+
+<div id="admin-indicator"></div>
+
+<header id="site-header">
+    <a class="back-link" href="index.html">← DIARY</a>
+    <span class="header-label">BOOST / VIDEO ARCHIVE</span>
+</header>
+
+<section id="hero">
+    <div class="hero-eyebrow">PERSONAL VIDEO ARCHIVE</div>
+    <h1 class="hero-title">Videos that make<br><em>me feel alive</em></h1>
+    <p class="hero-sub">元気が出る動画、繰り返し観たい動画を集めた個人アーカイブ。</p>
+</section>
+
+<div id="tag-bar">
+    <button class="tag-btn active" onclick="filterTag('all', this)">ALL</button>
+    <button class="tag-btn" onclick="filterTag('元気', this)">元気</button>
+    <button class="tag-btn" onclick="filterTag('音楽', this)">音楽</button>
+    <button class="tag-btn" onclick="filterTag('映画', this)">映画</button>
+    <button class="tag-btn" onclick="filterTag('笑い', this)">笑い</button>
+    <button class="tag-btn" onclick="filterTag('感動', this)">感動</button>
+    <button class="tag-btn" onclick="filterTag('その他', this)">その他</button>
+</div>
+
+<div id="video-grid"></div>
+<div id="empty-state">
+    <div class="empty-icon">▶</div>
+    <div class="empty-text">コナミコードで管理者モードに入って動画を追加してください</div>
+</div>
+
+<footer>
+    <span class="footer-label">BOOST — VIDEO ARCHIVE</span>
+    <span class="footer-label">© 2026</span>
+</footer>
+
+<!-- 再生モーダル -->
+<div id="modal">
+    <div class="modal-inner">
+        <button class="modal-close" onclick="closeModal()">×</button>
+        <div class="modal-video"><iframe id="modal-iframe" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
+        <div class="modal-info">
+            <div class="modal-title" id="modal-title"></div>
+            <div class="modal-desc" id="modal-desc"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 動画追加フォーム -->
+<div id="add-form">
+    <div class="form-inner">
+        <div class="form-title">Add Video</div>
+        <div class="form-group">
+            <label class="form-label">YouTube URL または VIDEO ID</label>
+            <input class="form-input" id="f-url" placeholder="https://www.youtube.com/watch?v=..." />
+        </div>
+        <div class="form-group">
+            <label class="form-label">タイトル</label>
+            <input class="form-input" id="f-title" placeholder="動画のタイトル" />
+        </div>
+        <div class="form-group">
+            <label class="form-label">説明（任意）</label>
+            <input class="form-input" id="f-desc" placeholder="この動画が好きな理由など..." />
+        </div>
+        <div class="form-group">
+            <label class="form-label">タグ</label>
+            <select class="form-select" id="f-tag">
+                <option value="元気">元気</option>
+                <option value="音楽">音楽</option>
+                <option value="映画">映画</option>
+                <option value="笑い">笑い</option>
+                <option value="感動">感動</option>
+                <option value="その他">その他</option>
+            </select>
+        </div>
+        <div class="form-actions">
+            <button class="form-cancel" onclick="closeAddForm()">CANCEL</button>
+            <button class="form-submit" onclick="addVideo()">ADD VIDEO</button>
+        </div>
+    </div>
+</div>
+
+<!-- 管理者モード追加ボタン -->
+<div id="admin-panel">
+    <button class="admin-btn" onclick="openAddForm()">+ ADD VIDEO</button>
+</div>
+
+<script>
+    // ── データ（localStorageで永続化） ──
+    const STORAGE_KEY = 'boost-videos';
+
+    const DEFAULT_VIDEOS = [
+        {
+            id: crypto.randomUUID(),
+            videoId: 'dQw4w9WgXcQ',
+            title: 'ここに好きな動画を追加してください',
+            desc: 'コナミコード（↑↑↓↓←→←→BA）で管理者モードに入ると動画を追加・削除できます。',
+            tag: '元気'
+        }
+    ];
+
+    function loadVideos() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? JSON.parse(saved) : DEFAULT_VIDEOS;
+        } catch { return DEFAULT_VIDEOS; }
+    }
+
+    function saveVideos(videos) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(videos));
+    }
+
+    let videos = loadVideos();
+    let currentTag = 'all';
+    let adminMode = false;
+
+    // ── YouTubeのIDを取得 ──
+    function extractVideoId(input) {
+        input = input.trim();
+        const patterns = [
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/,
+            /^([A-Za-z0-9_-]{11})$/
+        ];
+        for (const p of patterns) {
+            const m = input.match(p);
+            if (m) return m[1];
+        }
+        return null;
+    }
+
+    // ── サムネイルURL ──
+    function thumbUrl(videoId) {
+        return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    }
+
+    // ── レンダリング ──
+    function render() {
+        const grid = document.getElementById('video-grid');
+        const empty = document.getElementById('empty-state');
+        const filtered = currentTag === 'all' ? videos : videos.filter(v => v.tag === currentTag);
+
+        if (filtered.length === 0) {
+            grid.innerHTML = '';
+            empty.classList.add('visible');
+            return;
+        }
+        empty.classList.remove('visible');
+
+        grid.innerHTML = filtered.map(v => `
+            <div class="v-card" onclick="openModal('${v.videoId}','${v.title.replace(/'/g,"\\'")}','${(v.desc||'').replace(/'/g,"\\'")}')">
+                <div class="v-thumb">
+                    <img src="${thumbUrl(v.videoId)}" alt="${v.title}"
+                         onerror="this.src='https://img.youtube.com/vi/${v.videoId}/hqdefault.jpg'">
+                    <span class="v-tag-badge">${v.tag}</span>
+                    <div class="v-play"><div class="v-play-ring"></div></div>
+                </div>
+                <div class="v-info">
+                    <div class="v-title">${v.title}</div>
+                    ${v.desc ? `<div class="v-desc">${v.desc}</div>` : ''}
+                    <div class="v-meta">
+                        ${adminMode ? `<button onclick="event.stopPropagation();removeVideo('${v.id}')" style="background:transparent;border:1px solid rgba(255,80,80,0.4);color:rgba(255,80,80,0.7);padding:3px 10px;border-radius:100px;font-size:0.6rem;letter-spacing:1px;cursor:pointer;">REMOVE</button>` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ── タグフィルター ──
+    function filterTag(tag, btn) {
+        currentTag = tag;
+        document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        render();
+    }
+
+    // ── モーダル ──
+    function openModal(videoId, title, desc) {
+        document.getElementById('modal-iframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-desc').textContent = desc;
+        document.getElementById('modal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        document.getElementById('modal').classList.remove('open');
+        document.getElementById('modal-iframe').src = '';
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('modal').addEventListener('click', e => {
+        if (e.target === document.getElementById('modal')) closeModal();
+    });
+
+    // ── 動画追加 ──
+    function openAddForm() {
+        document.getElementById('add-form').classList.add('open');
+        document.getElementById('f-url').focus();
+    }
+
+    function closeAddForm() {
+        document.getElementById('add-form').classList.remove('open');
+        document.getElementById('f-url').value = '';
+        document.getElementById('f-title').value = '';
+        document.getElementById('f-desc').value = '';
+    }
+
+    function addVideo() {
+        const url = document.getElementById('f-url').value;
+        const title = document.getElementById('f-title').value.trim();
+        const desc = document.getElementById('f-desc').value.trim();
+        const tag = document.getElementById('f-tag').value;
+
+        const videoId = extractVideoId(url);
+        if (!videoId) { alert('YouTubeのURLまたはVideo IDを正しく入力してください'); return; }
+        if (!title) { alert('タイトルを入力してください'); return; }
+
+        videos.unshift({ id: crypto.randomUUID(), videoId, title, desc, tag });
+        saveVideos(videos);
+        render();
+        closeAddForm();
+    }
+
+    function removeVideo(id) {
+        if (!confirm('この動画を削除しますか？')) return;
+        videos = videos.filter(v => v.id !== id);
+        saveVideos(videos);
+        render();
+    }
+
+    // ── コナミコード ──
+    (function() {
+        const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+        let pos = 0;
+        document.addEventListener('keydown', e => {
+            if (e.key === KONAMI[pos]) {
+                pos++;
+                if (pos === KONAMI.length) {
+                    pos = 0;
+                    adminMode = !adminMode;
+                    document.getElementById('admin-panel').classList.toggle('visible', adminMode);
+                    const ind = document.getElementById('admin-indicator');
+                    ind.textContent = adminMode ? 'ADMIN MODE' : 'ADMIN OFF';
+                    ind.classList.add('visible');
+                    setTimeout(() => ind.classList.remove('visible'), 2000);
+                    render();
+                }
+            } else {
+                pos = e.key === KONAMI[0] ? 1 : 0;
+            }
+        });
+    })();
+
+    // ── ESCキーでモーダルを閉じる ──
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { closeModal(); closeAddForm(); }
+    });
+
+    // ── ローダー ──
+    window.addEventListener('load', () => {
+        gsap.to('#loader-title', { opacity: 1, duration: 0.8, ease: 'power2.out' });
+        gsap.to('#loader', {
+            opacity: 0, duration: 0.6, delay: 1.4, ease: 'power2.in',
+            onComplete: () => {
+                document.getElementById('loader').style.display = 'none';
+                render();
+                gsap.from('#hero', { opacity: 0, y: 30, duration: 0.8, ease: 'power2.out' });
+                gsap.from('#tag-bar', { opacity: 0, y: 20, duration: 0.6, delay: 0.2, ease: 'power2.out' });
+            }
+        });
+    });
+</script>
+</body>
+</html>
