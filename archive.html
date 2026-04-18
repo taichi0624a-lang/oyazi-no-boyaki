@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>O24 | Cinematic Archive</title>
+    <title>drop off</title>
     <link rel="icon" href="favicon.png" type="image/png">
     <link rel="apple-touch-icon" href="favicon.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -31,7 +31,8 @@
         /* ── ローダー ── */
         #chic-loader { position: fixed; inset: 0; background: var(--paper); display: flex; justify-content: center; align-items: center; z-index: 9999; overflow: hidden; }
         .chic-logo-wrap { display: flex; gap: 3vw; position: relative; z-index: 2; }
-        .c-char { font-family: 'Playfair Display', serif; font-size: clamp(8rem, 20vw, 18rem); color: #0a0a0a; font-weight: 400; line-height: 1; opacity: 0; }
+        .c-char { display:none; }
+        .c-word { font-family: 'Playfair Display', serif; font-size: clamp(5rem, 14vw, 12rem); color: #0a0a0a; font-weight: 400; line-height: 1; opacity: 0; font-style: italic; letter-spacing: -0.02em; }
         /* 映写機ビーム */
         .projector-beam { position: absolute; bottom: -10%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 35vw solid transparent; border-right: 35vw solid transparent; border-bottom: 120vh solid rgba(255,245,180,0.06); pointer-events: none; z-index: 1; animation: beam-flicker 3s ease-in-out infinite; }
         @keyframes beam-flicker { 0%,100%{opacity:1} 50%{opacity:0.7} 75%{opacity:0.9} }
@@ -278,14 +279,14 @@
     <section id="chic-loader">
         <div class="projector-beam"></div>
         <div class="chic-logo-wrap">
-            <span class="c-char">O</span><span class="c-char">2</span><span class="c-char">4</span>
+            <span class="c-word">drop</span><span class="c-word">off</span>
         </div>
     </section>
 
     <button class="theme-toggle" onclick="toggleTheme()">◐ THEME</button>
 
     <div id="app-wrapper" style="opacity:0; visibility:hidden;">
-        <h1 class="brand-logo">O24</h1>
+        <h1 class="brand-logo">drop off</h1>
 
         <div class="controls-section">
             <input id="search-input" class="search-input" type="text" placeholder="🔍  SEARCH TITLE / DIRECTOR" oninput="applyFilters()">
@@ -538,9 +539,9 @@
                     document.body.style.overflow = 'auto';
                 }
             });
-            tl.fromTo('.c-char',
-                { opacity:0, filter:'blur(30px)', x:(i)=>(i-1)*150, scale:1.2 },
-                { opacity:1, filter:'blur(0px)', x:0, scale:1, duration:3.5, stagger:0.2, ease:'power2.out' }
+            tl.fromTo('.c-word',
+                { opacity:0, filter:'blur(24px)', y:-60 },
+                { opacity:1, filter:'blur(0px)', y:0, duration:2.8, stagger:0.55, ease:'power3.out' }
             )
             .to({}, { duration:1.8 })
             .set('#app-wrapper', { visibility:'visible', opacity:1 })
