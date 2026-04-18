@@ -372,7 +372,8 @@
 
     <script>
         const API_KEY = 'c6dc0382ae920c2cb5143ff6a7ce97e6';
-        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTmG8i1VC9T_UZarakreWFHQQURph171YsAEZVUkMciHZ-mxrJrqJCGxGYBnLdD7yuf4OjsKdl3gsdT/pub?gid=0&single=true&output=csv';
+        const SHEET_CSV_URL        = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTmG8i1VC9T_UZarakreWFHQQURph171YsAEZVUkMciHZ-mxrJrqJCGxGYBnLdD7yuf4OjsKdl3gsdT/pub?gid=0&single=true&output=csv';
+        const TOWATCH_CSV_URL      = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTmG8i1VC9T_UZarakreWFHQQURph171YsAEZVUkMciHZ-mxrJrqJCGxGYBnLdD7yuf4OjsKdl3gsdT/pub?gid=281490225&single=true&output=csv';
 
         let allMovies = [];
         let activeMovie = null;
@@ -441,31 +442,46 @@
             return cols;
         }
 
+        function parseSheetCSV(text, status) {
+            const lines = text.split(/\r?\n/);
+            const promises = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const c = parseCSVRow(lines[i]);
+                // 列: タイトル, 製作年, 評価, コメント, URL, 監督, 製作国, 上映時間
+                if (c[0]) promises.push(fetchMovieData({
+                    title: c[0].trim(),
+                    status,
+                    filmarksYear: c[1]?.trim() || '',
+                    filmarksScore: c[2]?.trim() || '',
+                    filmarksComment: c[3]?.trim() || '',
+                    filmarksUrl: c[4]?.trim() || '',
+                    director: c[5]?.trim() || '',
+                    country: c[6]?.trim() || '',
+                    runtime: c[7]?.trim() || ''
+                }));
+            }
+            return promises;
+        }
+
         async function loadFromSheet() {
             try {
-                const res = await fetch(SHEET_CSV_URL + '&t=' + Date.now());
-                const text = await res.text();
-                const lines = text.split(/\r?\n/);
-                const promises = [];
-                for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
-                    const c = parseCSVRow(lines[i]);
-                    // 列: タイトル, 製作年, 評価, コメント, URL, 監督, 製作国, 上映時間
-                    if (c[0]) promises.push(fetchMovieData({
-                        title: c[0].trim(),
-                        status: 'watched',
-                        filmarksYear: c[1]?.trim() || '',
-                        filmarksScore: c[2]?.trim() || '',
-                        filmarksComment: c[3]?.trim() || '',
-                        filmarksUrl: c[4]?.trim() || '',
-                        director: c[5]?.trim() || '',
-                        country: c[6]?.trim() || '',
-                        runtime: c[7]?.trim() || ''
-                    }));
-                }
+                const t = '&t=' + Date.now();
+                const [watchedRes, towatchRes] = await Promise.all([
+                    fetch(SHEET_CSV_URL + t),
+                    fetch(TOWATCH_CSV_URL + t)
+                ]);
+                const [watchedText, towatchText] = await Promise.all([
+                    watchedRes.text(),
+                    towatchRes.text()
+                ]);
+                const promises = [
+                    ...parseSheetCSV(watchedText, 'watched'),
+                    ...parseSheetCSV(towatchText, 'towatch')
+                ];
                 await Promise.allSettled(promises);
                 renderAll();
-                switchView('watched', document.querySelectorAll('.t-btn')[1], 1);
+                switchView('towatch', document.querySelectorAll('.t-btn')[0], 0);
                 if (window._openMovieId) {
                     const m = allMovies.find(m => m.id === window._openMovieId);
                     if (m) openImmersive(m);
