@@ -5,465 +5,396 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Welcome to チョコの部屋</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Noto+Serif+JP:wght@400;700&family=DM+Sans:wght@300;400&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&family=Noto+Serif+JP:wght@700;900&family=DM+Serif+Display:ital@1&family=Space+Mono:wght@400&family=DM+Sans:wght@300;400&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
-/* ── POLKA DOT BACKGROUND ── */
+/* ── HEART PATTERN BACKGROUND ── */
 body {
   min-height: 100vh;
-  background-color: #fce8ef;
-  background-image: radial-gradient(circle, #f4b8cb 1.5px, transparent 1.5px);
-  background-size: 18px 18px;
+  background-color: #f9eef2;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ctext x='6' y='17' font-size='10' fill='%23e8b8c8' opacity='0.5'%3E♥%3C/text%3E%3C/svg%3E");
   font-family: 'DM Sans', 'Noto Serif JP', sans-serif;
-  color: #3a2030;
+  color: #6b2030;
 }
 
-/* ── PAGE WRAPPER ── */
-#page {
-  max-width: 680px;
+/* ── OUTER FRAME ── */
+#frame {
+  max-width: 580px;
   margin: 0 auto;
-  padding: 24px 16px 60px;
+  padding: 20px 12px 40px;
 }
 
-/* ── WELCOME HEADER BOX ── */
-#welcome-box {
-  background: #fff;
-  border: 2px solid #e8a0b4;
-  box-shadow: 4px 4px 0 #f4b8cb;
-  margin-bottom: 14px;
-  overflow: hidden;
-  position: relative;
-}
-.wb-inner {
-  display: grid;
-  grid-template-columns: 1fr 180px;
-  min-height: 220px;
-}
-.wb-text {
-  padding: 32px 28px 28px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.wb-welcome {
-  font-family: 'Pinyon Script', cursive;
-  font-size: 2.2rem;
-  color: #c0607a;
-  line-height: 1;
-  margin-bottom: 8px;
-  letter-spacing: 0.02em;
-}
-.wb-title {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 2.1rem;
-  font-weight: 700;
-  color: #c0607a;
-  line-height: 1.1;
-  letter-spacing: 0.05em;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-.wb-title .deco { color: #e8a0b4; font-size: 1.4rem; }
-.wb-sub {
-  font-size: 0.72rem;
-  color: #b07080;
-  letter-spacing: 3px;
-  margin-top: 10px;
-  font-family: 'Space Mono', monospace;
-}
-.wb-image {
-  background: #fce8ef;
-  border-left: 2px solid #f4b8cb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 80px;
+/* ── MAIN IMAGE AREA ── */
+#main-img-wrap {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: #f0dde5;
+  border: 3px solid #9b4458;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  display: block;
 }
-.wb-image img {
+#main-img {
   width: 100%; height: 100%;
-  object-fit: cover; display: block;
+  object-fit: cover; object-position: top;
+  display: block;
 }
-.wb-image-placeholder { text-align: center; }
-.wb-image-placeholder .lbl {
+#main-img-placeholder {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px;
+  background: linear-gradient(160deg, #f9e0e8 0%, #f0d0dc 50%, #e8c8d5 100%);
+}
+#main-img-placeholder .big-icon { font-size: 6rem; opacity: 0.35; }
+#main-img-placeholder .ph-label {
   font-family: 'Space Mono', monospace;
-  font-size: 7px; letter-spacing: 2px;
-  color: #e8a0b4; display: block; margin-top: 4px;
+  font-size: 9px; letter-spacing: 3px; color: #c08090;
+}
+#main-img-placeholder .ph-hint {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px; letter-spacing: 2px; color: #d0a0b0;
+  margin-top: -4px;
+}
+/* hide placeholder when img loads */
+#main-img-wrap.has-img #main-img-placeholder { display: none; }
+
+/* ── WELCOME TEXT BLOCK ── */
+#title-block {
+  background: #f9eef2;
+  border-left: 3px solid #9b4458;
+  border-right: 3px solid #9b4458;
+  border-bottom: 3px solid #9b4458;
+  padding: 22px 20px 20px;
+  text-align: center;
+  margin-bottom: 0;
+}
+.welcome-to {
+  font-family: 'Playfair Display', 'DM Serif Display', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  color: #6b2030;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+.room-title {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 900;
+  font-size: clamp(2.8rem, 10vw, 4.5rem);
+  color: #6b2030;
+  letter-spacing: 0.06em;
+  line-height: 1.0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.room-title .heart {
+  font-size: clamp(1.6rem, 6vw, 2.4rem);
+  color: #9b4458;
+  line-height: 1;
+}
+.counter-line {
+  margin-top: 14px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; color: #b07080;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.counter-num {
+  font-size: 11px; color: #6b2030; letter-spacing: 3px;
+  border: 1px solid #c08090; padding: 2px 10px;
+  background: #fff;
 }
 
-/* ── DECORATIVE BORDER BAR ── */
-.deco-bar {
-  height: 12px;
+/* ── SEPARATOR ── */
+.sep {
+  height: 10px;
   background: repeating-linear-gradient(
     90deg,
-    #e8a0b4 0px, #e8a0b4 12px,
-    #f4c8d4 12px, #f4c8d4 24px,
-    #fde0e8 24px, #fde0e8 36px,
-    #f4c8d4 36px, #f4c8d4 48px
+    #9b4458 0px, #9b4458 10px,
+    #c07888 10px, #c07888 20px,
+    #e0a0b0 20px, #e0a0b0 30px,
+    #c07888 30px, #c07888 40px
   );
-  margin-bottom: 14px;
+  margin: 14px 0;
 }
 
-/* ── NAV BAR ── */
-#nav-bar {
+/* ── NAV ── */
+#nav {
   background: #fff;
-  border: 2px solid #e8a0b4;
-  box-shadow: 3px 3px 0 #f4b8cb;
-  padding: 0;
+  border: 2px solid #9b4458;
+  display: flex; flex-wrap: wrap;
   margin-bottom: 14px;
-  display: flex;
-  flex-wrap: wrap;
 }
-.nav-item {
-  flex: 1;
+.nav-btn {
+  flex: 1; min-width: 80px;
+  padding: 10px 6px;
   text-align: center;
-  padding: 10px 8px;
   font-family: 'Noto Serif JP', serif;
-  font-size: 0.78rem;
-  color: #c0607a;
+  font-size: 0.82rem; font-weight: 700;
+  color: #6b2030;
   cursor: pointer;
-  border-right: 1px solid #f4c8d4;
+  border-right: 1px solid #e8c0cc;
+  background: transparent;
+  border-top: none; border-bottom: none; border-left: none;
   transition: background 0.15s;
-  text-decoration: none;
-  display: block;
 }
-.nav-item:last-child { border-right: none; }
-.nav-item:hover { background: #fce8ef; }
-.nav-item.active { background: #fce8ef; font-weight: 700; }
-.nav-item .nav-en {
+.nav-btn:last-child { border-right: none; }
+.nav-btn:hover, .nav-btn.active { background: #f9eef2; }
+.nav-btn .nav-en {
   display: block;
   font-family: 'Space Mono', monospace;
-  font-size: 7px; letter-spacing: 1px;
-  color: #e8a0b4; margin-top: 2px;
+  font-size: 7px; letter-spacing: 1px; color: #c08090;
+  font-weight: 400; margin-top: 2px;
 }
 
-/* ── SECTIONS (tab content) ── */
+/* ── PANELS ── */
 .section { display: none; }
 .section.active { display: block; }
 
-/* ── PANEL ── */
 .panel {
   background: #fff;
-  border: 2px solid #e8a0b4;
-  box-shadow: 3px 3px 0 #f4b8cb;
+  border: 2px solid #9b4458;
   margin-bottom: 14px;
-  overflow: hidden;
 }
-.panel-title {
-  background: linear-gradient(90deg, #e8a0b4, #f4c8d4);
-  padding: 7px 16px;
+.panel-hd {
+  background: #9b4458;
+  padding: 7px 14px;
   font-family: 'Noto Serif JP', serif;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 2px;
-  display: flex; align-items: center; gap: 8px;
+  font-size: 0.8rem; font-weight: 700;
+  color: #fff; letter-spacing: 2px;
 }
-.panel-body { padding: 18px 20px; }
+.panel-bd { padding: 16px 18px; }
 
 /* ── PROFILE TABLE ── */
-.prof-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-.prof-table tr { border-bottom: 1px dotted #f4c8d4; }
-.prof-table tr:last-child { border-bottom: none; }
-.prof-table td { padding: 7px 6px; }
-.prof-table .key {
+.ptable { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.ptable tr { border-bottom: 1px dotted #e8c0cc; }
+.ptable tr:last-child { border-bottom: none; }
+.ptable td { padding: 8px 6px; }
+.ptable .k {
   font-family: 'Space Mono', monospace;
-  font-size: 8px; letter-spacing: 2px;
-  color: #c0607a; width: 90px;
-  white-space: nowrap;
+  font-size: 8px; letter-spacing: 2px; color: #9b4458;
+  width: 90px; white-space: nowrap;
 }
-.prof-table .val { color: #3a2030; }
 
 /* ── PHOTO GRID ── */
-.photo-grid {
+.pgrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  gap: 4px;
 }
-.photo-cell {
+.pgcell {
   aspect-ratio: 1;
-  background: #fce8ef;
-  border: 1px solid #f4c8d4;
+  background: #f9eef2;
+  border: 1px solid #e8c0cc;
   overflow: hidden;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  flex-direction: column; gap: 4px;
+  flex-direction: column; gap: 3px;
   transition: opacity 0.18s;
   position: relative;
 }
-.photo-cell:hover { opacity: 0.85; }
-.photo-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.photo-cell.empty { cursor: default; }
-.photo-cell.empty:hover { opacity: 1; }
-.photo-cell .ph-icon { font-size: 1.8rem; opacity: 0.3; }
-.photo-cell .ph-lbl {
-  font-family: 'Space Mono', monospace;
-  font-size: 7px; letter-spacing: 1px; color: #e8a0b4;
-}
+.pgcell:hover { opacity: 0.82; }
+.pgcell.empty { cursor: default; }
+.pgcell.empty:hover { opacity: 1; }
+.pgcell img { width:100%; height:100%; object-fit:cover; display:block; }
+.pgcell .ei { font-size: 1.5rem; opacity: 0.25; }
+.pgcell .el { font-family:'Space Mono',monospace; font-size:7px; letter-spacing:1px; color:#e8c0cc; }
 
-/* ── DIARY ENTRIES ── */
-.diary-item {
-  border-bottom: 1px dotted #f4c8d4;
-  padding: 16px 0;
+/* ── DIARY ── */
+.di {
+  border-bottom: 1px dotted #e8c0cc;
+  padding: 14px 0;
 }
-.diary-item:last-child { border-bottom: none; padding-bottom: 0; }
-.di-header {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
-}
-.di-date {
-  font-family: 'Space Mono', monospace;
-  font-size: 8px; letter-spacing: 2px; color: #c0607a;
-}
+.di:last-child { border-bottom: none; padding-bottom: 0; }
+.di-top { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.di-date { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:2px; color:#9b4458; }
 .di-tag {
-  font-family: 'Space Mono', monospace;
-  font-size: 7px; letter-spacing: 1px;
-  background: #fce8ef; border: 1px solid #f4c8d4;
-  color: #c0607a; padding: 2px 7px;
+  font-family:'Space Mono',monospace; font-size:7px; letter-spacing:1px;
+  background:#f9eef2; border:1px solid #e8c0cc; color:#9b4458; padding:2px 7px;
 }
-.di-emoji { font-size: 1.1rem; margin-left: auto; }
-.di-title {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 0.95rem; font-weight: 700;
-  margin-bottom: 6px;
-}
-.di-body {
-  font-size: 0.82rem; line-height: 1.85;
-  color: #5a4050; font-weight: 300;
-}
-.di-photo {
-  margin-top: 10px;
-}
-.di-photo img {
-  max-width: 100%; max-height: 220px;
-  object-fit: cover; border: 1px solid #f4c8d4;
-  cursor: zoom-in;
-}
+.di-em { margin-left:auto; font-size:1rem; }
+.di-ttl { font-family:'Noto Serif JP',serif; font-size:0.92rem; font-weight:700; margin-bottom:5px; }
+.di-txt { font-size:0.8rem; line-height:1.85; color:#7a5060; font-weight:300; }
+.di-pic { margin-top:8px; }
+.di-pic img { max-width:100%; max-height:200px; object-fit:cover; border:1px solid #e8c0cc; cursor:zoom-in; }
 .di-del {
-  background: transparent; border: none;
-  font-family: 'Space Mono', monospace;
-  font-size: 7px; letter-spacing: 2px;
-  color: #f4c8d4; cursor: pointer;
-  margin-top: 8px; padding: 0;
-  transition: color 0.15s; display: block;
+  background:transparent; border:none; font-family:'Space Mono',monospace;
+  font-size:7px; letter-spacing:2px; color:#e8c0cc; cursor:pointer;
+  margin-top:6px; padding:0; display:block; transition:color 0.15s;
 }
-.di-del:hover { color: #c0607a; }
+.di-del:hover { color:#9b4458; }
 
 /* ── FORM ── */
-.form-add-btn {
-  width: 100%;
-  background: #fce8ef; border: 1px dashed #e8a0b4;
-  color: #c0607a;
-  font-family: 'Noto Serif JP', serif;
-  font-size: 0.82rem; letter-spacing: 1px;
-  padding: 12px; cursor: pointer;
-  transition: background 0.15s;
-  margin-bottom: 10px;
+.add-btn {
+  width:100%; background:#f9eef2; border:1px dashed #c08090;
+  color:#9b4458; font-family:'Noto Serif JP',serif;
+  font-size:0.82rem; letter-spacing:1px; padding:11px;
+  cursor:pointer; transition:background 0.15s; margin-bottom:10px;
 }
-.form-add-btn:hover { background: #f9d8e4; }
-.add-form { display: none; }
-.add-form.open { display: block; }
-.f-row { margin-bottom: 10px; }
-.f-label {
-  font-family: 'Space Mono', monospace;
-  font-size: 8px; letter-spacing: 2px; color: #c0607a;
-  display: block; margin-bottom: 4px;
+.add-btn:hover { background:#f0dde5; }
+.af { display:none; }
+.af.open { display:block; }
+.fl { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:2px; color:#9b4458; display:block; margin-bottom:4px; }
+.fr { margin-bottom:10px; }
+.fr input, .fr textarea, .fr select {
+  width:100%; background:#fffafc; border:1px solid #e8c0cc;
+  color:#3a2030; font-family:'DM Sans',sans-serif; font-size:0.82rem;
+  padding:9px 11px; outline:none; resize:vertical; transition:border-color 0.2s;
 }
-.f-row input, .f-row textarea, .f-row select {
-  width: 100%;
-  background: #fffafc; border: 1px solid #f4c8d4;
-  color: #3a2030;
-  font-family: 'DM Sans', sans-serif; font-size: 0.83rem;
-  padding: 9px 11px; outline: none; resize: vertical;
-  transition: border-color 0.2s;
+.fr input:focus, .fr textarea:focus { border-color:#9b4458; }
+.fr textarea { min-height:80px; }
+.fr select { cursor:pointer; }
+.fg { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.fsub {
+  background:#6b2030; color:#fff; border:none;
+  font-family:'Noto Serif JP',serif; font-size:0.8rem; letter-spacing:2px;
+  padding:10px 22px; cursor:pointer; transition:background 0.18s;
 }
-.f-row input:focus, .f-row textarea:focus { border-color: #e8a0b4; }
-.f-row textarea { min-height: 88px; }
-.f-row select { cursor: pointer; }
-.f-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.f-submit {
-  background: #c0607a; color: #fff; border: none;
-  font-family: 'Noto Serif JP', serif; font-size: 0.82rem;
-  letter-spacing: 2px; padding: 10px 24px;
-  cursor: pointer; transition: background 0.18s;
-}
-.f-submit:hover { background: #a04060; }
+.fsub:hover { background:#9b4458; }
 
 /* ── STATS ── */
-.stats-row {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 1px; background: #f4c8d4;
-  border: 1px solid #f4c8d4;
-}
-.stat-cell {
-  background: #fff; padding: 16px 10px; text-align: center;
-}
-.stat-n {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 1.8rem; font-weight: 700; color: #c0607a;
-}
-.stat-l {
-  font-family: 'Space Mono', monospace;
-  font-size: 7px; letter-spacing: 1px; color: #e8a0b4;
-  margin-top: 2px;
-}
+.srow { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:#e8c0cc; border:1px solid #e8c0cc; }
+.scell { background:#fff; padding:14px 8px; text-align:center; }
+.sn { font-family:'Noto Serif JP',serif; font-size:1.7rem; font-weight:700; color:#9b4458; }
+.sl { font-family:'Space Mono',monospace; font-size:7px; letter-spacing:1px; color:#c08090; margin-top:2px; }
 
-/* ── EMPTY STATE ── */
-.empty-state {
-  text-align: center; padding: 32px 0;
-  font-family: 'Space Mono', monospace;
-  font-size: 8px; letter-spacing: 2px; color: #e8a0b4;
+/* ── EMPTY ── */
+.empty-st { text-align:center; padding:28px 0; font-family:'Space Mono',monospace; font-size:8px; letter-spacing:2px; color:#e8c0cc; }
+
+/* ── IMAGE CHANGE BTN ── */
+#img-change-btn {
+  display:block; width:100%;
+  background:#f9eef2; border:1px dashed #c08090;
+  color:#9b4458; font-family:'Space Mono',monospace;
+  font-size:8px; letter-spacing:2px; padding:8px;
+  cursor:pointer; transition:background 0.15s; text-align:center;
+  margin-bottom:14px;
+}
+#img-change-btn:hover { background:#f0dde5; }
+#img-url-input { display:none; }
+#img-url-input.open { display:flex; gap:6px; margin-bottom:14px; }
+#img-url-input input {
+  flex:1; background:#fffafc; border:1px solid #e8c0cc;
+  color:#3a2030; font-family:'DM Sans',sans-serif; font-size:0.82rem;
+  padding:8px 10px; outline:none; transition:border-color 0.2s;
+}
+#img-url-input input:focus { border-color:#9b4458; }
+#img-url-input button {
+  background:#9b4458; color:#fff; border:none;
+  font-family:'Space Mono',monospace; font-size:8px; letter-spacing:1px;
+  padding:8px 14px; cursor:pointer;
 }
 
 /* ── FOOTER ── */
 #footer {
-  background: #fff;
-  border: 2px solid #e8a0b4;
-  box-shadow: 3px 3px 0 #f4b8cb;
-  padding: 14px 20px;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 8px;
-  margin-bottom: 0;
+  background:#fff; border:2px solid #9b4458;
+  padding:12px 18px;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;
+  margin-top:14px;
 }
-.footer-brand {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 0.85rem; font-weight: 700; color: #c0607a;
-}
-.footer-links {
-  font-family: 'Space Mono', monospace;
-  font-size: 8px; letter-spacing: 2px;
-  display: flex; gap: 16px;
-}
-.footer-links a { color: #e8a0b4; text-decoration: none; transition: color 0.15s; }
-.footer-links a:hover { color: #c0607a; }
+.fb { font-family:'Noto Serif JP',serif; font-size:0.85rem; font-weight:700; color:#6b2030; }
+.fl2 { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:1px; display:flex; gap:14px; }
+.fl2 a { color:#c08090; text-decoration:none; transition:color 0.15s; }
+.fl2 a:hover { color:#6b2030; }
 
 /* ── LIGHTBOX ── */
-#lightbox {
-  position: fixed; inset: 0; z-index: 900;
-  background: rgba(252,232,239,0.94);
-  backdrop-filter: blur(6px);
-  display: none; align-items: center; justify-content: center;
-  cursor: zoom-out;
-}
-#lightbox.on { display: flex; }
-#lightbox img {
-  max-width: 90vw; max-height: 90vh;
-  object-fit: contain; border: 2px solid #e8a0b4;
-  cursor: default;
-}
-#lb-x {
-  position: fixed; top: 20px; right: 5vw;
-  font-family: 'Space Mono', monospace;
-  font-size: 9px; letter-spacing: 2px; color: #c0607a;
-  background: #fff; border: 1px solid #e8a0b4;
-  padding: 6px 12px; cursor: pointer;
-}
+#lb { position:fixed; inset:0; z-index:900; background:rgba(249,238,242,0.95); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; cursor:zoom-out; }
+#lb.on { display:flex; }
+#lb img { max-width:90vw; max-height:90vh; object-fit:contain; border:2px solid #9b4458; cursor:default; }
+#lb-x { position:fixed; top:20px; right:5vw; font-family:'Space Mono',monospace; font-size:9px; letter-spacing:2px; color:#6b2030; background:#fff; border:1px solid #9b4458; padding:6px 12px; cursor:pointer; }
 
-/* ── MOBILE ── */
-@media (max-width: 500px) {
-  .wb-inner { grid-template-columns: 1fr; }
-  .wb-image { display: none; }
-  .wb-text { padding: 24px 20px; }
-  .wb-title { font-size: 1.7rem; }
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
-  .photo-grid { grid-template-columns: repeat(2, 1fr); }
-  .f-grid { grid-template-columns: 1fr; }
-  #nav-bar { flex-wrap: wrap; }
-  .nav-item { flex: 0 0 50%; border-bottom: 1px solid #f4c8d4; }
+@media (max-width:480px) {
+  .srow { grid-template-columns:repeat(2,1fr); }
+  .pgrid { grid-template-columns:repeat(2,1fr); }
+  .fg { grid-template-columns:1fr; }
+  .nav-btn { flex:0 0 50%; border-bottom:1px solid #e8c0cc; }
 }
 </style>
 </head>
 <body>
 
-<!-- LIGHTBOX -->
-<div id="lightbox">
-  <button id="lb-x">CLOSE ✕</button>
-  <img id="lb-img" src="" alt="">
-</div>
+<div id="lb"><button id="lb-x">CLOSE ✕</button><img id="lb-img" src="" alt=""></div>
 
-<div id="page">
+<div id="frame">
 
-  <!-- WELCOME HEADER -->
-  <div id="welcome-box">
-    <div class="wb-inner">
-      <div class="wb-text">
-        <div class="wb-welcome">Welcome to</div>
-        <div class="wb-title">
-          <span class="deco">•</span>チョコの部屋<span class="deco">•</span>
-        </div>
-        <div class="wb-sub">CHOCO'S ROOM — 愛犬観察日誌</div>
-      </div>
-      <div class="wb-image" id="hero-img-wrap">
-        <div class="wb-image-placeholder">
-          <span>🐶</span>
-          <span class="lbl">CHOCO</span>
-        </div>
-      </div>
+  <!-- MAIN IMAGE -->
+  <div id="main-img-wrap">
+    <img id="main-img" src="" alt="チョコ" style="display:none;">
+    <div id="main-img-placeholder">
+      <div class="big-icon">🐶</div>
+      <div class="ph-label">CHOCO PHOTO</div>
+      <div class="ph-hint">↓ 下のボタンから画像を追加</div>
     </div>
   </div>
 
-  <!-- DECO BAR -->
-  <div class="deco-bar"></div>
-
-  <!-- NAV -->
-  <div id="nav-bar">
-    <a class="nav-item active" data-tab="intro" onclick="switchTab('intro',this)">
-      はじめまして<span class="nav-en">INTRO</span>
-    </a>
-    <a class="nav-item" data-tab="diary" onclick="switchTab('diary',this)">
-      日記帳<span class="nav-en">DIARY</span>
-    </a>
-    <a class="nav-item" data-tab="photos" onclick="switchTab('photos',this)">
-      アルバム<span class="nav-en">PHOTOS</span>
-    </a>
-    <a class="nav-item" data-tab="stats" onclick="switchTab('stats',this)">
-      きろく<span class="nav-en">STATS</span>
-    </a>
+  <!-- WELCOME TEXT -->
+  <div id="title-block">
+    <div class="welcome-to">Welcome to</div>
+    <div class="room-title">
+      <span class="heart">♥</span>チョコの部屋<span class="heart">♥</span>
+    </div>
+    <div class="counter-line">
+      あなたは <span class="counter-num" id="hit-counter">000000</span> 人目のお客様です
+    </div>
   </div>
 
-  <!-- TAB: INTRO -->
+  <!-- IMAGE CHANGE -->
+  <button id="img-change-btn" onclick="toggleImgInput()">♥ メイン画像を変更する ♥</button>
+  <div id="img-url-input">
+    <input type="url" id="img-url-field" placeholder="画像URLを貼り付け (https://...)">
+    <button onclick="setMainImg()">SET</button>
+  </div>
+
+  <!-- SEP -->
+  <div class="sep"></div>
+
+  <!-- NAV -->
+  <div id="nav">
+    <button class="nav-btn active" onclick="switchTab('intro',this)">はじめまして<span class="nav-en">INTRO</span></button>
+    <button class="nav-btn" onclick="switchTab('diary',this)">日記帳<span class="nav-en">DIARY</span></button>
+    <button class="nav-btn" onclick="switchTab('photos',this)">アルバム<span class="nav-en">PHOTOS</span></button>
+    <button class="nav-btn" onclick="switchTab('stats',this)">きろく<span class="nav-en">STATS</span></button>
+  </div>
+
+  <!-- INTRO -->
   <div class="section active" id="tab-intro">
     <div class="panel">
-      <div class="panel-title">🐾 チョコってこんな子</div>
-      <div class="panel-body">
-        <table class="prof-table">
-          <tr><td class="key">NAME</td><td class="val">チョコ</td></tr>
-          <tr><td class="key">BREED</td><td class="val" id="prof-breed">—</td></tr>
-          <tr><td class="key">BIRTHDAY</td><td class="val" id="prof-bday">—</td></tr>
-          <tr><td class="key">AGE</td><td class="val" id="prof-age">—</td></tr>
-          <tr><td class="key">CHARACTER</td><td class="val">マイペースで甘えんぼ</td></tr>
-          <tr><td class="key">LIKES</td><td class="val">散歩・おやつ・ひなたぼっこ</td></tr>
+      <div class="panel-hd">♥ チョコってこんな子</div>
+      <div class="panel-bd">
+        <table class="ptable">
+          <tr><td class="k">NAME</td><td>チョコ</td></tr>
+          <tr><td class="k">BREED</td><td id="p-breed">—</td></tr>
+          <tr><td class="k">BIRTHDAY</td><td id="p-bday">—</td></tr>
+          <tr><td class="k">AGE</td><td id="p-age">—</td></tr>
+          <tr><td class="k">CHARACTER</td><td>マイペースで甘えんぼ</td></tr>
+          <tr><td class="k">LIKES</td><td>散歩・おやつ・ひなたぼっこ</td></tr>
         </table>
       </div>
     </div>
     <div class="panel">
-      <div class="panel-title">💌 ごあいさつ</div>
-      <div class="panel-body" style="font-size:0.85rem;line-height:1.9;color:#5a4050;font-weight:300;">
+      <div class="panel-hd">♥ ごあいさつ</div>
+      <div class="panel-bd" style="font-size:0.83rem;line-height:1.9;color:#7a5060;font-weight:300;">
         <p>ここはうちの愛犬チョコのページです。</p>
         <p style="margin-top:8px;">毎日の観察、散歩の記録、かわいい瞬間を残していきます。<br>ゆっくりしていってください。</p>
-        <p style="margin-top:12px; font-family:'Space Mono',monospace; font-size:8px; letter-spacing:2px; color:#e8a0b4;">— チョコの飼い主より</p>
+        <p style="margin-top:12px;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:#c08090;">— チョコの飼い主より</p>
       </div>
     </div>
   </div>
 
-  <!-- TAB: DIARY -->
+  <!-- DIARY -->
   <div class="section" id="tab-diary">
     <div class="panel">
-      <div class="panel-title">📝 観察日誌</div>
-      <div class="panel-body">
-        <button class="form-add-btn" onclick="toggleForm()">＋ 新しい観察を記録する</button>
-        <div class="add-form" id="add-form">
-          <div class="f-grid">
-            <div class="f-row">
-              <label class="f-label">TITLE</label>
-              <input type="text" id="f-title" placeholder="今日のチョコ">
-            </div>
-            <div class="f-row">
-              <label class="f-label">TAG</label>
+      <div class="panel-hd">♥ 観察日誌</div>
+      <div class="panel-bd">
+        <button class="add-btn" onclick="toggleForm()">♥ 新しい観察を記録する ♥</button>
+        <div class="af" id="af">
+          <div class="fg">
+            <div class="fr"><label class="fl">TITLE</label><input type="text" id="f-title" placeholder="今日のチョコ"></div>
+            <div class="fr"><label class="fl">TAG</label>
               <select id="f-tag">
                 <option value="観察">🐾 観察</option>
                 <option value="散歩">🌿 散歩</option>
@@ -471,225 +402,196 @@ body {
                 <option value="睡眠">😴 睡眠</option>
                 <option value="あそび">🎾 あそび</option>
                 <option value="病院">💉 病院</option>
-                <option value="その他">✿ その他</option>
+                <option value="その他">♥ その他</option>
               </select>
             </div>
           </div>
-          <div class="f-row">
-            <label class="f-label">MEMO</label>
-            <textarea id="f-body" placeholder="チョコの様子を書いてみて…"></textarea>
-          </div>
-          <div class="f-row">
-            <label class="f-label">PHOTO URL（任意）</label>
-            <input type="url" id="f-photo" placeholder="https://...">
-          </div>
-          <button class="f-submit" onclick="addEntry()">記録する ✦</button>
+          <div class="fr"><label class="fl">MEMO</label><textarea id="f-body" placeholder="チョコの様子を…"></textarea></div>
+          <div class="fr"><label class="fl">PHOTO URL（任意）</label><input type="url" id="f-photo" placeholder="https://..."></div>
+          <button class="fsub" onclick="addEntry()">記録する ♥</button>
         </div>
         <div id="diary-list"></div>
       </div>
     </div>
   </div>
 
-  <!-- TAB: PHOTOS -->
+  <!-- PHOTOS -->
   <div class="section" id="tab-photos">
     <div class="panel">
-      <div class="panel-title">📷 チョコアルバム</div>
-      <div class="panel-body">
-        <div class="photo-grid" id="photo-grid"></div>
+      <div class="panel-hd">♥ チョコアルバム</div>
+      <div class="panel-bd">
+        <div class="pgrid" id="photo-grid"></div>
       </div>
     </div>
   </div>
 
-  <!-- TAB: STATS -->
+  <!-- STATS -->
   <div class="section" id="tab-stats">
     <div class="panel">
-      <div class="panel-title">📊 チョコきろく</div>
-      <div class="panel-body" style="padding:0;">
-        <div class="stats-row">
-          <div class="stat-cell">
-            <div class="stat-n" id="s-posts">0</div>
-            <div class="stat-l">POSTS</div>
-          </div>
-          <div class="stat-cell">
-            <div class="stat-n" id="s-photos">0</div>
-            <div class="stat-l">PHOTOS</div>
-          </div>
-          <div class="stat-cell">
-            <div class="stat-n" id="s-days">—</div>
-            <div class="stat-l">DAYS</div>
-          </div>
-          <div class="stat-cell">
-            <div class="stat-n" id="s-walks">0</div>
-            <div class="stat-l">WALKS</div>
-          </div>
+      <div class="panel-hd">♥ チョコきろく</div>
+      <div class="panel-bd" style="padding:0;">
+        <div class="srow">
+          <div class="scell"><div class="sn" id="s-posts">0</div><div class="sl">POSTS</div></div>
+          <div class="scell"><div class="sn" id="s-photos">0</div><div class="sl">PHOTOS</div></div>
+          <div class="scell"><div class="sn" id="s-days">—</div><div class="sl">DAYS</div></div>
+          <div class="scell"><div class="sn" id="s-walks">0</div><div class="sl">WALKS</div></div>
         </div>
       </div>
     </div>
     <div class="panel">
-      <div class="panel-title">🗓 最近の記録</div>
-      <div class="panel-body" id="recent-list" style="font-size:0.8rem;"></div>
+      <div class="panel-hd">♥ 最近の記録</div>
+      <div class="panel-bd" id="recent-list" style="font-size:0.8rem;"></div>
     </div>
   </div>
 
-  <!-- DECO BAR -->
-  <div class="deco-bar" style="margin-top:14px;"></div>
+  <!-- SEP -->
+  <div class="sep"></div>
 
   <!-- FOOTER -->
   <div id="footer">
-    <span class="footer-brand">•チョコの部屋•</span>
-    <div class="footer-links">
+    <span class="fb">♥ チョコの部屋 ♥</span>
+    <div class="fl2">
       <a href="index.html">HOME</a>
       <a href="archive.html">FILM</a>
       <a href="music.html">MUSIC</a>
     </div>
   </div>
 
-</div><!-- /page -->
+</div>
 
 <script>
-const KEY = 'choco-v3';
-const MOODS = {散歩:'🌿',食事:'🍖',睡眠:'😴',あそび:'🎾',病院:'💉',観察:'🐾','その他':'✿'};
+const KEY  = 'choco-v4';
+const MKEY = 'choco-mainimg';
+const MOODS = {散歩:'🌿',食事:'🍖',睡眠:'😴',あそび:'🎾',病院:'💉',観察:'🐾','その他':'♥'};
 
-function load() {
-  try { return JSON.parse(localStorage.getItem(KEY) || '{"entries":[]}'); }
-  catch { return {entries:[]}; }
-}
+function load() { try { return JSON.parse(localStorage.getItem(KEY)||'{"entries":[]}'); } catch { return {entries:[]}; } }
 function save(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── HIT COUNTER ──
+(function(){
+  let n = parseInt(localStorage.getItem('choco-hits')||'0') + 1;
+  localStorage.setItem('choco-hits', n);
+  document.getElementById('hit-counter').textContent = String(n).padStart(6,'0');
+})();
+
+// ── MAIN IMAGE ──
+(function(){
+  const url = localStorage.getItem(MKEY);
+  if (url) setImg(url);
+})();
+function setImg(url) {
+  const img = document.getElementById('main-img');
+  const wrap = document.getElementById('main-img-wrap');
+  img.src = url; img.style.display = 'block';
+  wrap.classList.add('has-img');
+}
+function toggleImgInput() {
+  document.getElementById('img-url-input').classList.toggle('open');
+}
+function setMainImg() {
+  const url = document.getElementById('img-url-field').value.trim();
+  if (!url) return;
+  localStorage.setItem(MKEY, url);
+  setImg(url);
+  document.getElementById('img-url-input').classList.remove('open');
+  document.getElementById('img-url-field').value = '';
 }
 
 // ── TABS ──
 function switchTab(id, el) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
   el.classList.add('active');
 }
 
 // ── FORM ──
-function toggleForm() {
-  document.getElementById('add-form').classList.toggle('open');
-}
-
+function toggleForm() { document.getElementById('af').classList.toggle('open'); }
 function addEntry() {
   const title = document.getElementById('f-title').value.trim() || '今日のチョコ';
   const body  = document.getElementById('f-body').value.trim();
   const tag   = document.getElementById('f-tag').value;
   const photo = document.getElementById('f-photo').value.trim();
   const d = load();
-  d.entries.push({ title, body, tag, photo, date: new Date().toISOString() });
+  d.entries.push({title,body,tag,photo,date:new Date().toISOString()});
   save(d);
-  document.getElementById('f-title').value = '';
-  document.getElementById('f-body').value = '';
-  document.getElementById('f-photo').value = '';
-  document.getElementById('add-form').classList.remove('open');
+  ['f-title','f-body','f-photo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('af').classList.remove('open');
   renderAll();
 }
-
 function deleteEntry(i) {
   if (!confirm('この記録を削除しますか？')) return;
-  const d = load();
-  d.entries.splice(i, 1);
-  save(d);
-  renderAll();
+  const d = load(); d.entries.splice(i,1); save(d); renderAll();
 }
 
-// ── RENDER DIARY ──
+// ── RENDER ──
 function renderDiary() {
   const d = load();
   const list = document.getElementById('diary-list');
   const entries = [...d.entries].reverse();
-  if (!entries.length) {
-    list.innerHTML = '<div class="empty-state">まだ記録がないよ 🐾<br>チョコの観察を始めよう</div>';
-    return;
-  }
-  list.innerHTML = entries.map((e, ri) => {
-    const i = d.entries.length - 1 - ri;
+  if (!entries.length) { list.innerHTML='<div class="empty-st">まだ記録がないよ ♥<br>チョコの観察を始めよう</div>'; return; }
+  list.innerHTML = entries.map((e,ri)=>{
+    const i = d.entries.length-1-ri;
     const dt = new Date(e.date);
     const ds = `${dt.getFullYear()}.${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')}`;
-    return `<div class="diary-item">
-      <div class="di-header">
-        <span class="di-date">${ds}</span>
-        <span class="di-tag">${esc(e.tag)}</span>
-        <span class="di-emoji">${MOODS[e.tag]||'🐾'}</span>
-      </div>
-      <div class="di-title">${esc(e.title)}</div>
-      ${e.body ? `<div class="di-body">${esc(e.body).replace(/\n/g,'<br>')}</div>` : ''}
-      ${e.photo ? `<div class="di-photo"><img src="${esc(e.photo)}" alt="" onclick="openLb('${esc(e.photo)}')"></div>` : ''}
+    return `<div class="di">
+      <div class="di-top"><span class="di-date">${ds}</span><span class="di-tag">${esc(e.tag)}</span><span class="di-em">${MOODS[e.tag]||'♥'}</span></div>
+      <div class="di-ttl">${esc(e.title)}</div>
+      ${e.body?`<div class="di-txt">${esc(e.body).replace(/\n/g,'<br>')}</div>`:''}
+      ${e.photo?`<div class="di-pic"><img src="${esc(e.photo)}" alt="" onclick="openLb('${esc(e.photo)}')"></div>`:''}
       <button class="di-del" onclick="deleteEntry(${i})">✕ 削除</button>
     </div>`;
   }).join('');
 }
-
-// ── RENDER PHOTOS ──
 function renderPhotos() {
   const d = load();
-  const photos = d.entries.filter(e => e.photo);
+  const photos = [...d.entries].filter(e=>e.photo).reverse();
   const grid = document.getElementById('photo-grid');
   const slots = Math.max(6, photos.length + 3);
   let html = '';
-  const rev = [...photos].reverse();
-  for (let i = 0; i < slots; i++) {
-    if (rev[i]) {
-      html += `<div class="photo-cell" onclick="openLb('${esc(rev[i].photo)}')">
-        <img src="${esc(rev[i].photo)}" alt="${esc(rev[i].title)}" loading="lazy">
-      </div>`;
-    } else {
-      html += `<div class="photo-cell empty"><span class="ph-icon">🐾</span><span class="ph-lbl">PHOTO</span></div>`;
-    }
+  for (let i=0;i<slots;i++) {
+    if (photos[i]) html += `<div class="pgcell" onclick="openLb('${esc(photos[i].photo)}')"><img src="${esc(photos[i].photo)}" alt="${esc(photos[i].title)}" loading="lazy"></div>`;
+    else html += `<div class="pgcell empty"><span class="ei">🐾</span><span class="el">PHOTO</span></div>`;
   }
   grid.innerHTML = html;
 }
-
-// ── RENDER STATS ──
 function renderStats() {
   const d = load();
   document.getElementById('s-posts').textContent  = d.entries.length;
-  document.getElementById('s-photos').textContent = d.entries.filter(e => e.photo).length;
-  document.getElementById('s-walks').textContent  = d.entries.filter(e => e.tag === '散歩').length;
-
-  const recent = document.getElementById('recent-list');
-  const last5 = [...d.entries].reverse().slice(0, 5);
-  if (!last5.length) { recent.innerHTML = '<div class="empty-state">記録なし</div>'; return; }
-  recent.innerHTML = last5.map(e => {
+  document.getElementById('s-photos').textContent = d.entries.filter(e=>e.photo).length;
+  document.getElementById('s-walks').textContent  = d.entries.filter(e=>e.tag==='散歩').length;
+  const rl = document.getElementById('recent-list');
+  const last5 = [...d.entries].reverse().slice(0,5);
+  if (!last5.length) { rl.innerHTML='<div class="empty-st">記録なし</div>'; return; }
+  rl.innerHTML = last5.map(e=>{
     const dt = new Date(e.date);
-    const ds = `${dt.getMonth()+1}/${dt.getDate()}`;
-    return `<div style="display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px dotted #f4c8d4;">
-      <span style="font-family:'Space Mono',monospace;font-size:8px;color:#e8a0b4;width:36px;flex-shrink:0;">${ds}</span>
-      <span style="font-size:1rem;">${MOODS[e.tag]||'🐾'}</span>
+    return `<div style="display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px dotted #e8c0cc;">
+      <span style="font-family:'Space Mono',monospace;font-size:8px;color:#c08090;width:36px;flex-shrink:0;">${dt.getMonth()+1}/${dt.getDate()}</span>
+      <span>${MOODS[e.tag]||'♥'}</span>
       <span style="font-size:0.8rem;color:#3a2030;">${esc(e.title)}</span>
     </div>`;
   }).join('');
 }
 
 // ── BIRTHDAY ──
-(function() {
+(function(){
   const birthday = null; // 例: '2020-05-15'
   const breed    = null; // 例: 'トイプードル'
   if (birthday) {
     const b = new Date(birthday);
-    const ds = `${b.getFullYear()}.${String(b.getMonth()+1).padStart(2,'0')}.${String(b.getDate()).padStart(2,'0')}`;
-    document.getElementById('prof-bday').textContent = ds;
-    const days = Math.floor((Date.now() - b) / 86400000);
-    const yrs  = Math.floor(days / 365);
-    document.getElementById('prof-age').textContent  = `${yrs}歳 (${days}日)`;
-    document.getElementById('s-days').textContent    = days;
+    document.getElementById('p-bday').textContent = `${b.getFullYear()}.${String(b.getMonth()+1).padStart(2,'0')}.${String(b.getDate()).padStart(2,'0')}`;
+    const days = Math.floor((Date.now()-b)/86400000);
+    document.getElementById('p-age').textContent  = `${Math.floor(days/365)}歳 (${days}日)`;
+    document.getElementById('s-days').textContent = days;
   }
-  if (breed) document.getElementById('prof-breed').textContent = breed;
+  if (breed) document.getElementById('p-breed').textContent = breed;
 })();
 
 // ── LIGHTBOX ──
-function openLb(src) {
-  document.getElementById('lb-img').src = src;
-  document.getElementById('lightbox').classList.add('on');
-}
-document.getElementById('lightbox').addEventListener('click', e => {
-  if (e.target !== document.getElementById('lb-img'))
-    document.getElementById('lightbox').classList.remove('on');
-});
-document.getElementById('lb-x').addEventListener('click', () =>
-  document.getElementById('lightbox').classList.remove('on'));
+function openLb(src) { document.getElementById('lb-img').src=src; document.getElementById('lb').classList.add('on'); }
+document.getElementById('lb').addEventListener('click',e=>{ if(e.target!==document.getElementById('lb-img')) document.getElementById('lb').classList.remove('on'); });
+document.getElementById('lb-x').addEventListener('click',()=>document.getElementById('lb').classList.remove('on'));
 
 function renderAll() { renderDiary(); renderPhotos(); renderStats(); }
 renderAll();
