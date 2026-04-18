@@ -230,6 +230,19 @@ body {
 }
 .di-del:hover { color:#9b4458; }
 
+/* ── ADMIN ── */
+.admin-only { display: none !important; }
+body.admin-mode .admin-only { display: block !important; }
+body.admin-mode .admin-only-flex { display: flex !important; }
+#admin-badge {
+  position: fixed; bottom: 16px; left: 16px; z-index: 900;
+  background: #9b4458; color: #fff;
+  font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 2px;
+  padding: 5px 12px; pointer-events: none;
+  opacity: 0; transition: opacity 0.3s;
+}
+body.admin-mode #admin-badge { opacity: 1; }
+
 /* ── FORM ── */
 .add-btn {
   width:100%; background:#f9eef2; border:1px dashed #c08090;
@@ -344,9 +357,9 @@ body {
     </div>
   </div>
 
-  <!-- IMAGE CHANGE -->
-  <button id="img-change-btn" onclick="toggleImgInput()">♥ メイン画像を変更する ♥</button>
-  <div id="img-url-input">
+  <!-- IMAGE CHANGE (admin only) -->
+  <button id="img-change-btn" class="admin-only" onclick="toggleImgInput()">♥ メイン画像を変更する ♥</button>
+  <div id="img-url-input" class="admin-only">
     <input type="url" id="img-url-field" placeholder="画像URLを貼り付け (https://...)">
     <button onclick="setMainImg()">SET</button>
   </div>
@@ -392,7 +405,7 @@ body {
     <div class="panel">
       <div class="panel-hd">♥ 観察日誌</div>
       <div class="panel-bd">
-        <button class="add-btn" onclick="toggleForm()">♥ 新しい観察を記録する ♥</button>
+        <button class="add-btn admin-only" onclick="toggleForm()">♥ 新しい観察を記録する ♥</button>
         <div class="af" id="af">
           <div class="fg">
             <div class="fr"><label class="fl">TITLE</label><input type="text" id="f-title" placeholder="今日のチョコ"></div>
@@ -461,10 +474,29 @@ body {
 
 </div>
 
+<div id="admin-badge">ADMIN MODE</div>
+
 <script>
 const KEY  = 'choco-v4';
 const MKEY = 'choco-mainimg';
 const MOODS = {散歩:'🌿',食事:'🍖',睡眠:'😴',あそび:'🎾',病院:'💉',観察:'🐾','その他':'♥'};
+
+// ── ADMIN MODE (Konami: ↑↑↓↓←→←→BA) ──
+let adminMode = false;
+const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let konamiIdx = 0;
+document.addEventListener('keydown', e => {
+  if (e.key === KONAMI[konamiIdx]) {
+    konamiIdx++;
+    if (konamiIdx === KONAMI.length) {
+      konamiIdx = 0;
+      adminMode = !adminMode;
+      document.body.classList.toggle('admin-mode', adminMode);
+    }
+  } else {
+    konamiIdx = e.key === KONAMI[0] ? 1 : 0;
+  }
+});
 
 function load() { try { return JSON.parse(localStorage.getItem(KEY)||'{"entries":[]}'); } catch { return {entries:[]}; } }
 function save(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
@@ -542,7 +574,7 @@ function renderDiary() {
       <div class="di-ttl">${esc(e.title)}</div>
       ${e.body?`<div class="di-txt">${esc(e.body).replace(/\n/g,'<br>')}</div>`:''}
       ${e.photo?`<div class="di-pic"><img src="${esc(e.photo)}" alt="" onclick="openLb('${esc(e.photo)}')"></div>`:''}
-      <button class="di-del" onclick="deleteEntry(${i})">✕ 削除</button>
+      <button class="di-del admin-only" onclick="deleteEntry(${i})">✕ 削除</button>
     </div>`;
   }).join('');
 }
