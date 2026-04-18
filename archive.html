@@ -465,28 +465,28 @@
         }
 
         async function loadFromSheet() {
+            const t = '&t=' + Date.now();
+
+            // WATCHED（メイン）を先に確実に読み込む
             try {
-                const t = '&t=' + Date.now();
-                const [watchedRes, towatchRes] = await Promise.all([
-                    fetch(SHEET_CSV_URL + t),
-                    fetch(TOWATCH_CSV_URL + t)
-                ]);
-                const [watchedText, towatchText] = await Promise.all([
-                    watchedRes.text(),
-                    towatchRes.text()
-                ]);
-                const promises = [
-                    ...parseSheetCSV(watchedText, 'watched'),
-                    ...parseSheetCSV(towatchText, 'towatch')
-                ];
-                await Promise.allSettled(promises);
-                renderAll();
-                switchView('towatch', document.querySelectorAll('.t-btn')[0], 0);
-                if (window._openMovieId) {
-                    const m = allMovies.find(m => m.id === window._openMovieId);
-                    if (m) openImmersive(m);
-                }
-            } catch(e) { console.error('シートの読み込みに失敗しました', e); }
+                const watchedRes = await fetch(SHEET_CSV_URL + t);
+                const watchedText = await watchedRes.text();
+                await Promise.allSettled(parseSheetCSV(watchedText, 'watched'));
+            } catch(e) { console.error('WATCHEDシート読み込み失敗', e); }
+
+            // TOWATCHは失敗しても全体に影響させない
+            try {
+                const towatchRes = await fetch(TOWATCH_CSV_URL + t);
+                const towatchText = await towatchRes.text();
+                await Promise.allSettled(parseSheetCSV(towatchText, 'towatch'));
+            } catch(e) { console.error('TOWATCHシート読み込み失敗（公開設定を確認してください）', e); }
+
+            renderAll();
+            switchView('watched', document.querySelectorAll('.t-btn')[1], 1);
+            if (window._openMovieId) {
+                const m = allMovies.find(m => m.id === window._openMovieId);
+                if (m) openImmersive(m);
+            }
         }
 
         const TMDB_GENRE_MAP = {
