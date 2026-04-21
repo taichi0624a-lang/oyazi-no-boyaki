@@ -470,7 +470,7 @@
                          onerror="this.src='https://img.youtube.com/vi/${v.videoId}/hqdefault.jpg'">
                     <span class="v-tag-badge">${v.tag}</span>
                     <div class="v-play"><div class="v-play-ring"></div></div>
-                    <button class="v-del-btn" onclick="event.stopPropagation();removeVideo('${v.id}')" title="削除">✕</button>
+                    ${adminMode ? `<button class="v-del-btn" onclick="event.stopPropagation();removeVideo('${v.id}')" title="削除">✕</button>` : ''}
                 </div>
                 <div class="v-info">
                     <div class="v-title">${v.title}</div>
