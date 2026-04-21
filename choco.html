@@ -786,9 +786,17 @@ function deleteEntry(i) {
   const d = load(); d.entries.splice(i,1); save(d); renderAll();
 }
 
+// ── PHOTO MAP（base64をIDで管理）──
+window._pm = {}; // id -> src
+let _pmSeq = 0;
+function pmSet(src) {
+  const id = 'p' + (_pmSeq++);
+  window._pm[id] = src;
+  return id;
+}
+
 // ── RENDER ──
 function getPhotos(e) {
-  // 旧データ(e.photo 文字列)と新データ(e.photos 配列)の両方に対応
   if (e.photos && e.photos.length) return e.photos;
   if (e.photo) return [e.photo];
   return [];
@@ -805,7 +813,10 @@ function renderDiary() {
     const ds = `${dt.getFullYear()}.${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')}`;
     const photos = getPhotos(e);
     const photosHtml = photos.length
-      ? `<div class="di-photos">${photos.map(p=>`<img src="${p}" alt="" onclick="openLb('${p.startsWith('data:') ? 'data' : esc(p)}')" loading="lazy">`).join('')}</div>`
+      ? `<div class="di-photos">${photos.map(src => {
+          const id = pmSet(src);
+          return `<img src="${src}" alt="" data-pmid="${id}" class="lb-trigger" loading="lazy">`;
+        }).join('')}</div>`
       : '';
     return `<div class="di">
       <div class="di-top"><span class="di-date">${ds}</span><span class="di-tag">${esc(e.tag)}</span><span class="di-em">${MOODS[e.tag]||'♥'}</span></div>
@@ -819,26 +830,22 @@ function renderDiary() {
 
 function renderPhotos() {
   const d = load();
-  // 全エントリの写真を全部フラットに展開
   const allPhotos = [];
   [...d.entries].reverse().forEach(e => {
-    getPhotos(e).forEach(p => allPhotos.push({src:p, title:e.title}));
+    getPhotos(e).forEach(src => allPhotos.push({src, title:e.title}));
   });
   const grid = document.getElementById('photo-grid');
   const slots = Math.max(6, allPhotos.length + 3);
   let html = '';
   for (let i=0;i<slots;i++) {
     if (allPhotos[i]) {
-      const src = allPhotos[i].src;
-      const safeSrc = src.startsWith('data:') ? src : esc(src);
-      html += `<div class="pgcell" onclick="openLb('${src.startsWith('data:') ? 'data:lb:'+i : esc(src)}')"><img src="${safeSrc}" alt="${esc(allPhotos[i].title)}" loading="lazy"></div>`;
+      const id = pmSet(allPhotos[i].src);
+      html += `<div class="pgcell"><img src="${allPhotos[i].src}" alt="${esc(allPhotos[i].title)}" data-pmid="${id}" class="lb-trigger" loading="lazy"></div>`;
     } else {
       html += `<div class="pgcell empty"><span class="ei">🐾</span><span class="el">PHOTO</span></div>`;
     }
   }
   grid.innerHTML = html;
-  // data URLはlightbox用に別保持
-  window._lbPhotos = allPhotos.map(p=>p.src);
 }
 function renderStats() {
   const d = load();
@@ -874,15 +881,24 @@ function renderStats() {
 
 // ── LIGHTBOX ──
 function openLb(src) {
-  if (src.startsWith('data:lb:')) {
-    const idx = parseInt(src.split(':')[2]);
-    src = (window._lbPhotos||[])[idx] || src;
-  }
   document.getElementById('lb-img').src = src;
   document.getElementById('lb').classList.add('on');
 }
-document.getElementById('lb').addEventListener('click',e=>{ if(e.target!==document.getElementById('lb-img')) document.getElementById('lb').classList.remove('on'); });
-document.getElementById('lb-x').addEventListener('click',()=>document.getElementById('lb').classList.remove('on'));
+// イベント委任：.lb-trigger クラスの画像クリックで開く
+document.addEventListener('click', e => {
+  const el = e.target.closest('.lb-trigger');
+  if (el) {
+    const id  = el.dataset.pmid;
+    const src = (id && window._pm[id]) ? window._pm[id] : el.src;
+    openLb(src);
+  }
+});
+document.getElementById('lb').addEventListener('click', e => {
+  if (e.target !== document.getElementById('lb-img'))
+    document.getElementById('lb').classList.remove('on');
+});
+document.getElementById('lb-x').addEventListener('click', () =>
+  document.getElementById('lb').classList.remove('on'));
 
 function renderAll() { renderDiary(); renderPhotos(); renderStats(); }
 renderAll();
