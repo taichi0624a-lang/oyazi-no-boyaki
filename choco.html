@@ -465,7 +465,7 @@ body.admin-mode #admin-badge { opacity: 1; }
       <span class="heart">♥</span>チョコの部屋<span class="heart">♥</span>
     </div>
     <div class="counter-line">
-      あなたは <span class="counter-num" id="hit-counter">000000</span> 人目のお客様です
+      あなたは <span class="counter-num" id="hit-counter" onclick="adminTap()" style="cursor:pointer;" title="管理者">000000</span> 人目のお客様です
     </div>
   </div>
 
@@ -657,18 +657,35 @@ const MOODS = {散歩:'🌿',食事:'🍖',睡眠:'😴',あそび:'🎾',病院
   window.skipOp = finishOp;
 })();
 
-// ── ADMIN MODE (Konami: ↑↑↓↓←→←→BA) ──
+// ── ADMIN MODE ──
+// PC: コナミコマンド (↑↑↓↓←→←→BA)
+// スマホ: カウンターを5回素早くタップ
 let adminMode = false;
+
+function toggleAdmin() {
+  adminMode = !adminMode;
+  document.body.classList.toggle('admin-mode', adminMode);
+}
+
+// カウンタータップ（5回/2秒以内）
+let tapCount = 0, tapTimer = null;
+function adminTap() {
+  tapCount++;
+  clearTimeout(tapTimer);
+  tapTimer = setTimeout(() => { tapCount = 0; }, 2000);
+  if (tapCount >= 5) {
+    tapCount = 0;
+    toggleAdmin();
+  }
+}
+
+// コナミコマンド（PC）
 const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 let konamiIdx = 0;
 document.addEventListener('keydown', e => {
   if (e.key === KONAMI[konamiIdx]) {
     konamiIdx++;
-    if (konamiIdx === KONAMI.length) {
-      konamiIdx = 0;
-      adminMode = !adminMode;
-      document.body.classList.toggle('admin-mode', adminMode);
-    }
+    if (konamiIdx === KONAMI.length) { konamiIdx = 0; toggleAdmin(); }
   } else {
     konamiIdx = e.key === KONAMI[0] ? 1 : 0;
   }
