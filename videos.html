@@ -400,15 +400,7 @@
     // ── データ（localStorageで永続化） ──
     const STORAGE_KEY = 'boost-videos';
 
-    const DEFAULT_VIDEOS = [
-        {
-            id: crypto.randomUUID(),
-            videoId: 'dQw4w9WgXcQ',
-            title: 'ここに好きな動画を追加してください',
-            desc: 'コナミコード（↑↑↓↓←→←→BA）で管理者モードに入ると動画を追加・削除できます。',
-            tag: '元気'
-        }
-    ];
+    const DEFAULT_VIDEOS = [];
 
     function loadVideos() {
         try {
