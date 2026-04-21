@@ -429,10 +429,24 @@ body.admin-mode #admin-badge { opacity: 1; }
 #op-skip:hover { color: #9b4458; border-color: #9b4458; }
 
 /* ── LIGHTBOX ── */
-#lb { position:fixed; inset:0; z-index:900; background:rgba(249,238,242,0.95); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; cursor:zoom-out; }
+#lb { position:fixed; inset:0; z-index:900; background:rgba(249,238,242,0.96); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; }
 #lb.on { display:flex; }
-#lb img { max-width:90vw; max-height:90vh; object-fit:contain; border:2px solid #9b4458; cursor:default; }
-#lb-x { position:fixed; top:20px; right:5vw; font-family:'Space Mono',monospace; font-size:9px; letter-spacing:2px; color:#6b2030; background:#fff; border:1px solid #9b4458; padding:6px 12px; cursor:pointer; }
+#lb-img { max-width:82vw; max-height:84vh; object-fit:contain; border:2px solid #9b4458; display:block; }
+#lb-x { position:fixed; top:20px; right:5vw; font-family:'Space Mono',monospace; font-size:9px; letter-spacing:2px; color:#6b2030; background:#fff; border:1px solid #9b4458; padding:6px 12px; cursor:pointer; z-index:1; }
+#lb-counter { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); font-family:'Space Mono',monospace; font-size:9px; letter-spacing:3px; color:#9b4458; background:#fff; border:1px solid #e8c0cc; padding:4px 14px; }
+.lb-arrow {
+  position:fixed; top:50%; transform:translateY(-50%);
+  background:#fff; border:2px solid #9b4458;
+  color:#9b4458; font-size:1.4rem;
+  width:44px; height:44px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:background 0.15s;
+  user-select:none; z-index:1;
+}
+.lb-arrow:hover { background:#f9eef2; }
+.lb-arrow.hidden { opacity:0; pointer-events:none; }
+#lb-prev { left:4vw; }
+#lb-next { right:4vw; }
 
 @media (max-width:480px) {
   .srow { grid-template-columns:repeat(2,1fr); }
@@ -444,7 +458,13 @@ body.admin-mode #admin-badge { opacity: 1; }
 </head>
 <body>
 
-<div id="lb"><button id="lb-x">CLOSE ✕</button><img id="lb-img" src="" alt=""></div>
+<div id="lb">
+  <button id="lb-x">CLOSE ✕</button>
+  <button class="lb-arrow hidden" id="lb-prev" onclick="lbNav(-1)">‹</button>
+  <img id="lb-img" src="" alt="">
+  <button class="lb-arrow hidden" id="lb-next" onclick="lbNav(1)">›</button>
+  <div id="lb-counter"></div>
+</div>
 
 <div id="frame">
 
@@ -880,25 +900,72 @@ function renderStats() {
 })();
 
 // ── LIGHTBOX ──
-function openLb(src) {
-  document.getElementById('lb-img').src = src;
+let _lbList = []; // 現在のコンテキストの画像src配列
+let _lbIdx  = 0;
+
+function openLb(src, contextEls) {
+  // contextEls: 同じグループの .lb-trigger 要素一覧（省略時は単体）
+  if (contextEls && contextEls.length > 1) {
+    _lbList = Array.from(contextEls).map(el => {
+      const id = el.dataset.pmid;
+      return (id && window._pm[id]) ? window._pm[id] : el.src;
+    });
+    _lbIdx = Array.from(contextEls).findIndex(el => {
+      const id = el.dataset.pmid;
+      const s = (id && window._pm[id]) ? window._pm[id] : el.src;
+      return s === src;
+    });
+    if (_lbIdx < 0) _lbIdx = 0;
+  } else {
+    _lbList = [src];
+    _lbIdx  = 0;
+  }
+  lbShow();
+}
+
+function lbShow() {
+  const src = _lbList[_lbIdx];
+  document.getElementById('lb-img').src     = src;
+  document.getElementById('lb-counter').textContent = `${_lbIdx + 1} / ${_lbList.length}`;
+  document.getElementById('lb-prev').classList.toggle('hidden', _lbIdx === 0);
+  document.getElementById('lb-next').classList.toggle('hidden', _lbIdx === _lbList.length - 1);
   document.getElementById('lb').classList.add('on');
 }
-// イベント委任：.lb-trigger クラスの画像クリックで開く
+
+function lbNav(dir) {
+  _lbIdx = Math.max(0, Math.min(_lbList.length - 1, _lbIdx + dir));
+  lbShow();
+}
+
+function lbClose() {
+  document.getElementById('lb').classList.remove('on');
+}
+
+// イベント委任：.lb-trigger クリック → 同コンテナ内の全画像をグループ化
 document.addEventListener('click', e => {
   const el = e.target.closest('.lb-trigger');
-  if (el) {
-    const id  = el.dataset.pmid;
-    const src = (id && window._pm[id]) ? window._pm[id] : el.src;
-    openLb(src);
-  }
+  if (!el) return;
+  const id  = el.dataset.pmid;
+  const src = (id && window._pm[id]) ? window._pm[id] : el.src;
+  // 同じ .di-photos または .pgrid 内の兄弟画像を取得
+  const container = el.closest('.di-photos, .pgrid, #photo-grid');
+  const siblings  = container ? container.querySelectorAll('.lb-trigger') : [el];
+  openLb(src, siblings);
 });
+
+// 背景クリックで閉じる（矢印・画像以外）
 document.getElementById('lb').addEventListener('click', e => {
-  if (e.target !== document.getElementById('lb-img'))
-    document.getElementById('lb').classList.remove('on');
+  if (!e.target.closest('#lb-img, .lb-arrow, #lb-x')) lbClose();
 });
-document.getElementById('lb-x').addEventListener('click', () =>
-  document.getElementById('lb').classList.remove('on'));
+document.getElementById('lb-x').addEventListener('click', lbClose);
+
+// キーボード操作
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lb').classList.contains('on')) return;
+  if (e.key === 'ArrowRight') lbNav(1);
+  if (e.key === 'ArrowLeft')  lbNav(-1);
+  if (e.key === 'Escape')     lbClose();
+});
 
 function renderAll() { renderDiary(); renderPhotos(); renderStats(); }
 renderAll();
