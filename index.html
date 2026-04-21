@@ -704,89 +704,64 @@ body {
 }
 .w-pub:hover { opacity: 0.82; }
 
-/* ─── STUDIO LOADER ─── */
-#noise-loader {
-    position: fixed; inset: 0; z-index: 99999;
+/* ─── CHIC LOADER (O24-era) ─── */
+#chic-loader {
+    position: fixed; inset: 0;
+    background: var(--paper);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 99999; overflow: hidden;
     pointer-events: all;
 }
-#noise-loader.done { display: none; }
+#chic-loader.done { display: none; }
 
-.sl-backdrop { position: absolute; inset: 0; background: #0a0a0a; }
-
-/* 中心から四角く膨らむ赤（サイトカラー） */
-.sl-turq {
-    position: absolute; inset: 0;
-    background: #aa1414;
-    clip-path: inset(50% 50%);
-    animation: rectOpen 0.85s cubic-bezier(0.76,0,0.24,1) 0.15s forwards;
-}
-@keyframes rectOpen {
-    0%   { clip-path: inset(50% 50%); }
-    80%  { clip-path: inset(-2% -1.5%); }
-    100% { clip-path: inset(0% 0%); }
-}
-
-/* 中央マーク */
-.sl-mark {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 14px; z-index: 2;
-}
-
-/* タイトル */
-.sl-title {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(1.4rem, 4vw, 2.4rem);
-    font-weight: 700;
-    font-style: italic;
-    color: rgba(255,255,255,0.95);
-    letter-spacing: -0.01em;
-    opacity: 0;
-    animation: labelIn 0.6s ease 1.0s forwards;
-    white-space: nowrap;
-}
-
-/* ホライゾンライン（中心から左右へ伸びる） */
-.sl-horizon {
-    position: relative;
-    height: 1px; width: 0;
-    background: rgba(255,255,255,0.5);
-    animation: horizonGrow 0.7s cubic-bezier(0.76,0,0.24,1) 1.05s forwards;
-}
-@keyframes horizonGrow { to { width: 180px; } }
-
-.sl-horizon::before,
-.sl-horizon::after {
+#chic-loader::after {
     content: '';
-    position: absolute; top: 50%;
-    width: 4px; height: 4px; border-radius: 50%;
-    background: white; transform: translateY(-50%);
+    position: absolute; inset: -50%;
+    width: 200%; height: 200%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.10;
+    animation: grain 0.4s steps(1) infinite;
+    pointer-events: none;
+}
+@keyframes grain {
+    0%  { transform: translate(0,0); }
+    10% { transform: translate(-3%,-4%); }
+    20% { transform: translate(4%,2%); }
+    30% { transform: translate(-2%,5%); }
+    40% { transform: translate(5%,-3%); }
+    50% { transform: translate(-4%,4%); }
+    60% { transform: translate(3%,-2%); }
+    70% { transform: translate(-5%,3%); }
+    80% { transform: translate(2%,-5%); }
+    90% { transform: translate(-3%,2%); }
+    100%{ transform: translate(0,0); }
+}
+
+.cl-logo {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(2.4rem, 7vw, 5rem);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    position: relative; z-index: 1;
     opacity: 0;
-    animation: endDot 0.25s ease 1.65s forwards;
+    animation: clFadeIn 0.8s ease 0.3s forwards;
 }
-.sl-horizon::before { left: -2px; }
-.sl-horizon::after  { right: -2px; }
-@keyframes endDot { to { opacity: 1; } }
-
-/* ラベル */
-.sl-label {
-    font-size: 0.5rem; letter-spacing: 5px;
-    color: rgba(255,255,255,0.4);
+.cl-logo em { font-style: normal; color: var(--red); }
+.cl-sub {
+    position: absolute;
+    bottom: calc(50% - 3.2rem);
+    left: 50%; transform: translateX(-50%);
     font-family: 'Space Mono', monospace;
-    opacity: 0; white-space: nowrap;
-    animation: labelIn 0.5s ease 1.55s forwards;
+    font-size: 0.45rem; letter-spacing: 6px;
+    color: var(--dim);
+    white-space: nowrap; z-index: 1;
+    opacity: 0;
+    animation: clFadeIn 0.6s ease 0.9s forwards;
 }
-@keyframes labelIn { to { opacity: 1; } }
-
-/* 中心から四角く閉じる暗幕 */
-.sl-close {
-    position: absolute; inset: 0;
-    background: #0a0a0a;
-    clip-path: inset(50% 50%);
-    z-index: 3;
-    animation: rectOpen 0.85s cubic-bezier(0.76,0,0.24,1) 2.2s forwards;
-}
+@keyframes clFadeIn { to { opacity: 1; } }
 
 /* ─── KONAMI EFFECT ─── */
 #konami-overlay {
@@ -1020,16 +995,10 @@ body {
 
 <div id="read-progress"></div>
 
-<!-- STUDIO LOADER -->
-<div id="noise-loader">
-    <div class="sl-backdrop"></div>
-    <div class="sl-turq"></div>
-    <div class="sl-mark">
-        <div class="sl-title">子供のぼやき</div>
-        <div class="sl-horizon"></div>
-        <div class="sl-label">KODOMO NO BOYAKI</div>
-    </div>
-    <div class="sl-close"></div>
+<!-- CHIC LOADER -->
+<div id="chic-loader">
+    <div class="cl-logo">親父より親父な<em>子供</em>のぼやき</div>
+    <div class="cl-sub">KODOMO NO BOYAKI</div>
 </div>
 
 <!-- ══════════ MASTHEAD ══════════ -->
@@ -1803,10 +1772,14 @@ onValue(lastReadRef, snap => {
     lastRead = snap.val() || null;
 });
 
-// ── STUDIO LOADER ──
+// ── CHIC LOADER ──
 (function() {
-    const loader = document.getElementById('noise-loader');
-    setTimeout(() => { loader.classList.add('done'); }, 3100);
+    const loader = document.getElementById('chic-loader');
+    if (typeof gsap !== 'undefined') {
+        gsap.to(loader, { opacity: 0, duration: 2.5, delay: 1.2, ease: 'power2.inOut', onComplete: () => loader.classList.add('done') });
+    } else {
+        setTimeout(() => { loader.style.transition='opacity 2s'; loader.style.opacity='0'; setTimeout(()=>loader.classList.add('done'),2000); }, 1200);
+    }
 })();
 
 // ── THEME ──
