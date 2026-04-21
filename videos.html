@@ -533,26 +533,35 @@
         render();
     }
 
-    // ── コナミコード ──
+    // ── 管理者モード切替 ──
+    function toggleAdmin() {
+        adminMode = !adminMode;
+        document.getElementById('admin-panel').classList.toggle('visible', adminMode);
+        const ind = document.getElementById('admin-indicator');
+        ind.textContent = adminMode ? 'ADMIN MODE' : 'ADMIN OFF';
+        ind.classList.add('visible');
+        setTimeout(() => ind.classList.remove('visible'), 2000);
+        render();
+    }
+
+    // コナミコード（PC）
     (function() {
         const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
         let pos = 0;
         document.addEventListener('keydown', e => {
-            if (e.key === KONAMI[pos]) {
-                pos++;
-                if (pos === KONAMI.length) {
-                    pos = 0;
-                    adminMode = !adminMode;
-                    document.getElementById('admin-panel').classList.toggle('visible', adminMode);
-                    const ind = document.getElementById('admin-indicator');
-                    ind.textContent = adminMode ? 'ADMIN MODE' : 'ADMIN OFF';
-                    ind.classList.add('visible');
-                    setTimeout(() => ind.classList.remove('visible'), 2000);
-                    render();
-                }
-            } else {
-                pos = e.key === KONAMI[0] ? 1 : 0;
-            }
+            if (e.key === KONAMI[pos]) { pos++; if (pos === KONAMI.length) { pos = 0; toggleAdmin(); } }
+            else { pos = e.key === KONAMI[0] ? 1 : 0; }
+        });
+    })();
+
+    // 5タップ（モバイル）
+    (function() {
+        let taps = 0, timer;
+        document.getElementById('site-header').addEventListener('click', () => {
+            taps++;
+            clearTimeout(timer);
+            timer = setTimeout(() => { taps = 0; }, 800);
+            if (taps >= 5) { taps = 0; toggleAdmin(); }
         });
     })();
 
