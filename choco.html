@@ -271,6 +271,48 @@ body.admin-mode #admin-badge { opacity: 1; }
 }
 .fsub:hover { background:#9b4458; }
 
+/* ── PHOTO PICKER ── */
+#photo-pick-label {
+  display: block; cursor: pointer;
+}
+#photo-pick-label input[type="file"] { display: none; }
+#photo-pick-btn {
+  display: block; width: 100%;
+  background: #fffafc; border: 1px dashed #e8c0cc;
+  color: #9b4458; font-family: 'Noto Serif JP', serif;
+  font-size: 0.82rem; letter-spacing: 1px;
+  padding: 10px; text-align: center;
+  transition: background 0.15s;
+}
+#photo-pick-label:hover #photo-pick-btn { background: #f9eef2; }
+#photo-previews {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 8px;
+}
+.preview-thumb {
+  position: relative; width: 72px; height: 72px;
+  border: 1px solid #e8c0cc; overflow: hidden; flex-shrink: 0;
+}
+.preview-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.preview-thumb .rm {
+  position: absolute; top: 2px; right: 2px;
+  background: rgba(107,32,48,0.75); color: #fff; border: none;
+  font-size: 10px; width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; border-radius: 50%; line-height: 1;
+}
+/* 複数写真グリッド（日記内） */
+.di-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 4px; margin-top: 8px;
+}
+.di-photos img {
+  width: 100%; aspect-ratio: 1;
+  object-fit: cover; border: 1px solid #e8c0cc; cursor: zoom-in;
+  display: block;
+}
+
 /* ── STATS ── */
 .srow { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:#e8c0cc; border:1px solid #e8c0cc; }
 .scell { background:#fff; padding:14px 8px; text-align:center; }
@@ -493,7 +535,14 @@ body.admin-mode #admin-badge { opacity: 1; }
             </div>
           </div>
           <div class="fr"><label class="fl">MEMO</label><textarea id="f-body" placeholder="チョコの様子を…"></textarea></div>
-          <div class="fr"><label class="fl">PHOTO URL（任意）</label><input type="url" id="f-photo" placeholder="https://..."></div>
+          <div class="fr">
+            <label class="fl">PHOTOS（複数枚OK）</label>
+            <label id="photo-pick-label">
+              <input type="file" id="f-photos" accept="image/*" multiple onchange="previewPhotos(this)">
+              <span id="photo-pick-btn">🐾 フォルダから写真を選ぶ</span>
+            </label>
+            <div id="photo-previews"></div>
+          </div>
           <button class="fsub" onclick="addEntry()">記録する ♥</button>
         </div>
         <div id="diary-list"></div>
@@ -668,25 +717,66 @@ function switchTab(id, el) {
 }
 
 // ── FORM ──
+let pendingPhotos = []; // {dataUrl, name}
+
 function toggleForm() { document.getElementById('af').classList.toggle('open'); }
+
+function previewPhotos(input) {
+  const files = Array.from(input.files);
+  const container = document.getElementById('photo-previews');
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const dataUrl = e.target.result;
+      pendingPhotos.push(dataUrl);
+      const idx = pendingPhotos.length - 1;
+      const wrap = document.createElement('div');
+      wrap.className = 'preview-thumb';
+      wrap.dataset.idx = idx;
+      wrap.innerHTML = `<img src="${dataUrl}" alt=""><button class="rm" onclick="removePreview(this)" type="button">✕</button>`;
+      container.appendChild(wrap);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function removePreview(btn) {
+  const wrap = btn.parentElement;
+  const idx = parseInt(wrap.dataset.idx);
+  pendingPhotos[idx] = null;
+  wrap.remove();
+}
+
 function addEntry() {
-  const title = document.getElementById('f-title').value.trim() || '今日のチョコ';
-  const body  = document.getElementById('f-body').value.trim();
-  const tag   = document.getElementById('f-tag').value;
-  const photo = document.getElementById('f-photo').value.trim();
+  const title  = document.getElementById('f-title').value.trim() || '今日のチョコ';
+  const body   = document.getElementById('f-body').value.trim();
+  const tag    = document.getElementById('f-tag').value;
+  const photos = pendingPhotos.filter(p => p !== null);
   const d = load();
-  d.entries.push({title,body,tag,photo,date:new Date().toISOString()});
+  d.entries.push({title, body, tag, photos, date: new Date().toISOString()});
   save(d);
-  ['f-title','f-body','f-photo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-body').value  = '';
+  document.getElementById('photo-previews').innerHTML = '';
+  pendingPhotos = [];
   document.getElementById('af').classList.remove('open');
   renderAll();
 }
+
 function deleteEntry(i) {
   if (!confirm('この記録を削除しますか？')) return;
   const d = load(); d.entries.splice(i,1); save(d); renderAll();
 }
 
 // ── RENDER ──
+function getPhotos(e) {
+  // 旧データ(e.photo 文字列)と新データ(e.photos 配列)の両方に対応
+  if (e.photos && e.photos.length) return e.photos;
+  if (e.photo) return [e.photo];
+  return [];
+}
+
 function renderDiary() {
   const d = load();
   const list = document.getElementById('diary-list');
@@ -696,26 +786,42 @@ function renderDiary() {
     const i = d.entries.length-1-ri;
     const dt = new Date(e.date);
     const ds = `${dt.getFullYear()}.${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')}`;
+    const photos = getPhotos(e);
+    const photosHtml = photos.length
+      ? `<div class="di-photos">${photos.map(p=>`<img src="${p}" alt="" onclick="openLb('${p.startsWith('data:') ? 'data' : esc(p)}')" loading="lazy">`).join('')}</div>`
+      : '';
     return `<div class="di">
       <div class="di-top"><span class="di-date">${ds}</span><span class="di-tag">${esc(e.tag)}</span><span class="di-em">${MOODS[e.tag]||'♥'}</span></div>
       <div class="di-ttl">${esc(e.title)}</div>
       ${e.body?`<div class="di-txt">${esc(e.body).replace(/\n/g,'<br>')}</div>`:''}
-      ${e.photo?`<div class="di-pic"><img src="${esc(e.photo)}" alt="" onclick="openLb('${esc(e.photo)}')"></div>`:''}
+      ${photosHtml}
       <button class="di-del admin-only" onclick="deleteEntry(${i})">✕ 削除</button>
     </div>`;
   }).join('');
 }
+
 function renderPhotos() {
   const d = load();
-  const photos = [...d.entries].filter(e=>e.photo).reverse();
+  // 全エントリの写真を全部フラットに展開
+  const allPhotos = [];
+  [...d.entries].reverse().forEach(e => {
+    getPhotos(e).forEach(p => allPhotos.push({src:p, title:e.title}));
+  });
   const grid = document.getElementById('photo-grid');
-  const slots = Math.max(6, photos.length + 3);
+  const slots = Math.max(6, allPhotos.length + 3);
   let html = '';
   for (let i=0;i<slots;i++) {
-    if (photos[i]) html += `<div class="pgcell" onclick="openLb('${esc(photos[i].photo)}')"><img src="${esc(photos[i].photo)}" alt="${esc(photos[i].title)}" loading="lazy"></div>`;
-    else html += `<div class="pgcell empty"><span class="ei">🐾</span><span class="el">PHOTO</span></div>`;
+    if (allPhotos[i]) {
+      const src = allPhotos[i].src;
+      const safeSrc = src.startsWith('data:') ? src : esc(src);
+      html += `<div class="pgcell" onclick="openLb('${src.startsWith('data:') ? 'data:lb:'+i : esc(src)}')"><img src="${safeSrc}" alt="${esc(allPhotos[i].title)}" loading="lazy"></div>`;
+    } else {
+      html += `<div class="pgcell empty"><span class="ei">🐾</span><span class="el">PHOTO</span></div>`;
+    }
   }
   grid.innerHTML = html;
+  // data URLはlightbox用に別保持
+  window._lbPhotos = allPhotos.map(p=>p.src);
 }
 function renderStats() {
   const d = load();
@@ -750,7 +856,14 @@ function renderStats() {
 })();
 
 // ── LIGHTBOX ──
-function openLb(src) { document.getElementById('lb-img').src=src; document.getElementById('lb').classList.add('on'); }
+function openLb(src) {
+  if (src.startsWith('data:lb:')) {
+    const idx = parseInt(src.split(':')[2]);
+    src = (window._lbPhotos||[])[idx] || src;
+  }
+  document.getElementById('lb-img').src = src;
+  document.getElementById('lb').classList.add('on');
+}
 document.getElementById('lb').addEventListener('click',e=>{ if(e.target!==document.getElementById('lb-img')) document.getElementById('lb').classList.remove('on'); });
 document.getElementById('lb-x').addEventListener('click',()=>document.getElementById('lb').classList.remove('on'));
 
