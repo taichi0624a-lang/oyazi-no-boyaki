@@ -696,9 +696,41 @@ body.admin-mode #admin-badge { opacity: 1; }
 
 <div id="admin-badge">ADMIN MODE</div>
 
-<script>
-const KEY  = 'choco-v4';
-const MKEY = 'choco-mainimg';
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC84FjbrkhiTVQvU0sS9QO52VAu-Jv53Gs",
+  authDomain: "ozi-blog.firebaseapp.com",
+  databaseURL: "https://ozi-blog-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "ozi-blog",
+  storageBucket: "ozi-blog.firebasestorage.app",
+  messagingSenderId: "871002428547",
+  appId: "1:871002428547:web:9d70c40bb5aff60bafb7b6"
+};
+const db = getDatabase(initializeApp(firebaseConfig, 'choco'));
+const diaryRef   = ref(db, 'choco/diary');
+const hitsRef    = ref(db, 'choco/hits');
+const mainImgRef = ref(db, 'choco/mainImg');
+const friendsRef = ref(db, 'choco/friends');
+
+// ローカル状態
+let diaryEntries = [];
+let friendsList  = [];
+
+function saveEntries() {
+  if (!diaryEntries.length) return;
+  const obj = {};
+  diaryEntries.forEach((e, i) => { obj[String(i)] = e; });
+  set(diaryRef, obj);
+}
+function saveFriends() {
+  const obj = {};
+  friendsList.forEach((f, i) => { obj[String(i)] = f; });
+  set(friendsRef, friendsList.length ? obj : null);
+}
+
 const MOODS = {散歩:'🌿',食事:'🍖',睡眠:'😴',あそび:'🎾',病院:'💉',観察:'🐾','その他':'♥'};
 
 // ── OP ANIMATION ──
@@ -781,22 +813,16 @@ document.addEventListener('keydown', e => {
   }
 });
 
-function load() { try { return JSON.parse(localStorage.getItem(KEY)||'{"entries":[]}'); } catch { return {entries:[]}; } }
-function save(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ── HIT COUNTER ──
-(function(){
-  let n = parseInt(localStorage.getItem('choco-hits')||'0') + 1;
-  localStorage.setItem('choco-hits', n);
+runTransaction(hitsRef, (n) => (n || 0) + 1).then(r => {
+  const n = r.snapshot.val();
   document.getElementById('hit-counter').textContent = String(n).padStart(6,'0');
-})();
+});
 
 // ── MAIN IMAGE ──
-(function(){
-  const url = localStorage.getItem(MKEY) || './choco-main.jpg';
-  setImg(url);
-})();
+onValue(mainImgRef, snap => { setImg(snap.val() || './choco-main.jpg'); }, { onlyOnce: true });
 function setImg(url) {
   const img = document.getElementById('main-img');
   const wrap = document.getElementById('main-img-wrap');
@@ -809,7 +835,7 @@ function toggleImgInput() {
 function setMainImg() {
   const url = document.getElementById('img-url-field').value.trim();
   if (!url) return;
-  localStorage.setItem(MKEY, url);
+  set(mainImgRef, url);
   setImg(url);
   document.getElementById('img-url-input').classList.remove('open');
   document.getElementById('img-url-field').value = '';
@@ -860,20 +886,21 @@ function addEntry() {
   const body   = document.getElementById('f-body').value.trim();
   const tag    = document.getElementById('f-tag').value;
   const photos = pendingPhotos.filter(p => p !== null);
-  const d = load();
-  d.entries.push({title, body, tag, photos, date: new Date().toISOString()});
-  save(d);
+  diaryEntries.push({title, body, tag, photos, date: new Date().toISOString()});
+  saveEntries();
   document.getElementById('f-title').value = '';
   document.getElementById('f-body').value  = '';
   document.getElementById('photo-previews').innerHTML = '';
   pendingPhotos = [];
   document.getElementById('af').classList.remove('open');
-  renderAll();
+  renderDiary(); renderPhotos();
 }
 
 function deleteEntry(i) {
   if (!confirm('この記録を削除しますか？')) return;
-  const d = load(); d.entries.splice(i,1); save(d); renderAll();
+  diaryEntries.splice(i, 1);
+  saveEntries();
+  renderDiary(); renderPhotos();
 }
 
 // ── PHOTO MAP（base64をIDで管理）──
@@ -893,12 +920,11 @@ function getPhotos(e) {
 }
 
 function renderDiary() {
-  const d = load();
   const list = document.getElementById('diary-list');
-  const entries = [...d.entries].reverse();
+  const entries = [...diaryEntries].reverse();
   if (!entries.length) { list.innerHTML='<div class="empty-st">まだ記録がないよ ♥<br>チョコの観察を始めよう</div>'; return; }
   list.innerHTML = entries.map((e,ri)=>{
-    const i = d.entries.length-1-ri;
+    const i = diaryEntries.length-1-ri;
     const dt = new Date(e.date);
     const ds = `${dt.getFullYear()}.${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')}`;
     const photos = getPhotos(e);
@@ -919,9 +945,8 @@ function renderDiary() {
 }
 
 function renderPhotos() {
-  const d = load();
   const allPhotos = [];
-  [...d.entries].reverse().forEach(e => {
+  [...diaryEntries].reverse().forEach(e => {
     getPhotos(e).forEach(src => allPhotos.push({src, title:e.title}));
   });
   const grid = document.getElementById('photo-grid');
@@ -938,11 +963,7 @@ function renderPhotos() {
   grid.innerHTML = html;
 }
 // ── FRIENDS ──
-const FKEY = 'choco-friends-v1';
 let friendPhotoData = null;
-
-function loadFriends() { try { return JSON.parse(localStorage.getItem(FKEY)||'[]'); } catch { return []; } }
-function saveFriends(f) { localStorage.setItem(FKEY, JSON.stringify(f)); }
 
 function friendPhotoPreview(input) {
   const file = input.files[0];
@@ -964,10 +985,8 @@ function addFriend() {
   const type  = document.getElementById('ff-type').value;
   const memo  = document.getElementById('ff-memo').value.trim();
   const photo = friendPhotoData || '';
-  const friends = loadFriends();
-  friends.push({ name, type, memo, photo, date: new Date().toISOString() });
-  saveFriends(friends);
-  // reset
+  friendsList.push({ name, type, memo, photo, date: new Date().toISOString() });
+  saveFriends();
   document.getElementById('ff-name').value = '';
   document.getElementById('ff-memo').value = '';
   document.getElementById('ff-photo').value = '';
@@ -980,14 +999,13 @@ function addFriend() {
 
 function deleteFriend(i) {
   if (!confirm('この友達を削除しますか？')) return;
-  const friends = loadFriends();
-  friends.splice(i, 1);
-  saveFriends(friends);
+  friendsList.splice(i, 1);
+  saveFriends();
   renderFriends();
 }
 
 function renderFriends() {
-  const friends = loadFriends();
+  const friends = friendsList;
   const grid = document.getElementById('friend-grid');
   let html = friends.map((f, i) => {
     const photoHtml = f.photo
@@ -1095,8 +1113,36 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape')     lbClose();
 });
 
-function renderAll() { renderDiary(); renderPhotos(); renderStats(); }
-renderAll();
+function renderAll() { renderDiary(); renderPhotos(); renderFriends(); }
+
+// ── FIREBASE リスナー ──
+onValue(diaryRef, snap => {
+  const data = snap.val();
+  diaryEntries = data ? Object.values(data).sort((a, b) => new Date(a.date) - new Date(b.date)) : [];
+  renderDiary(); renderPhotos();
+});
+
+onValue(friendsRef, snap => {
+  const data = snap.val();
+  friendsList = data ? Object.values(data) : [];
+  renderFriends();
+});
+
+// ── GLOBAL EXPORTS (onclick から呼べるように) ──
+window.adminTap        = adminTap;
+window.toggleForm      = toggleForm;
+window.previewPhotos   = previewPhotos;
+window.removePreview   = removePreview;
+window.addEntry        = addEntry;
+window.deleteEntry     = deleteEntry;
+window.switchTab       = switchTab;
+window.toggleImgInput  = toggleImgInput;
+window.setMainImg      = setMainImg;
+window.friendPhotoPreview = friendPhotoPreview;
+window.addFriend       = addFriend;
+window.deleteFriend    = deleteFriend;
+window.lbNav           = lbNav;
+window.lbClose         = lbClose;
 </script>
 </body>
 </html>

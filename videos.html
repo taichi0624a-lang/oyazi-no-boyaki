@@ -408,24 +408,30 @@
     <button class="admin-btn" onclick="openAddForm()">+ ADD VIDEO</button>
 </div>
 
-<script>
-    // ── データ（localStorageで永続化） ──
-    const STORAGE_KEY = 'boost-videos';
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    const DEFAULT_VIDEOS = [];
+const firebaseConfig = {
+    apiKey: "AIzaSyC84FjbrkhiTVQvU0sS9QO52VAu-Jv53Gs",
+    authDomain: "ozi-blog.firebaseapp.com",
+    databaseURL: "https://ozi-blog-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "ozi-blog",
+    storageBucket: "ozi-blog.firebasestorage.app",
+    messagingSenderId: "871002428547",
+    appId: "1:871002428547:web:9d70c40bb5aff60bafb7b6"
+};
+const db = getDatabase(initializeApp(firebaseConfig, 'boost'));
+const videosRef = ref(db, 'boost/videos');
 
-    function loadVideos() {
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            return saved ? JSON.parse(saved) : DEFAULT_VIDEOS;
-        } catch { return DEFAULT_VIDEOS; }
-    }
+function saveVideos(v) {
+    if (!v.length) { set(videosRef, null); return; }
+    const obj = {};
+    v.forEach(item => { obj[item.id] = item; });
+    set(videosRef, obj);
+}
 
-    function saveVideos(videos) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(videos));
-    }
-
-    let videos = loadVideos();
+    let videos = [];
     let currentTag = 'all';
     let adminMode = false;
 
@@ -530,7 +536,7 @@
         if (!videoId) { alert('YouTubeのURLまたはVideo IDを正しく入力してください'); return; }
         if (!title) { alert('タイトルを入力してください'); return; }
 
-        videos.unshift({ id: crypto.randomUUID(), videoId, title, desc, tag });
+        videos.unshift({ id: crypto.randomUUID(), videoId, title, desc, tag, addedAt: Date.now() });
         saveVideos(videos);
         render();
         closeAddForm();
@@ -580,6 +586,13 @@
         if (e.key === 'Escape') { closeModal(); closeAddForm(); }
     });
 
+    // ── Firebase リスナー ──
+    onValue(videosRef, snap => {
+        const data = snap.val();
+        videos = data ? Object.values(data).sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0)) : [];
+        render();
+    });
+
     // ── ローダー ──
     window.addEventListener('load', () => {
         gsap.to('#loader-title', { opacity: 1, duration: 0.8, ease: 'power2.out' });
@@ -587,12 +600,20 @@
             opacity: 0, duration: 0.6, delay: 1.4, ease: 'power2.in',
             onComplete: () => {
                 document.getElementById('loader').style.display = 'none';
-                render();
                 gsap.from('#hero', { opacity: 0, y: 30, duration: 0.8, ease: 'power2.out' });
                 gsap.from('#tag-bar', { opacity: 0, y: 20, duration: 0.6, delay: 0.2, ease: 'power2.out' });
             }
         });
     });
+
+    // onclick から呼べるようにグローバル公開
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.openAddForm = openAddForm;
+    window.closeAddForm = closeAddForm;
+    window.addVideo = addVideo;
+    window.removeVideo = removeVideo;
+    window.filterTag = filterTag;
 </script>
 </body>
 </html>
