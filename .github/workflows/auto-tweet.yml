@@ -1,8 +1,6 @@
 name: Auto Tweet
 
 on:
-  schedule:
-    - cron: '*/10 * * * *'  # 10分ごとに新記事チェック
   workflow_dispatch:
 
 jobs:
