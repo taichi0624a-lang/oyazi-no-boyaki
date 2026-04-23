@@ -1216,9 +1216,11 @@ const lastReadRef = ref(db, 'lastread');
 
 // ── SAVE HELPERS ──
 function saveEntries() {
+    if (!entries.length) return; // 空の時は絶対に書き込まない
     const obj = {};
     entries.forEach(e => { obj[String(e.id)] = e; });
-    set(diaryRef, entries.length ? obj : null);
+    set(diaryRef, obj);
+    localStorage.setItem('ozi-entries-backup', JSON.stringify(entries));
 }
 function savePhotos() {
     const obj = {};
@@ -1739,9 +1741,19 @@ onValue(diaryRef, snap => {
     const data = snap.val();
     if (data) {
         entries = Object.values(data).sort((a, b) => b.id - a.id);
+        localStorage.setItem('ozi-entries-backup', JSON.stringify(entries));
     } else {
-        entries = [...DEFAULT_ENTRIES];
-        saveEntries();
+        // Firebaseが空 → localStorageバックアップを確認
+        const backup = localStorage.getItem('ozi-entries-backup');
+        if (backup) {
+            try {
+                entries = JSON.parse(backup).sort((a, b) => b.id - a.id);
+                saveEntries(); // バックアップをFirebaseに復元
+            } catch { entries = [...DEFAULT_ENTRIES]; }
+        } else {
+            entries = [...DEFAULT_ENTRIES];
+            saveEntries();
+        }
     }
     renderDateline();
     renderFeatured();
