@@ -8,7 +8,7 @@ async function main() {
   const data = await res.json();
   if (!data) { console.log('記事なし'); return; }
 
-  const entries = Object.values(data).sort((a, b) => new Date(b.date) - new Date(a.date));
+  const entries = Object.values(data).filter(e => e && e.date).sort((a, b) => new Date(b.date) - new Date(a.date));
   const latest = entries[0];
 
   // 前回ツイートした日時を取得
