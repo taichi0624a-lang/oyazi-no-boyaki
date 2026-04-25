@@ -15,7 +15,7 @@ async function main() {
   const lastRes = await fetch(`${FIREBASE_URL}/twitter/lastTweetedDate.json`);
   const lastTweeted = await lastRes.json();
 
-  if (lastTweeted === latest.date) {
+  if (lastTweeted === latest.date && process.env.FORCE_TWEET !== 'true') {
     console.log('すでにツイート済み:', latest.title);
     return;
   }
@@ -36,6 +36,8 @@ async function main() {
     excerpt,
     ``,
     `https://kodomo-no-boyaki.com`,
+    ``,
+    `#チョコの部屋 #美麻の部屋`,
   ].join('\n').slice(0, 280);
 
   await client.v2.tweet(text);
