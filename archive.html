@@ -908,32 +908,13 @@
             }).catch(() => {});
         }
 
-        async function markAsWatched() {
+        function markAsWatched() {
             if (!activeMovie) return;
-            // 即座にWATCHEDに移動
-            statusOverrides[activeMovie.id] = 'watched';
-            localStorage.setItem('o24-overrides', JSON.stringify(statusOverrides));
+            watchRating = 0;
+            updateWatchStars();
+            document.getElementById('wp-comment').value = '';
+            document.getElementById('watch-panel').style.display = 'block';
             document.getElementById('watched-btn').style.display = 'none';
-            document.getElementById('review-tab-btn').style.display = '';
-            renderTicket(activeMovie);
-            renderAll();
-
-            // Filmarksに「観た」だけ登録（スコア・コメントなし）
-            try {
-                fetch('https://o24-filmarks.onrender.com/mark-movie', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: 'o24-secret-2026', title: activeMovie.title, score: '', comment: '' })
-                }).then(r => r.json()).then(d => {
-                    if (d.ok && d.movieUrl) {
-                        activeMovie.filmarksUrl = d.movieUrl;
-                        if (!reviews[activeMovie.id]) reviews[activeMovie.id] = {};
-                        reviews[activeMovie.id].filmarksUrl = d.movieUrl;
-                        localStorage.setItem('o24-reviews', JSON.stringify(reviews));
-                    }
-                    pushToSheets(activeMovie, '', '', activeMovie.filmarksUrl);
-                }).catch(() => { pushToSheets(activeMovie, '', '', ''); });
-            } catch(e) { pushToSheets(activeMovie, '', '', ''); }
         }
 
         function setWR(val) {
