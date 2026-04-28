@@ -550,7 +550,21 @@ function saveVideos(v) {
     }
 
     // ── 管理者モード切替 ──
-    function toggleAdmin() {
+    async function toggleAdmin() {
+        const HASH = 'eb7d9712c3f7526aab0af167bd3b7c562e1734d989e8a7eb4f2fa39e2a4bd31a';
+        if (!adminMode) {
+            const input = prompt('Password:');
+            if (!input) return;
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+            const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+            if (hex !== HASH) {
+                const ind = document.getElementById('admin-indicator');
+                ind.textContent = 'WRONG PASSWORD';
+                ind.classList.add('visible');
+                setTimeout(() => ind.classList.remove('visible'), 2000);
+                return;
+            }
+        }
         adminMode = !adminMode;
         document.getElementById('admin-panel').classList.toggle('visible', adminMode);
         const ind = document.getElementById('admin-indicator');

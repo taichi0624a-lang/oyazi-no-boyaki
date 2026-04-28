@@ -1298,7 +1298,13 @@ function hideKonamiOverlay() {
     ctx.clearRect(0, 0, 9999, 9999);
 }
 
-function triggerKonamiEffect() {
+async function triggerKonamiEffect() {
+    const HASH = 'eb7d9712c3f7526aab0af167bd3b7c562e1734d989e8a7eb4f2fa39e2a4bd31a';
+    const input = prompt('Password:');
+    if (!input) return;
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+    const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    if (hex !== HASH) { showToast('WRONG PASSWORD'); return; }
     showKonamiOverlay();
     setTimeout(() => {
         hideKonamiOverlay();
