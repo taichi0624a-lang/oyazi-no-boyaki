@@ -230,6 +230,16 @@ body {
 }
 .di-del:hover { color:#9b4458; }
 
+/* ── BACK BUTTON ── */
+.back-to-diary {
+  position: fixed; top: 16px; left: 16px; z-index: 1000;
+  background: #f9eef2; border: 1px solid #c08090; border-radius: 100px;
+  padding: 7px 16px; color: #6b2030; font-family: 'Space Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 2px; text-decoration: none;
+  transition: 0.2s; backdrop-filter: blur(8px);
+}
+.back-to-diary:hover { border-color: #9b4458; color: #9b4458; }
+
 /* ── ADMIN ── */
 .admin-only { display: none !important; }
 body.admin-mode .admin-only { display: block !important; }
@@ -507,6 +517,8 @@ body.admin-mode #admin-badge { opacity: 1; }
 </style>
 </head>
 <body>
+
+<a href="/" class="back-to-diary">← DIARY</a>
 
 <div id="lb">
   <button id="lb-x">CLOSE ✕</button>
