@@ -1156,9 +1156,8 @@ body {
 <!-- AUTH MODAL -->
 <div id="auth-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99997;justify-content:center;align-items:center;">
   <div style="background:#111;border:1px solid #2a2a2a;padding:2rem;width:300px;">
-    <div style="color:#ece8e1;letter-spacing:4px;font-size:0.75rem;margin-bottom:1.5rem;">ADMIN LOGIN</div>
-    <input id="auth-email" type="email" placeholder="Email" autocomplete="email" style="display:block;width:100%;padding:10px;background:#0a0a0a;border:1px solid #333;color:#ece8e1;margin-bottom:8px;box-sizing:border-box;font-size:0.9rem;outline:none;">
-    <input id="auth-pass" type="password" placeholder="Password" autocomplete="current-password" style="display:block;width:100%;padding:10px;background:#0a0a0a;border:1px solid #333;color:#ece8e1;margin-bottom:12px;box-sizing:border-box;font-size:0.9rem;outline:none;">
+    <div style="color:#ece8e1;letter-spacing:4px;font-size:0.75rem;margin-bottom:1.5rem;">PASSWORD</div>
+    <input id="auth-pass" type="password" placeholder="••••••••" autocomplete="current-password" style="display:block;width:100%;padding:10px;background:#0a0a0a;border:1px solid #333;color:#ece8e1;margin-bottom:12px;box-sizing:border-box;font-size:0.9rem;outline:none;">
     <div id="auth-err" style="color:#ff6b6b;font-size:0.75rem;margin-bottom:10px;display:none;"></div>
     <div style="display:flex;gap:8px;">
       <button id="auth-cancel-btn" style="flex:1;padding:10px;background:transparent;border:1px solid #333;color:#666;cursor:pointer;font-size:0.75rem;letter-spacing:2px;">CANCEL</button>
@@ -1317,10 +1316,9 @@ function hideKonamiOverlay() {
 function triggerKonamiEffect() {
     const modal = document.getElementById('auth-modal');
     modal.style.display = 'flex';
-    document.getElementById('auth-email').value = '';
     document.getElementById('auth-pass').value = '';
     document.getElementById('auth-err').style.display = 'none';
-    setTimeout(() => document.getElementById('auth-email').focus(), 100);
+    setTimeout(() => document.getElementById('auth-pass').focus(), 100);
 }
 
 async function triggerKonamiLogout() {
@@ -1342,11 +1340,10 @@ document.getElementById('auth-cancel-btn').addEventListener('click', () => {
     document.getElementById('auth-modal').style.display = 'none';
 });
 document.getElementById('auth-login-btn').addEventListener('click', async () => {
-    const email = document.getElementById('auth-email').value;
     const pass = document.getElementById('auth-pass').value;
     const errEl = document.getElementById('auth-err');
     try {
-        await signInWithEmailAndPassword(auth, email, pass);
+        await signInWithEmailAndPassword(auth, 'kodomo.no.boyaki@gmail.com', pass);
         document.getElementById('auth-modal').style.display = 'none';
         showKonamiOverlay();
         setTimeout(() => {
