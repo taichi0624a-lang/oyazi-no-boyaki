@@ -627,6 +627,7 @@ body {
 #write-modal.active { display: flex; }
 .wm-inner {
     width: 100%; max-width: 620px;
+    max-height: 92vh; overflow-y: auto;
     background: var(--paper);
     border: 1px solid var(--rule);
     padding: 44px 40px;
@@ -703,6 +704,24 @@ body {
     padding: 9px 22px; cursor: pointer; transition: opacity 0.15s;
 }
 .w-pub:hover { opacity: 0.82; }
+
+/* ─── ENTRY PHOTOS ─── */
+.wf-photo-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.wf-photo-thumb { position: relative; width: 72px; height: 72px; }
+.wf-photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wf-photo-thumb-del { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.6); color: #fff; border: none; cursor: pointer; font-size: 9px; line-height: 1; padding: 2px 4px; }
+.wf-photo-add-btn { border: 1px dashed var(--rule); color: var(--dim); background: transparent; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 2px; padding: 7px 14px; cursor: pointer; transition: 0.15s; }
+.wf-photo-add-btn:hover { border-color: var(--ink); color: var(--ink); }
+.s-entry-photos { display: grid; gap: 4px; margin-top: 18px; }
+.s-entry-photos.ph-1 { grid-template-columns: 1fr; }
+.s-entry-photos.ph-2 { grid-template-columns: 1fr 1fr; }
+.s-entry-photos.ph-3,
+.s-entry-photos.ph-many { grid-template-columns: repeat(3, 1fr); }
+.s-entry-photos img { width: 100%; height: 200px; object-fit: cover; display: block; cursor: zoom-in; }
+.s-entry-photos.ph-1 img { height: 320px; }
+#ep-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.93); z-index: 99998; display: none; align-items: center; justify-content: center; cursor: zoom-out; }
+#ep-lightbox.active { display: flex; }
+#ep-lightbox img { max-width: 94vw; max-height: 94vh; object-fit: contain; }
 
 /* ─── CHIC LOADER (O24-era cinematic) ─── */
 #chic-loader {
@@ -1143,6 +1162,12 @@ body {
                 placeholder="今日のことを書く..."
                 oninput="document.getElementById('w-chars').textContent=this.value.length+' CHARS'"></textarea>
         </div>
+        <div class="wf">
+            <label>PHOTOS</label>
+            <div class="wf-photo-thumbs" id="w-photo-thumbs"></div>
+            <button class="wf-photo-add-btn" onclick="document.getElementById('w-photo-file').click()">+ ADD PHOTO</button>
+            <input type="file" id="w-photo-file" accept="image/*" multiple style="display:none" onchange="handleEntryPhotoSelect(this)">
+        </div>
         <div class="wm-foot">
             <span class="wm-chars" id="w-chars">0 CHARS</span>
             <div class="wm-acts">
@@ -1151,6 +1176,11 @@ body {
             </div>
         </div>
     </div>
+</div>
+
+<!-- ENTRY PHOTO LIGHTBOX -->
+<div id="ep-lightbox" onclick="this.classList.remove('active')">
+    <img id="ep-lb-img" src="" alt="">
 </div>
 
 <!-- AUTH MODAL -->
@@ -1262,6 +1292,7 @@ let openId     = null;
 let editingId  = null;
 let photos = [];
 let pendingPhotoSrc = null;
+let entryPhotos = [];
 
 // ── ADMIN ──
 let isAdmin = sessionStorage.getItem('ozi-admin') === '1';
@@ -1434,6 +1465,11 @@ function renderStrips() {
                     <div class="strip-body-gutter"></div>
                     <div class="strip-body-content">
                         <div class="s-body-text">${e.content}</div>
+                        ${(e.photos && e.photos.length) ? (() => {
+                            const n = e.photos.length;
+                            const cls = n===1?'ph-1':n===2?'ph-2':n===3?'ph-3':'ph-many';
+                            return `<div class="s-entry-photos ${cls}">${e.photos.map(src=>`<img src="${src}" onclick="openEntryPhoto(this.src);event.stopPropagation()">`).join('')}</div>`;
+                        })() : ''}
                         <div class="s-body-meta">
                             <div class="s-body-tags-full">${bodyTags}</div>
                             ${adminBtns}
@@ -1531,6 +1567,7 @@ function deleteEntry(id) {
 // ── WRITE ──
 function openWriter() {
     editingId = null;
+    entryPhotos = [];
     document.getElementById('w-title').value   = '';
     document.getElementById('w-content').value = '';
     document.getElementById('w-chars').textContent = '0 CHARS';
@@ -1538,6 +1575,7 @@ function openWriter() {
     document.getElementById('w-pub').textContent   = 'PUBLISH \u2192';
     selTags = [];
     document.querySelectorAll('.tag-opt').forEach(b => b.classList.remove('selected'));
+    renderEntryPhotoThumbs();
     document.getElementById('write-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
     setTimeout(() => document.getElementById('w-title').focus(), 80);
@@ -1546,6 +1584,7 @@ function openEditor(id) {
     const e = entries.find(x => x.id === id);
     if (!e) return;
     editingId = id;
+    entryPhotos = [...(e.photos || [])];
     document.getElementById('w-title').value   = e.title;
     document.getElementById('w-content').value = e.content;
     document.getElementById('w-chars').textContent = e.content.length + ' CHARS';
@@ -1555,6 +1594,7 @@ function openEditor(id) {
     document.querySelectorAll('.tag-opt').forEach(b => {
         b.classList.toggle('selected', selTags.includes(b.textContent));
     });
+    renderEntryPhotoThumbs();
     document.getElementById('write-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
     setTimeout(() => document.getElementById('w-title').focus(), 80);
@@ -1576,7 +1616,7 @@ function publishEntry() {
     if (editingId) {
         const idx = entries.findIndex(x => x.id === editingId);
         if (idx !== -1) {
-            entries[idx] = { ...entries[idx], title, content, tags: [...selTags] };
+            entries[idx] = { ...entries[idx], title, content, tags: [...selTags], photos: [...entryPhotos] };
             saveEntries();
             closeWriter();
             renderFeatured();
@@ -1587,13 +1627,37 @@ function publishEntry() {
     }
 
     const date = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' });
-    entries.unshift({ id: Date.now(), title, content, date, tags: [...selTags] });
+    entries.unshift({ id: Date.now(), title, content, date, tags: [...selTags], photos: [...entryPhotos] });
     saveEntries();
     closeWriter();
     renderDateline();
     renderFeatured();
     renderStrips();
     showToast('PUBLISHED \u00b7 ' + entries.length + ' ENTRIES');
+}
+
+// ── ENTRY PHOTOS ──
+function renderEntryPhotoThumbs() {
+    const wrap = document.getElementById('w-photo-thumbs');
+    wrap.innerHTML = entryPhotos.map((src, i) =>
+        `<div class="wf-photo-thumb"><img src="${src}"><button class="wf-photo-thumb-del" onclick="removeEntryPhoto(${i})">✕</button></div>`
+    ).join('');
+}
+function handleEntryPhotoSelect(input) {
+    Array.from(input.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = ev => { entryPhotos.push(ev.target.result); renderEntryPhotoThumbs(); };
+        reader.readAsDataURL(file);
+    });
+    input.value = '';
+}
+function removeEntryPhoto(i) {
+    entryPhotos.splice(i, 1);
+    renderEntryPhotoThumbs();
+}
+function openEntryPhoto(src) {
+    document.getElementById('ep-lb-img').src = src;
+    document.getElementById('ep-lightbox').classList.add('active');
 }
 
 // ── SEARCH ──
@@ -1859,7 +1923,8 @@ Object.assign(window, {
     openPhotoUpload, closePhotoUpload, handleFileSelect, clearPhotoPreview,
     publishPhoto, deletePhoto, openLightbox, closeLightbox,
     openEntryById, openStrip, closeReadModal, scrollToSection,
-    deleteEntry, toggleStrip
+    deleteEntry, toggleStrip,
+    handleEntryPhotoSelect, removeEntryPhoto, openEntryPhoto
 });
 </script>
 </body>
