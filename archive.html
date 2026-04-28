@@ -328,6 +328,8 @@
                 <option value="year-desc">YEAR ↓</option>
                 <option value="year-asc">YEAR ↑</option>
                 <option value="title">TITLE A-Z</option>
+                <option value="score-desc">MY SCORE ↓</option>
+                <option value="score-asc">MY SCORE ↑</option>
             </select>
             <button class="random-btn" onclick="pickRandom()">⚄ RANDOM</button>
         </div>
@@ -717,6 +719,8 @@
             if (sortBy === 'year-desc') filtered.sort((a,b) => (b.year||'0').localeCompare(a.year||'0'));
             else if (sortBy === 'year-asc') filtered.sort((a,b) => (a.year||'0').localeCompare(b.year||'0'));
             else if (sortBy === 'title') filtered.sort((a,b) => a.title.localeCompare(b.title));
+            else if (sortBy === 'score-desc') filtered.sort((a,b) => (parseFloat(b.filmarksScore||0)||0) - (parseFloat(a.filmarksScore||0)||0));
+            else if (sortBy === 'score-asc') filtered.sort((a,b) => (parseFloat(a.filmarksScore||0)||0) - (parseFloat(b.filmarksScore||0)||0));
             return filtered;
         }
 
