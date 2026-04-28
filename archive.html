@@ -882,6 +882,32 @@
 
         let watchRating = 0;
 
+        const SHEETS_WEBHOOK = 'https://script.google.com/macros/s/AKfycbwDjSst8WOi8S7-LqMVex5UL2uDxJkcwXb7Amh37_RItMIfcl3UnDiLKkQ_Ba-7V8L9vQ/exec';
+
+        function pushToSheets(movie, score, comment, filmarksUrl) {
+            fetch(SHEETS_WEBHOOK, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    token: 'o24-sheets-2026',
+                    movie: {
+                        title:      movie.title || '',
+                        year:       movie.filmarksYear || (movie.release_date || '').slice(0,4) || '',
+                        score:      score || '',
+                        comment:    comment || '',
+                        filmarksUrl: filmarksUrl || movie.filmarksUrl || '',
+                        director:   movie.director || '',
+                        country:    (movie.production_countries || []).map(c => c.iso_3166_1).join(',') || '',
+                        runtime:    movie.runtime || '',
+                        genre:      movie.appGenre || '',
+                        tmdbId:     movie.id || '',
+                        poster_path: movie.poster_path || ''
+                    }
+                })
+            }).catch(() => {});
+        }
+
         async function markAsWatched() {
             if (!activeMovie) return;
             // 即座にWATCHEDに移動
@@ -905,8 +931,9 @@
                         reviews[activeMovie.id].filmarksUrl = d.movieUrl;
                         localStorage.setItem('o24-reviews', JSON.stringify(reviews));
                     }
-                }).catch(()=>{});
-            } catch(e) {}
+                    pushToSheets(activeMovie, '', '', activeMovie.filmarksUrl);
+                }).catch(() => { pushToSheets(activeMovie, '', '', ''); });
+            } catch(e) { pushToSheets(activeMovie, '', '', ''); }
         }
 
         function setWR(val) {
@@ -968,7 +995,6 @@
                 });
                 const data = await res.json();
                 if (data.ok) {
-                    // filmarksUrlをメモリとlocalStorageに保存
                     if (data.movieUrl) {
                         activeMovie.filmarksUrl = data.movieUrl;
                         if (reviews[activeMovie.id]) {
@@ -978,12 +1004,12 @@
                         }
                         localStorage.setItem('o24-reviews', JSON.stringify(reviews));
                     }
-                    console.log('Filmarks登録完了:', data.movieUrl);
+                    pushToSheets(activeMovie, score, comment, data.movieUrl || '');
                 } else {
-                    console.warn('Filmarks登録失敗:', data.error);
+                    pushToSheets(activeMovie, score, comment, '');
                 }
             } catch(e) {
-                console.warn('Filmarksサーバーエラー:', e.message);
+                pushToSheets(activeMovie, score, comment, '');
             }
         }
 
