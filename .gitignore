@@ -1,0 +1,7 @@
+# Local Netlify folder
+.netlify
+
+# Google API credentials
+credentials.json
+token.pickle
+*.pickle
