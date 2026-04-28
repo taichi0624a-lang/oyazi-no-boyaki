@@ -694,11 +694,26 @@ body.admin-mode #admin-badge { opacity: 1; }
   <button id="op-skip" onclick="skipOp()">SKIP →</button>
 </div>
 
+<!-- AUTH MODAL -->
+<div id="auth-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99997;justify-content:center;align-items:center;">
+  <div style="background:#111;border:1px solid #2a2a2a;padding:2rem;width:300px;">
+    <div style="color:#ece8e1;letter-spacing:4px;font-size:0.75rem;margin-bottom:1.5rem;">ADMIN LOGIN</div>
+    <input id="auth-email" type="email" placeholder="Email" autocomplete="email" style="display:block;width:100%;padding:10px;background:#0a0a0a;border:1px solid #333;color:#ece8e1;margin-bottom:8px;box-sizing:border-box;font-size:0.9rem;outline:none;">
+    <input id="auth-pass" type="password" placeholder="Password" autocomplete="current-password" style="display:block;width:100%;padding:10px;background:#0a0a0a;border:1px solid #333;color:#ece8e1;margin-bottom:12px;box-sizing:border-box;font-size:0.9rem;outline:none;">
+    <div id="auth-err" style="color:#ff6b6b;font-size:0.75rem;margin-bottom:10px;display:none;"></div>
+    <div style="display:flex;gap:8px;">
+      <button id="auth-cancel-btn" style="flex:1;padding:10px;background:transparent;border:1px solid #333;color:#666;cursor:pointer;font-size:0.75rem;letter-spacing:2px;">CANCEL</button>
+      <button id="auth-login-btn" style="flex:1;padding:10px;background:#ece8e1;border:none;color:#0a0a0a;cursor:pointer;font-size:0.75rem;letter-spacing:2px;font-weight:bold;">LOGIN</button>
+    </div>
+  </div>
+</div>
+
 <div id="admin-badge">ADMIN MODE</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC84FjbrkhiTVQvU0sS9QO52VAu-Jv53Gs",
@@ -709,7 +724,9 @@ const firebaseConfig = {
   messagingSenderId: "871002428547",
   appId: "1:871002428547:web:9d70c40bb5aff60bafb7b6"
 };
-const db = getDatabase(initializeApp(firebaseConfig, 'choco'));
+const chocoApp = initializeApp(firebaseConfig, 'choco');
+const db = getDatabase(chocoApp);
+const auth = getAuth(chocoApp);
 const diaryRef   = ref(db, 'choco/diary');
 const hitsRef    = ref(db, 'choco/hits');
 const mainImgRef = ref(db, 'choco/mainImg');
@@ -784,18 +801,41 @@ const MOODS = {散歩:'🌿',食事:'🍖',睡眠:'😴',あそび:'🎾',病院
 // スマホ: カウンターを5回素早くタップ
 let adminMode = false;
 
-async function toggleAdmin() {
-  const HASH = 'eb7d9712c3f7526aab0af167bd3b7c562e1734d989e8a7eb4f2fa39e2a4bd31a';
+function toggleAdmin() {
   if (!adminMode) {
-    const input = prompt('Password:');
-    if (!input) return;
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
-    const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-    if (hex !== HASH) { alert('Wrong password'); return; }
+    const modal = document.getElementById('auth-modal');
+    modal.style.display = 'flex';
+    document.getElementById('auth-email').value = '';
+    document.getElementById('auth-pass').value = '';
+    document.getElementById('auth-err').style.display = 'none';
+    setTimeout(() => document.getElementById('auth-email').focus(), 100);
+  } else {
+    signOut(auth);
+    adminMode = false;
+    document.body.classList.remove('admin-mode');
   }
-  adminMode = !adminMode;
-  document.body.classList.toggle('admin-mode', adminMode);
 }
+
+document.getElementById('auth-cancel-btn').addEventListener('click', () => {
+  document.getElementById('auth-modal').style.display = 'none';
+});
+document.getElementById('auth-login-btn').addEventListener('click', async () => {
+  const email = document.getElementById('auth-email').value;
+  const pass = document.getElementById('auth-pass').value;
+  const errEl = document.getElementById('auth-err');
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+    document.getElementById('auth-modal').style.display = 'none';
+    adminMode = true;
+    document.body.classList.add('admin-mode');
+  } catch(e) {
+    errEl.textContent = 'メールアドレスまたはパスワードが違います';
+    errEl.style.display = 'block';
+  }
+});
+document.getElementById('auth-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('auth-login-btn').click();
+});
 
 // カウンタータップ（5回/2秒以内）
 let tapCount = 0, tapTimer = null;
