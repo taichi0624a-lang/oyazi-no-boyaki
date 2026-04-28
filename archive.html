@@ -487,7 +487,7 @@
         async function loadWatchProviders(movie, forceRefresh = false) {
             const el = document.getElementById('where-to-watch');
             if (!el) return;
-            if (effectiveStatus(movie) !== 'towatch') { el.innerHTML = ''; return; }
+            if (effectiveStatus(movie) !== 'towatch' && effectiveStatus(movie) !== 'watched') { el.innerHTML = ''; return; }
             el.innerHTML = `<div class="wtw-section"><div class="wtw-header"><div class="wtw-label">WHERE TO WATCH — JP</div></div><div class="wtw-logos" style="opacity:0.4;font-size:0.7rem;color:#555">CHECKING...</div></div>`;
             const providers = await fetchWatchProviders(movie.id, forceRefresh);
             el.innerHTML = `
