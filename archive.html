@@ -507,7 +507,7 @@
         }
 
         async function prefetchProviders() {
-            const towatch = allMovies.filter(m => effectiveStatus(m) === 'towatch');
+            const towatch = allMovies.filter(m => effectiveStatus(m) === 'towatch' || effectiveStatus(m) === 'watched');
             for (const movie of towatch) {
                 const cached = watchProvidersCache[movie.id];
                 const stale = !cached || (Date.now() - cached.ts) > PROVIDERS_TTL;
@@ -747,7 +747,7 @@
                         <div class="c-sub">${movie.year}</div>
                         ${scoreHtml}
                         ${commentHtml}
-                        ${status === 'towatch' ? `<div class="c-providers">${providerIconsHtml(cachedProviders)}</div>` : ''}
+                        <div class="c-providers">${providerIconsHtml(cachedProviders)}</div>
                     </div>`;
                 card.onclick = () => openImmersive(movie);
                 document.getElementById(`${status}-grid`).appendChild(card);
