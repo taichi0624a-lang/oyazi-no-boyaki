@@ -286,14 +286,6 @@
         }
         #admin-indicator.visible { opacity: 1; }
 
-        /* ── EMPTY STATE ── */
-        #empty-state {
-            display: none; text-align: center; padding: 80px 40px;
-            color: var(--text-sub);
-        }
-        #empty-state.visible { display: block; }
-        .empty-icon { font-size: 3rem; margin-bottom: 20px; opacity: 0.3; }
-        .empty-text { font-size: 0.8rem; letter-spacing: 2px; }
 
         /* ── FOOTER ── */
         footer {
@@ -347,10 +339,6 @@
 </div>
 
 <div id="video-grid"></div>
-<div id="empty-state">
-    <div class="empty-icon">▶</div>
-    <div class="empty-text">コナミコードで管理者モードに入って動画を追加してください</div>
-</div>
 
 <footer>
     <span class="footer-label">BOOST — VIDEO ARCHIVE</span>
@@ -473,17 +461,11 @@ function saveVideos(v) {
     // ── レンダリング ──
     function render() {
         const grid = document.getElementById('video-grid');
-        const empty = document.getElementById('empty-state');
         const filtered = currentTag === 'all' ? videos : videos.filter(v => v.tag === currentTag);
         const countEl = document.getElementById('hero-count');
         if (countEl) countEl.textContent = String(videos.length).padStart(3, '0');
 
-        if (filtered.length === 0) {
-            grid.innerHTML = '';
-            empty.classList.add('visible');
-            return;
-        }
-        empty.classList.remove('visible');
+        if (filtered.length === 0) { grid.innerHTML = ''; return; }
 
         grid.innerHTML = filtered.map(v => `
             <div class="v-card" onclick="openModal('${v.videoId}','${v.title.replace(/'/g,"\\'")}','${(v.desc||'').replace(/'/g,"\\'")}')">
