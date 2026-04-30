@@ -1982,11 +1982,7 @@ onValue(lastReadRef, snap => {
     )
     .to({}, { duration: 1.2 })
     .to('#loader-tagline', { opacity: 0, duration: 0.3 }, '-=0.3')
-    .set('#chic-loader', { backgroundColor: '#050505' })
-    .set('.c-char', { color: '#ece8e1' })
-    .set('#loader-progress', { background: 'linear-gradient(90deg, transparent 0%, #ece8e1 30%, #ece8e1 70%, transparent 100%)' })
-    .to({}, { duration: 0.08 })
-    .to('#chic-loader', { opacity: 0, duration: 0.25, ease: 'power1.in' });
+    .to('#chic-loader', { opacity: 0, duration: 0.5, ease: 'power1.in' });
 })();
 
 // ── THEME ──
