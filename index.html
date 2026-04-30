@@ -39,7 +39,8 @@ body.dark-mode .ft-excerpt,  html.dark-mode .ft-excerpt  { color: #b0aa9f; }
 body.dark-mode .strip-body-content, html.dark-mode .strip-body-content { background: var(--paper); }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+a, button { -webkit-tap-highlight-color: transparent; }
 
 body {
     background: var(--bg);
@@ -741,13 +742,29 @@ body {
 .chic-logo-wrap {
     display: flex; gap: 3vw; align-items: baseline;
     position: relative; z-index: 1;
+    flex-wrap: nowrap;
 }
 .c-char {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(8rem, 20vw, 18rem);
+    font-size: clamp(6rem, 20vw, 18rem);
     color: #0a0a0a;
     font-weight: 400;
     line-height: 1;
+}
+#loader-progress {
+    position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent 0%, #0a0a0a 30%, #0a0a0a 70%, transparent 100%);
+    transform-origin: left center; transform: scaleX(0);
+}
+#loader-tagline {
+    position: absolute; bottom: clamp(28px, 6vw, 48px); left: 0; right: 0;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(7px, 1.8vw, 10px);
+    letter-spacing: clamp(3px, 1vw, 6px);
+    color: #0a0a0a;
+    opacity: 0;
 }
 
 /* ─── KONAMI EFFECT ─── */
@@ -965,16 +982,74 @@ body {
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 720px) {
-    #featured { grid-template-columns: 1fr; gap: 24px; padding: 36px 0 28px; }
-    .ft-title { font-size: clamp(1.4rem, 6vw, 2.4rem); }
-    .strip-head { grid-template-columns: 44px 1fr auto; }
-    .strip-body-inner { grid-template-columns: 44px 1fr; }
-    .arc-grid { grid-template-columns: 1fr; }
-    .photo-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    /* ── Layout ── */
     #wrap { padding: 0 5vw; }
-    .mh-top { padding: 14px 5vw 12px; }
-    .mh-dateline { padding: 5px 5vw; }
-    .wm-inner { padding: 32px 24px; }
+
+    /* ── Masthead ── */
+    .mh-top { padding: 12px 5vw 10px; gap: 8px; }
+    .mh-brand { font-size: clamp(0.82rem, 4vw, 1.3rem); white-space: normal; line-height: 1.25; }
+    .mh-dateline { padding: 5px 5vw; flex-wrap: wrap; gap: 2px 12px; font-size: 7.5px; justify-content: flex-start; }
+
+    /* ── Featured ── */
+    #featured { grid-template-columns: 1fr; gap: 0; padding: 28px 0 22px; }
+    .ft-title { font-size: clamp(1.65rem, 7.5vw, 2.8rem); margin-bottom: 14px; }
+    .ft-kicker { margin-bottom: 12px; }
+    .ft-right-top { border-bottom: none; padding-bottom: 12px; }
+    .ft-excerpt { font-size: 0.9rem; line-height: 1.82; }
+    .ft-read { padding: 10px 18px; min-height: 44px; }
+
+    /* ── Entry strips ── */
+    .strip-head { grid-template-columns: 44px 1fr 48px; min-height: 70px; }
+    .strip-num-col { padding: 18px 12px 18px 0; }
+    .strip-main-col { padding: 15px 14px; }
+    .strip-toggle-col { padding: 0; display: flex; align-items: center; justify-content: center; min-height: 70px; }
+    .s-toggle { width: 30px; height: 30px; font-size: 1.1rem; }
+    .s-title { font-size: clamp(1.05rem, 4.5vw, 1.4rem); }
+    .s-date { font-size: 8px; margin-top: 4px; }
+    .strip-body-inner { grid-template-columns: 44px 1fr; }
+    .strip-body-content { padding: 20px 14px 28px; }
+    .s-body-text { font-size: 0.92rem; line-height: 1.9; }
+    .s-body-meta { margin-top: 18px; padding-top: 14px; flex-wrap: wrap; gap: 10px; }
+    .s-del, .s-edit { padding: 7px 12px; font-size: 8px; min-height: 36px; }
+
+    /* ── Archives ── */
+    .arc-grid { grid-template-columns: 1fr; }
+    .arc-card { padding: 20px 18px; }
+    #arc-section { margin-top: 36px; padding-top: 36px; }
+
+    /* ── Photos ── */
+    .photo-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .s-entry-photos.ph-3,
+    .s-entry-photos.ph-many { grid-template-columns: repeat(2, 1fr); }
+    .s-entry-photos img { height: 160px; }
+    .s-entry-photos.ph-1 img { height: 260px; }
+
+    /* ── Write modal ── */
+    .wm-inner { padding: 24px 18px; max-height: 96vh; }
+    .wf { margin-bottom: 18px; }
+    .wf-title { font-size: 1.3rem; }
+
+    /* ── Search ── */
+    #search-overlay { padding: 80px 5vw 40px; }
+
+    /* ── Footer ── */
+    #site-footer { margin: 36px 0 32px; padding: 14px 0; gap: 6px; }
+
+    /* ── Toast ── */
+    #toast { bottom: 18px; right: 5vw; left: 5vw; text-align: center; }
+
+    /* ── Loader ── */
+    .c-char { font-size: clamp(4rem, 21vw, 18rem); }
+    .chic-logo-wrap { gap: 3.5vw; }
+}
+
+@media (max-width: 430px) {
+    .mh-brand { font-size: clamp(0.78rem, 4vw, 1rem); }
+    .mh-btn { padding: 6px 10px; font-size: 9px; letter-spacing: 1px; }
+    .strip-head { grid-template-columns: 36px 1fr 44px; }
+    .strip-num-col { padding: 16px 10px 16px 0; }
+    .strip-body-inner { grid-template-columns: 36px 1fr; }
+    .c-char { font-size: clamp(3.6rem, 21vw, 18rem); }
 }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -1004,6 +1079,8 @@ body {
         <span class="c-char">2</span>
         <span class="c-char">4</span>
     </div>
+    <div id="loader-tagline">PERSONAL DIARY</div>
+    <div id="loader-progress"></div>
 </div>
 
 <!-- ══════════ MASTHEAD ══════════ -->
@@ -1880,6 +1957,7 @@ onValue(lastReadRef, snap => {
 (function() {
     document.body.style.overflow = 'hidden';
     const loader = document.getElementById('chic-loader');
+    const xOffset = Math.min(110, window.innerWidth * 0.26);
 
     const tl = gsap.timeline({
         onComplete: () => {
@@ -1889,14 +1967,26 @@ onValue(lastReadRef, snap => {
     });
 
     tl.fromTo('.c-char',
-        { opacity: 0, filter: 'blur(30px)', x: (i) => (i - 1) * 120, scale: 1.2 },
-        { opacity: 1, filter: 'blur(0px)', x: 0, scale: 1, duration: 3.0, stagger: 0.2, ease: 'power2.out' }
+        { opacity: 0, filter: 'blur(28px)', x: (i) => (i - 1) * xOffset, scale: 1.15 },
+        { opacity: 1, filter: 'blur(0px)', x: 0, scale: 1, duration: 2.8, stagger: 0.18, ease: 'power2.out' }
     )
-    .to({}, { duration: 1.5 })
+    .fromTo('#loader-progress',
+        { scaleX: 0 },
+        { scaleX: 1, duration: 4.2, ease: 'expo.out' },
+        0
+    )
+    .fromTo('#loader-tagline',
+        { opacity: 0, y: 6 },
+        { opacity: 0.45, y: 0, duration: 1.0, ease: 'power2.out' },
+        1.2
+    )
+    .to({}, { duration: 1.2 })
+    .to('#loader-tagline', { opacity: 0, duration: 0.3 }, '-=0.3')
     .set('#chic-loader', { backgroundColor: '#050505' })
     .set('.c-char', { color: '#ece8e1' })
-    .to({}, { duration: 0.05 })
-    .set('#chic-loader', { opacity: 0 });
+    .set('#loader-progress', { background: 'linear-gradient(90deg, transparent 0%, #ece8e1 30%, #ece8e1 70%, transparent 100%)' })
+    .to({}, { duration: 0.08 })
+    .to('#chic-loader', { opacity: 0, duration: 0.25, ease: 'power1.in' });
 })();
 
 // ── THEME ──
