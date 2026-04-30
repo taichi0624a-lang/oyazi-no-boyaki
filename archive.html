@@ -29,24 +29,26 @@
         body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; transition: background 0.4s, color 0.4s; }
 
         /* ── ローダー ── */
-        #chic-loader { position: fixed; inset: 0; background: var(--paper); display: flex; justify-content: center; align-items: center; z-index: 9999; overflow: hidden; }
-        .chic-logo-wrap { display:flex; gap:0.22em; position:relative; z-index:2; }
+        /* ── LOADER ── */
+        #chic-loader { position:fixed; inset:0; background:#080808; display:flex; align-items:center; justify-content:center; z-index:9999; overflow:hidden; }
+        /* grain */
+        #chic-loader::after { content:''; position:absolute; inset:-50%; width:200%; height:200%; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E"); opacity:0.09; animation:grain 0.35s steps(1) infinite; pointer-events:none; z-index:1; }
+        @keyframes grain { 0%{transform:translate(0,0)} 25%{transform:translate(-2%,-2%)} 50%{transform:translate(2%,-1%)} 75%{transform:translate(-1%,2%)} 100%{transform:translate(1%,1%)} }
+        /* vignette */
+        #chic-loader::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%); pointer-events:none; z-index:2; }
+        /* letterbox bars */
+        .lbox-bar { position:absolute; left:0; right:0; height:0; background:#000; z-index:4; }
+        .lbox-top    { top:0; }
+        .lbox-bottom { bottom:0; }
+        /* title card */
+        .tc-center { position:relative; z-index:3; text-align:center; }
+        .tc-eyebrow { font-family:'Space Mono',monospace; font-size:clamp(7px,1.4vw,9px); letter-spacing:6px; color:rgba(236,232,225,0.35); margin-bottom:clamp(16px,3vw,28px); opacity:0; }
+        .chic-logo-wrap { display:flex; gap:0.18em; align-items:baseline; justify-content:center; }
+        .c-word { font-family:'Playfair Display',serif; font-size:clamp(4rem,13vw,11rem); color:#ece8e1; font-weight:400; font-style:italic; line-height:1; letter-spacing:0.03em; opacity:0; }
+        .tc-divider { width:0; height:1px; background:rgba(236,232,225,0.25); margin:clamp(14px,2.5vw,22px) auto; }
+        .tc-sub { font-family:'Space Mono',monospace; font-size:clamp(7px,1.3vw,9px); letter-spacing:5px; color:rgba(236,232,225,0.3); opacity:0; }
         .c-char { display:none; }
-        .c-word { font-family:'Playfair Display',serif; font-size:clamp(5rem,14vw,12rem); color:#0a0a0a; font-weight:400; line-height:1; letter-spacing:0.06em; }
-        .curtain { position:absolute; top:0; height:100%; width:51%; background:var(--paper); z-index:4; }
-        .curtain-left  { left:0; }
-        .curtain-right { right:0; }
-        /* 映写機ビーム */
-        .projector-beam { position: absolute; bottom: -10%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 35vw solid transparent; border-right: 35vw solid transparent; border-bottom: 120vh solid rgba(255,245,180,0.06); pointer-events: none; z-index: 1; animation: beam-flicker 3s ease-in-out infinite; }
-        @keyframes beam-flicker { 0%,100%{opacity:1} 50%{opacity:0.7} 75%{opacity:0.9} }
-        /* フィルムグレイン */
-        #chic-loader::after { content:''; position:absolute; inset:-50%; width:200%; height:200%; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E"); opacity:0.12; animation:grain 0.4s steps(1) infinite; pointer-events:none; z-index:3; }
-        @keyframes grain { 0%{transform:translate(0,0)} 20%{transform:translate(-3%,-3%)} 40%{transform:translate(3%,-1%)} 60%{transform:translate(-1%,3%)} 80%{transform:translate(2%,2%)} 100%{transform:translate(0,0)} }
-        /* フィルムストリップ（ローダー上下） */
-        .film-bar { position:absolute; left:0; right:0; height:28px; background: repeating-linear-gradient(90deg, #0a0a0a 0px, #0a0a0a 12px, transparent 12px, transparent 26px); }
-        .film-bar.top { top:0; }
-        .film-bar.bottom { bottom:0; }
-        .film-bar::after { content:''; position:absolute; inset:4px 0; background: repeating-linear-gradient(90deg, transparent 0px, transparent 6px, rgba(255,255,255,0.15) 6px, rgba(255,255,255,0.15) 20px, transparent 20px, transparent 26px); }
+        .curtain { display:none; }
 
         /* ── フィルムストリップ スクロールバー ── */
         #film-scroll { position:fixed; left:0; top:0; width:18px; height:100vh; z-index:400; pointer-events:none; background:#0d0d0d; background-image: radial-gradient(circle, rgba(255,255,255,0.18) 3px, transparent 3px); background-size:18px 18px; background-position:center; }
@@ -284,11 +286,15 @@
 
     <!-- ローダー -->
     <section id="chic-loader">
-        <div class="projector-beam"></div>
-        <div class="curtain curtain-left"></div>
-        <div class="curtain curtain-right"></div>
-        <div class="chic-logo-wrap">
-            <span class="c-word">drop</span><span class="c-word">off</span>
+        <div class="lbox-bar lbox-top"></div>
+        <div class="lbox-bar lbox-bottom"></div>
+        <div class="tc-center">
+            <div class="tc-eyebrow">A PERSONAL FILM ARCHIVE</div>
+            <div class="chic-logo-wrap">
+                <span class="c-word">drop</span><span class="c-word">off</span>
+            </div>
+            <div class="tc-divider"></div>
+            <div class="tc-sub">2026</div>
         </div>
     </section>
 
@@ -555,14 +561,29 @@
                     document.body.style.overflow = 'auto';
                 }
             });
-            // カーテンが左右に開いてタイトルが現れる
             tl
-              .to({}, { duration: 0.6 })
-              .to('.curtain-left',  { x:'-101%', duration:1.6, ease:'power3.inOut' })
-              .to('.curtain-right', { x:'101%',  duration:1.6, ease:'power3.inOut' }, '<')
-              .to({}, { duration: 2.2 })
+              // レターボックスバーがスライドイン
+              .to('.lbox-top',    { height:'13vh', duration:0.65, ease:'power2.inOut' })
+              .to('.lbox-bottom', { height:'13vh', duration:0.65, ease:'power2.inOut' }, '<')
+              // アイブロウテキスト
+              .to('.tc-eyebrow', { opacity:1, duration:0.7, ease:'power1.out' }, '-=0.1')
+              // タイトル登場
+              .fromTo('.c-word',
+                { opacity:0, filter:'blur(10px)', y:10 },
+                { opacity:1, filter:'blur(0)', y:0, duration:1.3, stagger:0.12, ease:'power2.out' },
+                '-=0.3'
+              )
+              // ディバイダーライン伸長
+              .to('.tc-divider', { width:'80px', duration:0.9, ease:'power2.out' }, '-=0.5')
+              // 年号フェードイン
+              .to('.tc-sub', { opacity:1, duration:0.6, ease:'power1.out' }, '-=0.4')
+              // ホールド
+              .to({}, { duration: 1.6 })
+              // app表示 + バー退場 + フェード
               .set('#app-wrapper', { visibility:'visible', opacity:1 })
-              .to('#chic-loader', { opacity:0, duration:2.0, ease:'power2.inOut' });
+              .to('.lbox-top',    { height:0, duration:1.0, ease:'power2.inOut' })
+              .to('.lbox-bottom', { height:0, duration:1.0, ease:'power2.inOut' }, '<')
+              .to('#chic-loader', { opacity:0, duration:0.7, ease:'power1.in' }, '-=0.5');
         });
 
         function renderSkeletons(gridId) {
