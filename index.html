@@ -757,15 +757,6 @@ body {
     background: linear-gradient(90deg, transparent 0%, #0a0a0a 30%, #0a0a0a 70%, transparent 100%);
     transform-origin: left center; transform: scaleX(0);
 }
-#loader-tagline {
-    position: absolute; bottom: clamp(28px, 6vw, 48px); left: 0; right: 0;
-    text-align: center;
-    font-family: 'Space Mono', monospace;
-    font-size: clamp(7px, 1.8vw, 10px);
-    letter-spacing: clamp(3px, 1vw, 6px);
-    color: #0a0a0a;
-    opacity: 0;
-}
 
 /* ─── KONAMI EFFECT ─── */
 #konami-overlay {
@@ -1079,7 +1070,6 @@ body {
         <span class="c-char">2</span>
         <span class="c-char">4</span>
     </div>
-    <div id="loader-tagline">PERSONAL DIARY</div>
     <div id="loader-progress"></div>
 </div>
 
@@ -1975,13 +1965,7 @@ onValue(lastReadRef, snap => {
         { scaleX: 1, duration: 4.2, ease: 'expo.out' },
         0
     )
-    .fromTo('#loader-tagline',
-        { opacity: 0, y: 6 },
-        { opacity: 0.45, y: 0, duration: 1.0, ease: 'power2.out' },
-        1.2
-    )
     .to({}, { duration: 1.2 })
-    .to('#loader-tagline', { opacity: 0, duration: 0.3 }, '-=0.3')
     .to('#chic-loader', { opacity: 0, duration: 0.5, ease: 'power1.in' });
 })();
 
