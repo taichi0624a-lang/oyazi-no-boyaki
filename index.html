@@ -1315,7 +1315,7 @@ body {
 <script type="module">
 // ── FIREBASE ──
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, onDisconnect, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -1893,20 +1893,20 @@ window.addEventListener('scroll', () => {
     document.getElementById('read-progress').style.width = max > 0 ? (scrolled / max * 100) + '%' : '0%';
 }, { passive: true });
 
-// ── ONLINE BADGE ──
+// ── ONLINE PRESENCE (Firebase) ──
 (function() {
-    const NS = 'oyaji-diary-v1';
-    fetch('https://api.countapi.xyz/hit/' + NS + '/online')
-        .then(r => r.json()).then(d => {
-            document.getElementById('online-num').textContent = Math.max(1, d.value);
-            document.getElementById('online-badge').classList.add('show');
-        }).catch(() => {
-            document.getElementById('online-num').textContent = '1';
-            document.getElementById('online-badge').classList.add('show');
-        });
-    const dec = () => fetch('https://api.countapi.xyz/update/' + NS + '/online?amount=-1').catch(() => {});
-    window.addEventListener('beforeunload', dec);
-    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') dec(); });
+    const presenceBase = ref(db, 'presence');
+    const myKey = Date.now().toString(36) + '_' + Math.random().toString(36).slice(2);
+    const myRef = ref(db, 'presence/' + myKey);
+
+    set(myRef, { t: serverTimestamp() });
+    onDisconnect(myRef).remove();
+
+    onValue(presenceBase, snap => {
+        const count = snap.val() ? Object.keys(snap.val()).length : 1;
+        document.getElementById('online-num').textContent = count;
+        document.getElementById('online-badge').classList.add('show');
+    });
 })();
 
 // ── VISITOR COUNTER (Firebase) ──
