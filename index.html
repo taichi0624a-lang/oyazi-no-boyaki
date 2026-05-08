@@ -1306,7 +1306,7 @@ body {
 // ── FIREBASE ──
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, onDisconnect, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyC84FjbrkhiTVQvU0sS9QO52VAu-Jv53Gs",
@@ -1365,6 +1365,7 @@ let photos = [];
 let pendingPhotoSrc = null;
 let entryPhotos = [];
 let firebaseLoaded = false;
+let firebaseUser = null;
 
 // ── ADMIN ──
 let isAdmin = sessionStorage.getItem('ozi-admin') === '1';
@@ -1684,6 +1685,12 @@ function publishEntry() {
     const title   = document.getElementById('w-title').value.trim();
     const content = document.getElementById('w-content').value.trim();
     if (!title || !content) { showToast('TITLE & CONTENT REQUIRED'); return; }
+    if (!firebaseUser) {
+        showToast('セッション切れ · 再ログインしてください');
+        closeWriter();
+        setTimeout(() => document.getElementById('auth-modal').style.display = 'flex', 400);
+        return;
+    }
 
     if (editingId) {
         const idx = entries.findIndex(x => x.id === editingId);
@@ -1913,6 +1920,11 @@ runTransaction(visitsRef, (current) => (current || 0) + 1)
     .catch(() => {
         document.getElementById('vc-num').textContent = '—';
     });
+
+// ── AUTH STATE ──
+onAuthStateChanged(auth, user => {
+    firebaseUser = user;
+});
 
 // ── REAL-TIME LISTENERS (Firebase) ──
 onValue(diaryRef, snap => {
