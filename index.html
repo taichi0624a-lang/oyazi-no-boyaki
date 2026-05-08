@@ -1329,12 +1329,11 @@ const lastReadRef = ref(db, 'lastread');
 // ── SAVE HELPERS ──
 function saveEntries() {
     if (!entries.length) return;
-    if (!auth.currentUser) { showToast('NOT AUTHENTICATED · RE-LOGIN'); return; }
     const obj = {};
     entries.forEach(e => { obj[String(e.id)] = e; });
     set(diaryRef, obj).catch(err => {
         console.error('Firebase write error:', err);
-        showToast('SAVE FAILED · ' + (err.code || 'ERROR'));
+        showToast('SAVE FAILED · ' + (err.code || 'CHECK LOGIN'));
     });
     localStorage.setItem('ozi-entries-backup', JSON.stringify(entries));
 }
@@ -1682,7 +1681,7 @@ function toggleTag(btn, tag) {
 function publishEntry() {
     const title   = document.getElementById('w-title').value.trim();
     const content = document.getElementById('w-content').value.trim();
-    if (!title || !content) { showToast('TITLE AND CONTENT REQUIRED'); return; }
+    if (!title || !content) { showToast('TITLE & CONTENT REQUIRED'); return; }
 
     if (editingId) {
         const idx = entries.findIndex(x => x.id === editingId);
