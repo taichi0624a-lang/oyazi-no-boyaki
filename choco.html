@@ -1090,15 +1090,14 @@ function renderPhotos() {
     getPhotos(e).forEach(src => allPhotos.push({src, title:e.title}));
   });
   const grid = document.getElementById('photo-grid');
-  const slots = Math.max(6, allPhotos.length + 3);
   let html = '';
-  for (let i=0;i<slots;i++) {
-    if (allPhotos[i]) {
-      const id = pmSet(allPhotos[i].src);
-      html += `<div class="pgcell"><img src="${allPhotos[i].src}" alt="${esc(allPhotos[i].title)}" data-pmid="${id}" class="lb-trigger" loading="lazy"></div>`;
-    } else {
-      html += `<div class="pgcell empty"><span class="ei">🐾</span><span class="el">PHOTO</span></div>`;
-    }
+  if (!allPhotos.length) {
+    html = '<div class="empty-st" style="grid-column:1/-1;">まだ写真がないよ ♥</div>';
+  } else {
+    allPhotos.forEach(p => {
+      const id = pmSet(p.src);
+      html += `<div class="pgcell"><img src="${p.src}" alt="${esc(p.title)}" data-pmid="${id}" class="lb-trigger" loading="lazy"></div>`;
+    });
   }
   grid.innerHTML = html;
 }
