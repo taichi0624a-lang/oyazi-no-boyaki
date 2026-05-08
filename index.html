@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -1681,7 +1681,27 @@ function toggleTag(btn, tag) {
     btn.classList.toggle('selected');
     selTags.includes(tag) ? selTags = selTags.filter(t => t !== tag) : selTags.push(tag);
 }
-function publishEntry() {
+function compressDataUrl(dataUrl, maxPx, quality) {
+    return new Promise(resolve => {
+        if (!dataUrl || !dataUrl.startsWith('data:image')) { resolve(dataUrl); return; }
+        const img = new Image();
+        img.onload = () => {
+            let w = img.width, h = img.height;
+            if (w > maxPx || h > maxPx) {
+                if (w >= h) { h = Math.round(h * maxPx / w); w = maxPx; }
+                else        { w = Math.round(w * maxPx / h); h = maxPx; }
+            }
+            const c = document.createElement('canvas');
+            c.width = w; c.height = h;
+            c.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(c.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+    });
+}
+
+async function publishEntry() {
     const title   = document.getElementById('w-title').value.trim();
     const content = document.getElementById('w-content').value.trim();
     if (!title || !content) { showToast('TITLE & CONTENT REQUIRED'); return; }
@@ -1692,27 +1712,33 @@ function publishEntry() {
         return;
     }
 
+    const btn = document.getElementById('w-pub');
+    btn.disabled = true; btn.textContent = '保存中...';
+
+    const photos = await Promise.all(entryPhotos.map(p => compressDataUrl(p, 1200, 0.80)));
+
     if (editingId) {
         const idx = entries.findIndex(x => x.id === editingId);
         if (idx !== -1) {
-            entries[idx] = { ...entries[idx], title, content, tags: [...selTags], photos: [...entryPhotos] };
+            entries[idx] = { ...entries[idx], title, content, tags: [...selTags], photos };
             saveEntries();
             closeWriter();
             renderFeatured();
             renderStrips();
             showToast('SAVED');
         }
+        btn.disabled = false;
         return;
     }
 
     const date = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' });
-    entries.unshift({ id: Date.now(), title, content, date, tags: [...selTags], photos: [...entryPhotos] });
+    entries.unshift({ id: Date.now(), title, content, date, tags: [...selTags], photos });
     saveEntries();
     closeWriter();
     renderDateline();
     renderFeatured();
     renderStrips();
-    showToast('PUBLISHED \u00b7 ' + entries.length + ' ENTRIES');
+    showToast('PUBLISHED');
 }
 
 // ── ENTRY PHOTOS ──
@@ -1725,7 +1751,23 @@ function renderEntryPhotoThumbs() {
 function handleEntryPhotoSelect(input) {
     Array.from(input.files).forEach(file => {
         const reader = new FileReader();
-        reader.onload = ev => { entryPhotos.push(ev.target.result); renderEntryPhotoThumbs(); };
+        reader.onload = ev => {
+            const img = new Image();
+            img.onload = () => {
+                const MAX = 1200;
+                let w = img.width, h = img.height;
+                if (w > MAX || h > MAX) {
+                    if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
+                    else        { w = Math.round(w * MAX / h); h = MAX; }
+                }
+                const c = document.createElement('canvas');
+                c.width = w; c.height = h;
+                c.getContext('2d').drawImage(img, 0, 0, w, h);
+                entryPhotos.push(c.toDataURL('image/jpeg', 0.80));
+                renderEntryPhotoThumbs();
+            };
+            img.src = ev.target.result;
+        };
         reader.readAsDataURL(file);
     });
     input.value = '';
