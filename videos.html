@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOOST | Video Archive</title>
     <link rel="icon" href="favicon.png" type="image/png">
+    <script>if(localStorage.getItem('ozi-theme')==='light'){document.documentElement.classList.add('light-mode')}</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
@@ -301,6 +302,45 @@
             #site-header { padding: 20px; }
             #video-grid { grid-template-columns: 1fr; }
         }
+
+        /* ── THEME TOGGLE ── */
+        .theme-toggle-btn {
+            background: transparent; border: 1px solid rgba(255,255,255,0.15);
+            color: var(--text-sub); width: 32px; height: 32px; border-radius: 50%;
+            font-size: 1rem; cursor: pointer; transition: 0.2s; line-height: 1;
+        }
+        .theme-toggle-btn:hover { border-color: var(--turq); color: var(--turq); }
+        body.light-mode .theme-toggle-btn, html.light-mode body .theme-toggle-btn { border-color: rgba(0,0,0,0.15); }
+
+        /* ── LIGHT MODE ── */
+        body.light-mode, html.light-mode body {
+            --bg: #f5f2ec; --text: #0e0d0c; --text-sub: #666;
+            --card-bg: rgba(0,0,0,0.03); --card-border: rgba(0,0,0,0.1); --rule: rgba(0,0,0,0.1);
+        }
+        body.light-mode, html.light-mode body { background: var(--bg); color: var(--text); }
+        body.light-mode #loader, html.light-mode body #loader { background: #f5f2ec; }
+        body.light-mode .loader-title, html.light-mode body .loader-title { color: #0e0d0c; }
+        body.light-mode .loader-bar, html.light-mode body .loader-bar { background: rgba(0,0,0,0.1); }
+        body.light-mode #site-header, html.light-mode body #site-header { background: linear-gradient(to bottom, rgba(245,242,236,0.98) 0%, transparent 100%); }
+        body.light-mode .hero-title, html.light-mode body .hero-title { color: #0e0d0c; }
+        body.light-mode .hero-num, html.light-mode body .hero-num { color: rgba(0,0,0,0.06); }
+        body.light-mode .tag-btn, html.light-mode body .tag-btn { color: #bbb; border-right-color: rgba(0,0,0,0.1); }
+        body.light-mode .tag-btn:hover, html.light-mode body .tag-btn:hover { color: #666; }
+        body.light-mode .tag-btn.active, html.light-mode body .tag-btn.active { color: var(--turq); }
+        body.light-mode .v-title, html.light-mode body .v-title { color: #0e0d0c; }
+        body.light-mode .v-card:hover, html.light-mode body .v-card:hover { box-shadow: 0 20px 60px rgba(0,0,0,0.12); }
+        body.light-mode #modal, html.light-mode body #modal { background: rgba(245,242,236,0.92); }
+        body.light-mode .modal-inner, html.light-mode body .modal-inner { background: #fff; border-color: rgba(0,0,0,0.1); }
+        body.light-mode .modal-title, html.light-mode body .modal-title { color: #0e0d0c; }
+        body.light-mode .modal-desc, html.light-mode body .modal-desc { color: #666; }
+        body.light-mode .modal-close, html.light-mode body .modal-close { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: #0e0d0c; }
+        body.light-mode #add-form, html.light-mode body #add-form { background: rgba(245,242,236,0.92); }
+        body.light-mode .form-inner, html.light-mode body .form-inner { background: #fff; border-color: rgba(0,0,0,0.1); }
+        body.light-mode .form-title, html.light-mode body .form-title { color: #0e0d0c; }
+        body.light-mode .form-input, body.light-mode .form-select, html.light-mode body .form-input, html.light-mode body .form-select { background: #f5f2ec; border-color: rgba(0,0,0,0.12); color: #0e0d0c; }
+        body.light-mode .form-select option, html.light-mode body .form-select option { background: #f5f2ec; color: #0e0d0c; }
+        body.light-mode .form-cancel, html.light-mode body .form-cancel { color: #666; border-color: rgba(0,0,0,0.15); }
+        body.light-mode .form-cancel:hover, html.light-mode body .form-cancel:hover { border-color: #0e0d0c; color: #0e0d0c; }
     </style>
 </head>
 <body>
@@ -315,6 +355,7 @@
 <header id="site-header">
     <a class="back-link" href="index.html">← DIARY</a>
     <span class="header-label">BOOST / VIDEO ARCHIVE</span>
+    <button class="theme-toggle-btn" onclick="toggleTheme()">◐</button>
 </header>
 
 <section id="hero">
@@ -646,6 +687,16 @@ function saveVideos(v) {
     window.addVideo = addVideo;
     window.removeVideo = removeVideo;
     window.filterTag = filterTag;
+
+    function toggleTheme() {
+        const isLight = document.body.classList.toggle('light-mode');
+        document.documentElement.classList.toggle('light-mode', isLight);
+        localStorage.setItem('ozi-theme', isLight ? 'light' : 'dark');
+    }
+    (function() {
+        if (localStorage.getItem('ozi-theme') === 'light') document.body.classList.add('light-mode');
+    })();
+    window.toggleTheme = toggleTheme;
 </script>
 </body>
 </html>

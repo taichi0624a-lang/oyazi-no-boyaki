@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Welcome to チョコの部屋</title>
+<script>if(localStorage.getItem('ozi-theme')==='dark'){document.documentElement.classList.add('dark-mode')}</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&family=Noto+Serif+JP:wght@700;900&family=DM+Serif+Display:ital@1&family=Space+Mono:wght@400&family=DM+Sans:wght@300;400&display=swap');
 
@@ -514,11 +515,93 @@ body.admin-mode #admin-badge { opacity: 1; }
   .fg { grid-template-columns:1fr; }
   .nav-btn { flex:0 0 50%; border-bottom:1px solid #e8c0cc; }
 }
+
+/* ── THEME TOGGLE BTN ── */
+.theme-toggle {
+  position: fixed; top: 16px; right: 16px; z-index: 1000;
+  background: #f9eef2; border: 1px solid #c08090; border-radius: 100px;
+  padding: 7px 14px; color: #6b2030; font-family: 'Space Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 2px; cursor: pointer;
+  transition: 0.2s; backdrop-filter: blur(8px);
+}
+.theme-toggle:hover { border-color: #9b4458; color: #9b4458; }
+
+/* ── DARK MODE ── */
+body.dark-mode, html.dark-mode body {
+  background-color: #1a0810;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ctext x='6' y='17' font-size='10' fill='%235a2030' opacity='0.5'%3E♥%3C/text%3E%3C/svg%3E");
+  color: #f0c0d0;
+}
+body.dark-mode #title-block, html.dark-mode body #title-block { background: #1a0810; border-color: #5a2030; }
+body.dark-mode .welcome-to, html.dark-mode body .welcome-to { color: #f0c0d0; }
+body.dark-mode .room-title, html.dark-mode body .room-title { color: #f0c0d0; }
+body.dark-mode .counter-num, html.dark-mode body .counter-num { background: #220e18; border-color: #5a2030; color: #f0c0d0; }
+body.dark-mode .counter-line, html.dark-mode body .counter-line { color: #8a5060; }
+body.dark-mode .sep, html.dark-mode body .sep { opacity: 0.4; }
+body.dark-mode #nav, html.dark-mode body #nav { background: #1a0810; border-color: #5a2030; }
+body.dark-mode .nav-btn, html.dark-mode body .nav-btn { color: #f0c0d0; border-color: #3a1020; }
+body.dark-mode .nav-btn:hover, body.dark-mode .nav-btn.active, html.dark-mode body .nav-btn:hover, html.dark-mode body .nav-btn.active { background: #2a1020; }
+body.dark-mode .nav-btn .nav-en, html.dark-mode body .nav-btn .nav-en { color: #8a4860; }
+body.dark-mode .panel, html.dark-mode body .panel { background: #220e18; border-color: #5a2030; }
+body.dark-mode .ptable tr, html.dark-mode body .ptable tr { border-color: #3a1020; }
+body.dark-mode .ptable .k, html.dark-mode body .ptable .k { color: #c08090; }
+body.dark-mode .di, html.dark-mode body .di { border-color: #3a1020; }
+body.dark-mode .di-txt, html.dark-mode body .di-txt { color: #c08090; }
+body.dark-mode .di-date, html.dark-mode body .di-date { color: #c08090; }
+body.dark-mode .di-tag, html.dark-mode body .di-tag { background: #2a1020; border-color: #5a2030; color: #c08090; }
+body.dark-mode .di-del, html.dark-mode body .di-del { color: #5a2030; }
+body.dark-mode .di-del:hover, html.dark-mode body .di-del:hover { color: #c08090; }
+body.dark-mode .di-photos img, html.dark-mode body .di-photos img { border-color: #3a1020; }
+body.dark-mode .pgcell, html.dark-mode body .pgcell { background: #220e18; border-color: #3a1020; }
+body.dark-mode .pgcell .el, html.dark-mode body .pgcell .el { color: #5a2030; }
+body.dark-mode .friend-card, html.dark-mode body .friend-card { background: #220e18; border-color: #3a1020; }
+body.dark-mode .friend-card:hover, html.dark-mode body .friend-card:hover { border-color: #9b4458; }
+body.dark-mode .friend-card-photo, html.dark-mode body .friend-card-photo { background: #1a0810; }
+body.dark-mode .friend-card-name, html.dark-mode body .friend-card-name { color: #f0c0d0; }
+body.dark-mode .friend-card-memo, html.dark-mode body .friend-card-memo { color: #c08090; }
+body.dark-mode .friend-add-card, html.dark-mode body .friend-add-card { background: #1a0810; border-color: #3a1020; color: #5a2030; }
+body.dark-mode .friend-add-card:hover, html.dark-mode body .friend-add-card:hover { border-color: #9b4458; color: #9b4458; }
+body.dark-mode .add-btn, html.dark-mode body .add-btn { background: #220e18; border-color: #5a2030; color: #c08090; }
+body.dark-mode .add-btn:hover, html.dark-mode body .add-btn:hover { background: #2a1020; }
+body.dark-mode .fr input, body.dark-mode .fr textarea, body.dark-mode .fr select, html.dark-mode body .fr input, html.dark-mode body .fr textarea, html.dark-mode body .fr select { background: #1a0810; border-color: #5a2030; color: #f0c0d0; }
+body.dark-mode .fr input:focus, body.dark-mode .fr textarea:focus, html.dark-mode body .fr input:focus, html.dark-mode body .fr textarea:focus { border-color: #9b4458; }
+body.dark-mode .fsub, html.dark-mode body .fsub { background: #9b4458; }
+body.dark-mode .fsub:hover, html.dark-mode body .fsub:hover { background: #c06878; }
+body.dark-mode #photo-pick-btn, html.dark-mode body #photo-pick-btn { background: #1a0810; border-color: #5a2030; color: #c08090; }
+body.dark-mode #photo-pick-label:hover #photo-pick-btn, html.dark-mode body #photo-pick-label:hover #photo-pick-btn { background: #220e18; }
+body.dark-mode .preview-thumb, html.dark-mode body .preview-thumb { border-color: #3a1020; }
+body.dark-mode #footer, html.dark-mode body #footer { background: #220e18; border-color: #5a2030; }
+body.dark-mode .fb, html.dark-mode body .fb { color: #f0c0d0; }
+body.dark-mode .fl2 a, html.dark-mode body .fl2 a { color: #8a4860; }
+body.dark-mode .fl2 a:hover, html.dark-mode body .fl2 a:hover { color: #f0c0d0; }
+body.dark-mode .empty-st, html.dark-mode body .empty-st { color: #5a2030; }
+body.dark-mode .back-to-diary, html.dark-mode body .back-to-diary { background: #1a0810; border-color: #5a2030; color: #f0c0d0; }
+body.dark-mode .theme-toggle, html.dark-mode body .theme-toggle { background: #1a0810; border-color: #5a2030; color: #c08090; }
+body.dark-mode #main-img-wrap, html.dark-mode body #main-img-wrap { border-color: #5a2030; background: #1a0810; }
+body.dark-mode #main-img-placeholder, html.dark-mode body #main-img-placeholder { background: linear-gradient(160deg, #2a1020 0%, #1a0810 50%, #140610 100%); }
+body.dark-mode #img-change-btn, html.dark-mode body #img-change-btn { background: #220e18; border-color: #5a2030; color: #c08090; }
+body.dark-mode #img-change-btn:hover, html.dark-mode body #img-change-btn:hover { background: #2a1020; }
+body.dark-mode #img-url-input input, html.dark-mode body #img-url-input input { background: #1a0810; border-color: #5a2030; color: #f0c0d0; }
+body.dark-mode #lb, html.dark-mode body #lb { background: rgba(26,8,16,0.97); }
+body.dark-mode #lb-img, html.dark-mode body #lb-img { border-color: #5a2030; }
+body.dark-mode #lb-x, html.dark-mode body #lb-x { background: #220e18; border-color: #5a2030; color: #f0c0d0; }
+body.dark-mode .lb-arrow, html.dark-mode body .lb-arrow { background: #220e18; border-color: #5a2030; color: #c08090; }
+body.dark-mode .lb-arrow:hover, html.dark-mode body .lb-arrow:hover { background: #2a1020; }
+body.dark-mode #lb-counter, html.dark-mode body #lb-counter { background: #220e18; border-color: #3a1020; color: #c08090; }
+body.dark-mode #op-overlay, html.dark-mode body #op-overlay {
+  background: #1a0810;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ctext x='6' y='17' font-size='10' fill='%235a2030' opacity='0.5'%3E♥%3C/text%3E%3C/svg%3E");
+}
+body.dark-mode #op-title .op-welcome, html.dark-mode body #op-title .op-welcome { color: #c08090; }
+body.dark-mode #op-title .op-name, html.dark-mode body #op-title .op-name { color: #f0c0d0; }
+body.dark-mode #op-skip, html.dark-mode body #op-skip { color: #5a2030; border-color: #3a1020; }
+body.dark-mode #op-skip:hover, html.dark-mode body #op-skip:hover { color: #c08090; border-color: #c08090; }
 </style>
 </head>
 <body>
 
 <a href="/" class="back-to-diary">← DIARY</a>
+<button class="theme-toggle" onclick="toggleTheme()">◐</button>
 
 <div id="lb">
   <button id="lb-x">CLOSE ✕</button>
@@ -1200,6 +1283,16 @@ window.addFriend       = addFriend;
 window.deleteFriend    = deleteFriend;
 window.lbNav           = lbNav;
 window.lbClose         = lbClose;
+
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark-mode');
+  document.documentElement.classList.toggle('dark-mode', isDark);
+  localStorage.setItem('ozi-theme', isDark ? 'dark' : 'light');
+}
+(function() {
+  if (localStorage.getItem('ozi-theme') === 'dark') document.body.classList.add('dark-mode');
+})();
+window.toggleTheme = toggleTheme;
 </script>
 </body>
 </html>
