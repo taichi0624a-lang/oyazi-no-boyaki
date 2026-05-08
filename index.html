@@ -1328,10 +1328,14 @@ const lastReadRef = ref(db, 'lastread');
 
 // ── SAVE HELPERS ──
 function saveEntries() {
-    if (!entries.length) return; // 空の時は絶対に書き込まない
+    if (!entries.length) return;
+    if (!auth.currentUser) { showToast('NOT AUTHENTICATED · RE-LOGIN'); return; }
     const obj = {};
     entries.forEach(e => { obj[String(e.id)] = e; });
-    set(diaryRef, obj);
+    set(diaryRef, obj).catch(err => {
+        console.error('Firebase write error:', err);
+        showToast('SAVE FAILED · ' + (err.code || 'ERROR'));
+    });
     localStorage.setItem('ozi-entries-backup', JSON.stringify(entries));
 }
 function savePhotos() {
