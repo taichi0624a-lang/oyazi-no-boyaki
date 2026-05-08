@@ -818,30 +818,6 @@ body {
 }
 #toast.show { opacity: 1; transform: translateY(0); }
 
-/* ─── ONLINE BADGE ─── */
-#online-badge {
-    position: fixed; bottom: 24px; left: 24px;
-    z-index: 400;
-    display: flex; align-items: center; gap: 8px;
-    background: var(--paper);
-    border: 1px solid var(--rule);
-    padding: 7px 13px;
-    opacity: 0; transition: opacity 0.5s;
-    pointer-events: none;
-}
-#online-badge.show { opacity: 1; }
-.o-dot {
-    width: 5px; height: 5px; border-radius: 50%;
-    background: #27864a;
-    box-shadow: 0 0 6px rgba(39,134,74,0.55);
-    animation: pulse-dot 2s infinite;
-}
-@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.2} }
-.o-txt {
-    font-family: 'Space Mono', monospace;
-    font-size: 8px; letter-spacing: 2px; color: var(--dim);
-}
-
 /* ─── EMPTY ARC CARD ─── */
 .arc-empty { pointer-events: none; }
 
@@ -1206,11 +1182,6 @@ body {
 
 </div>
 
-<!-- ONLINE BADGE -->
-<div id="online-badge">
-    <div class="o-dot"></div>
-    <span class="o-txt"><span id="online-num">—</span>&nbsp;NOW ONLINE</span>
-</div>
 
 <!-- TOAST -->
 <div id="toast"></div>
@@ -2003,21 +1974,6 @@ window.addEventListener('scroll', () => {
     document.getElementById('read-progress').style.width = max > 0 ? (scrolled / max * 100) + '%' : '0%';
 }, { passive: true });
 
-// ── ONLINE PRESENCE (Firebase) ──
-(function() {
-    const presenceBase = ref(db, 'presence');
-    const myKey = Date.now().toString(36) + '_' + Math.random().toString(36).slice(2);
-    const myRef = ref(db, 'presence/' + myKey);
-
-    set(myRef, { t: serverTimestamp() });
-    onDisconnect(myRef).remove();
-
-    onValue(presenceBase, snap => {
-        const count = snap.val() ? Object.keys(snap.val()).length : 1;
-        document.getElementById('online-num').textContent = count;
-        document.getElementById('online-badge').classList.add('show');
-    });
-})();
 
 // ── VISITOR COUNTER (Firebase) ──
 runTransaction(visitsRef, (current) => (current || 0) + 1)
