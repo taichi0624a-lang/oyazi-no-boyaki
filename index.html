@@ -1645,7 +1645,8 @@ function openWriter() {
     document.getElementById('w-content').value = '';
     document.getElementById('w-chars').textContent = '0 CHARS';
     document.getElementById('wm-lbl').textContent  = 'NEW ENTRY';
-    document.getElementById('w-pub').textContent   = 'PUBLISH \u2192';
+    const _pb = document.getElementById('w-pub');
+    _pb.textContent = 'PUBLISH \u2192'; _pb.disabled = false;
     selTags = [];
     document.querySelectorAll('.tag-opt').forEach(b => b.classList.remove('selected'));
     renderEntryPhotoThumbs();
@@ -1662,7 +1663,8 @@ function openEditor(id) {
     document.getElementById('w-content').value = e.content;
     document.getElementById('w-chars').textContent = e.content.length + ' CHARS';
     document.getElementById('wm-lbl').textContent  = 'EDIT ENTRY';
-    document.getElementById('w-pub').textContent   = 'SAVE \u2192';
+    const _pb2 = document.getElementById('w-pub');
+    _pb2.textContent = 'SAVE \u2192'; _pb2.disabled = false;
     selTags = [...(e.tags || [])];
     document.querySelectorAll('.tag-opt').forEach(b => {
         b.classList.toggle('selected', selTags.includes(b.textContent));
@@ -1735,6 +1737,7 @@ async function publishEntry() {
     entries.unshift({ id: Date.now(), title, content, date, tags: [...selTags], photos });
     saveEntries();
     closeWriter();
+    btn.disabled = false;
     renderDateline();
     renderFeatured();
     renderStrips();
