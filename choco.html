@@ -324,62 +324,6 @@ body.admin-mode #admin-badge { opacity: 1; }
   display: block;
 }
 
-/* ── TOMODACHI ZUKAN ── */
-.friend-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 10px;
-}
-.friend-card {
-  border: 2px solid #e8c0cc;
-  background: #fff;
-  overflow: hidden;
-  transition: border-color 0.18s;
-}
-.friend-card:hover { border-color: #9b4458; }
-.friend-card-photo {
-  width: 100%; aspect-ratio: 1;
-  background: #f9eef2;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden; cursor: pointer;
-}
-.friend-card-photo img { width:100%; height:100%; object-fit:cover; display:block; }
-.friend-card-photo .no-photo { font-size: 2.2rem; opacity: 0.25; }
-.friend-card-info { padding: 8px 10px; }
-.friend-card-name {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 0.88rem; font-weight: 700;
-  color: #3a2030; margin-bottom: 2px;
-}
-.friend-card-type {
-  font-family: 'Space Mono', monospace;
-  font-size: 7px; letter-spacing: 1px; color: #c08090;
-  margin-bottom: 4px;
-}
-.friend-card-memo {
-  font-size: 0.72rem; color: #7a5060;
-  line-height: 1.5; font-weight: 300;
-}
-.friend-card-del {
-  display: block; margin-top: 6px;
-  background: transparent; border: none;
-  font-family: 'Space Mono', monospace;
-  font-size: 7px; letter-spacing: 2px;
-  color: #e8c0cc; cursor: pointer;
-  transition: color 0.15s; padding: 0;
-}
-.friend-card-del:hover { color: #9b4458; }
-.friend-add-card {
-  border: 2px dashed #e8c0cc;
-  background: #f9eef2;
-  display: flex; align-items: center; justify-content: center;
-  aspect-ratio: 1; cursor: pointer;
-  font-size: 1.6rem; color: #e8c0cc;
-  transition: border-color 0.18s, color 0.18s;
-  min-height: 140px;
-}
-.friend-add-card:hover { border-color: #9b4458; color: #9b4458; }
-
 /* ── EMPTY ── */
 .empty-st { text-align:center; padding:28px 0; font-family:'Space Mono',monospace; font-size:8px; letter-spacing:2px; color:#e8c0cc; }
 
@@ -554,13 +498,6 @@ body.dark-mode .di-del:hover, html.dark-mode body .di-del:hover { color: #c08090
 body.dark-mode .di-photos img, html.dark-mode body .di-photos img { border-color: #3a1020; }
 body.dark-mode .pgcell, html.dark-mode body .pgcell { background: #220e18; border-color: #3a1020; }
 body.dark-mode .pgcell .el, html.dark-mode body .pgcell .el { color: #5a2030; }
-body.dark-mode .friend-card, html.dark-mode body .friend-card { background: #220e18; border-color: #3a1020; }
-body.dark-mode .friend-card:hover, html.dark-mode body .friend-card:hover { border-color: #9b4458; }
-body.dark-mode .friend-card-photo, html.dark-mode body .friend-card-photo { background: #1a0810; }
-body.dark-mode .friend-card-name, html.dark-mode body .friend-card-name { color: #f0c0d0; }
-body.dark-mode .friend-card-memo, html.dark-mode body .friend-card-memo { color: #c08090; }
-body.dark-mode .friend-add-card, html.dark-mode body .friend-add-card { background: #1a0810; border-color: #3a1020; color: #5a2030; }
-body.dark-mode .friend-add-card:hover, html.dark-mode body .friend-add-card:hover { border-color: #9b4458; color: #9b4458; }
 body.dark-mode .add-btn, html.dark-mode body .add-btn { background: #220e18; border-color: #5a2030; color: #c08090; }
 body.dark-mode .add-btn:hover, html.dark-mode body .add-btn:hover { background: #2a1020; }
 body.dark-mode .fr input, body.dark-mode .fr textarea, body.dark-mode .fr select, html.dark-mode body .fr input, html.dark-mode body .fr textarea, html.dark-mode body .fr select { background: #1a0810; border-color: #5a2030; color: #f0c0d0; }
@@ -649,7 +586,6 @@ body.dark-mode #op-skip:hover, html.dark-mode body #op-skip:hover { color: #c080
     <button class="nav-btn active" onclick="switchTab('intro',this)">はじめまして<span class="nav-en">INTRO</span></button>
     <button class="nav-btn" onclick="switchTab('diary',this)">日記帳<span class="nav-en">DIARY</span></button>
     <button class="nav-btn" onclick="switchTab('photos',this)">アルバム<span class="nav-en">PHOTOS</span></button>
-    <button class="nav-btn" onclick="switchTab('stats',this)">お友達図鑑<span class="nav-en">FRIENDS</span></button>
   </div>
 
   <!-- INTRO -->
@@ -725,46 +661,6 @@ body.dark-mode #op-skip:hover, html.dark-mode body #op-skip:hover { color: #c080
     </div>
   </div>
 
-  <!-- FRIENDS -->
-  <div class="section" id="tab-stats">
-    <div class="panel">
-      <div class="panel-hd">♥ お友達図鑑</div>
-      <div class="panel-bd">
-
-        <!-- 追加フォーム（管理者のみ） -->
-        <div id="friend-form" style="display:none; margin-bottom:16px;">
-          <div class="fg">
-            <div class="fr"><label class="fl">なまえ</label><input type="text" id="ff-name" placeholder="ポチ"></div>
-            <div class="fr"><label class="fl">TYPE</label>
-              <select id="ff-type">
-                <option value="🐶 いぬ">🐶 いぬ</option>
-                <option value="🐱 ねこ">🐱 ねこ</option>
-                <option value="🐰 うさぎ">🐰 うさぎ</option>
-                <option value="👤 ひと">👤 ひと</option>
-                <option value="🐾 その他">🐾 その他</option>
-              </select>
-            </div>
-          </div>
-          <div class="fr"><label class="fl">MEMO</label><input type="text" id="ff-memo" placeholder="よく公園で会う・人懐っこい など"></div>
-          <div class="fr">
-            <label class="fl">PHOTO</label>
-            <label style="cursor:pointer;">
-              <input type="file" id="ff-photo" accept="image/*" style="display:none;" onchange="friendPhotoPreview(this)">
-              <span id="ff-photo-btn" style="display:block;width:100%;background:#fffafc;border:1px dashed #e8c0cc;color:#9b4458;font-family:'Noto Serif JP',serif;font-size:0.82rem;padding:9px;text-align:center;">🐾 写真を選ぶ</span>
-            </label>
-            <img id="ff-preview" src="" alt="" style="display:none;width:80px;height:80px;object-fit:cover;border:1px solid #e8c0cc;margin-top:6px;">
-          </div>
-          <div style="display:flex;gap:8px;">
-            <button class="fsub" onclick="addFriend()">追加する ♥</button>
-            <button onclick="document.getElementById('friend-form').style.display='none'" style="background:transparent;border:1px solid #e8c0cc;color:#c08090;font-family:'Noto Serif JP',serif;font-size:0.8rem;padding:10px 16px;cursor:pointer;">キャンセル</button>
-          </div>
-        </div>
-
-        <div class="friend-grid" id="friend-grid"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- SEP -->
   <div class="sep"></div>
 
@@ -824,11 +720,9 @@ const auth = getAuth(chocoApp);
 const diaryRef   = ref(db, 'choco/diary');
 const hitsRef    = ref(db, 'choco/hits');
 const mainImgRef = ref(db, 'choco/mainImg');
-const friendsRef = ref(db, 'choco/friends');
 
 // ローカル状態
 let diaryEntries = [];
-let friendsList  = [];
 
 function saveEntries() {
   if (!diaryEntries.length) return;
@@ -836,12 +730,6 @@ function saveEntries() {
   diaryEntries.forEach((e, i) => { obj[String(i)] = e; });
   set(diaryRef, obj);
 }
-function saveFriends() {
-  const obj = {};
-  friendsList.forEach((f, i) => { obj[String(i)] = f; });
-  set(friendsRef, friendsList.length ? obj : null);
-}
-
 const MOODS = {散歩:'🌿',食事:'🍖',睡眠:'😴',あそび:'🎾',病院:'💉',観察:'🐾','その他':'♥'};
 
 // ── OP ANIMATION ──
@@ -1101,75 +989,6 @@ function renderPhotos() {
   }
   grid.innerHTML = html;
 }
-// ── FRIENDS ──
-let friendPhotoData = null;
-
-function friendPhotoPreview(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    friendPhotoData = e.target.result;
-    const prev = document.getElementById('ff-preview');
-    prev.src = friendPhotoData;
-    prev.style.display = 'block';
-    document.getElementById('ff-photo-btn').textContent = '✓ 写真を選択済み';
-  };
-  reader.readAsDataURL(file);
-}
-
-function addFriend() {
-  const name = document.getElementById('ff-name').value.trim();
-  if (!name) { alert('なまえを入力してね'); return; }
-  const type  = document.getElementById('ff-type').value;
-  const memo  = document.getElementById('ff-memo').value.trim();
-  const photo = friendPhotoData || '';
-  friendsList.push({ name, type, memo, photo, date: new Date().toISOString() });
-  saveFriends();
-  document.getElementById('ff-name').value = '';
-  document.getElementById('ff-memo').value = '';
-  document.getElementById('ff-photo').value = '';
-  document.getElementById('ff-preview').style.display = 'none';
-  document.getElementById('ff-photo-btn').textContent = '🐾 写真を選ぶ';
-  document.getElementById('friend-form').style.display = 'none';
-  friendPhotoData = null;
-  renderFriends();
-}
-
-function deleteFriend(i) {
-  if (!confirm('この友達を削除しますか？')) return;
-  friendsList.splice(i, 1);
-  saveFriends();
-  renderFriends();
-}
-
-function renderFriends() {
-  const friends = friendsList;
-  const grid = document.getElementById('friend-grid');
-  let html = friends.map((f, i) => {
-    const photoHtml = f.photo
-      ? `<div class="friend-card-photo"><img src="${f.photo}" alt="${esc(f.name)}" data-pmid="${pmSet(f.photo)}" class="lb-trigger"></div>`
-      : `<div class="friend-card-photo"><span class="no-photo">🐾</span></div>`;
-    return `<div class="friend-card">
-      ${photoHtml}
-      <div class="friend-card-info">
-        <div class="friend-card-name">${esc(f.name)}</div>
-        <div class="friend-card-type">${esc(f.type)}</div>
-        ${f.memo ? `<div class="friend-card-memo">${esc(f.memo)}</div>` : ''}
-        <button class="friend-card-del admin-only" onclick="deleteFriend(${i})">✕ 削除</button>
-      </div>
-    </div>`;
-  }).join('');
-  // 管理者モード時は「追加」カードを末尾に
-  html += `<div class="friend-add-card admin-only" onclick="document.getElementById('friend-form').style.display='block'">＋</div>`;
-  grid.innerHTML = html;
-  if (!friends.length) {
-    grid.innerHTML += `<div class="empty-st" style="grid-column:1/-1;">まだお友達がいないよ ♥<br>散歩で出会ったこを追加しよう</div>`;
-  }
-}
-
-function renderStats() { renderFriends(); }
-
 // ── BIRTHDAY ──
 (function(){
   const birthday = null; // 例: '2020-05-15'
@@ -1252,19 +1071,13 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape')     lbClose();
 });
 
-function renderAll() { renderDiary(); renderPhotos(); renderFriends(); }
+function renderAll() { renderDiary(); renderPhotos(); }
 
 // ── FIREBASE リスナー ──
 onValue(diaryRef, snap => {
   const data = snap.val();
   diaryEntries = data ? Object.values(data).sort((a, b) => new Date(a.date) - new Date(b.date)) : [];
   renderDiary(); renderPhotos();
-});
-
-onValue(friendsRef, snap => {
-  const data = snap.val();
-  friendsList = data ? Object.values(data) : [];
-  renderFriends();
 });
 
 // ── GLOBAL EXPORTS (onclick から呼べるように) ──
@@ -1277,9 +1090,6 @@ window.deleteEntry     = deleteEntry;
 window.switchTab       = switchTab;
 window.toggleImgInput  = toggleImgInput;
 window.setMainImg      = setMainImg;
-window.friendPhotoPreview = friendPhotoPreview;
-window.addFriend       = addFriend;
-window.deleteFriend    = deleteFriend;
 window.lbNav           = lbNav;
 window.lbClose         = lbClose;
 
