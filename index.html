@@ -720,9 +720,33 @@ body {
 .s-entry-photos.ph-many { grid-template-columns: repeat(3, 1fr); }
 .s-entry-photos img { width: 100%; height: 200px; object-fit: cover; display: block; cursor: zoom-in; }
 .s-entry-photos.ph-1 img { height: 320px; }
-#ep-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.93); z-index: 99998; display: none; align-items: center; justify-content: center; cursor: zoom-out; }
+#ep-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.93); z-index: 99998; display: none; align-items: center; justify-content: center; }
 #ep-lightbox.active { display: flex; }
-#ep-lightbox img { max-width: 94vw; max-height: 94vh; object-fit: contain; }
+#ep-lightbox img { max-width: 90vw; max-height: 86vh; object-fit: contain; cursor: default; user-select: none; }
+#ep-lb-prev, #ep-lb-next {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+    color: #fff; font-size: 1.6rem; width: 44px; height: 44px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s; z-index: 1; line-height: 1;
+}
+#ep-lb-prev { left: 16px; }
+#ep-lb-next { right: 16px; }
+#ep-lb-prev:hover, #ep-lb-next:hover { background: rgba(255,255,255,0.22); }
+#ep-lb-prev[hidden], #ep-lb-next[hidden] { display: none; }
+#ep-lb-close {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+    color: #fff; font-size: 0.85rem; width: 36px; height: 36px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s; z-index: 1;
+}
+#ep-lb-close:hover { background: rgba(255,255,255,0.22); }
+#ep-lb-counter {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 3px;
+    color: rgba(255,255,255,0.5); pointer-events: none;
+}
 
 /* ─── CHIC LOADER (O24-era cinematic) ─── */
 #chic-loader {
@@ -1246,8 +1270,12 @@ body {
 </div>
 
 <!-- ENTRY PHOTO LIGHTBOX -->
-<div id="ep-lightbox" onclick="this.classList.remove('active')">
-    <img id="ep-lb-img" src="" alt="">
+<div id="ep-lightbox" onclick="document.getElementById('ep-lightbox').classList.remove('active')">
+    <button id="ep-lb-prev" onclick="epLbNav(-1);event.stopPropagation()">&#8249;</button>
+    <img id="ep-lb-img" src="" alt="" onclick="event.stopPropagation()">
+    <button id="ep-lb-next" onclick="epLbNav(1);event.stopPropagation()">&#8250;</button>
+    <button id="ep-lb-close" onclick="document.getElementById('ep-lightbox').classList.remove('active');event.stopPropagation()">&#x2715;</button>
+    <div id="ep-lb-counter"></div>
 </div>
 
 <!-- AUTH MODAL -->
@@ -1541,7 +1569,7 @@ function renderStrips() {
                         ${(e.photos && e.photos.length) ? (() => {
                             const n = e.photos.length;
                             const cls = n===1?'ph-1':n===2?'ph-2':n===3?'ph-3':'ph-many';
-                            return `<div class="s-entry-photos ${cls}">${e.photos.map(src=>`<img src="${src}" onclick="openEntryPhoto(this.src);event.stopPropagation()">`).join('')}</div>`;
+                            return `<div class="s-entry-photos ${cls}">${e.photos.map((src,pi)=>`<img src="${src}" onclick="openEntryPhoto(${e.id},${pi});event.stopPropagation()">`).join('')}</div>`;
                         })() : ''}
                         <div class="s-body-meta">
                             <div class="s-body-tags-full">${bodyTags}</div>
@@ -1779,9 +1807,25 @@ function removeEntryPhoto(i) {
     entryPhotos.splice(i, 1);
     renderEntryPhotoThumbs();
 }
-function openEntryPhoto(src) {
-    document.getElementById('ep-lb-img').src = src;
+let _epPhotos = [], _epIdx = 0;
+function openEntryPhoto(entryId, idx) {
+    const e = entries.find(x => x.id === entryId);
+    if (!e || !e.photos || !e.photos.length) return;
+    _epPhotos = e.photos;
+    _epIdx = idx;
+    _renderEpLb();
     document.getElementById('ep-lightbox').classList.add('active');
+}
+function _renderEpLb() {
+    document.getElementById('ep-lb-img').src = _epPhotos[_epIdx];
+    const n = _epPhotos.length;
+    document.getElementById('ep-lb-counter').textContent = n > 1 ? (_epIdx + 1) + ' / ' + n : '';
+    document.getElementById('ep-lb-prev').hidden = _epIdx === 0;
+    document.getElementById('ep-lb-next').hidden = _epIdx === n - 1;
+}
+function epLbNav(dir) {
+    _epIdx = Math.max(0, Math.min(_epPhotos.length - 1, _epIdx + dir));
+    _renderEpLb();
 }
 
 // ── SEARCH ──
@@ -1908,6 +1952,12 @@ function closeLightbox() {
 
 // ── KEYBOARD ──
 document.addEventListener('keydown', e => {
+    const epLb = document.getElementById('ep-lightbox');
+    if (epLb.classList.contains('active')) {
+        if (e.key === 'ArrowLeft')  { epLbNav(-1); return; }
+        if (e.key === 'ArrowRight') { epLbNav(1);  return; }
+        if (e.key === 'Escape')     { epLb.classList.remove('active'); return; }
+    }
     if (e.key === 'Escape') {
         if (document.getElementById('lightbox').classList.contains('active'))           closeLightbox();
         else if (document.getElementById('photo-modal').classList.contains('active'))   closePhotoUpload();
@@ -1927,6 +1977,19 @@ document.addEventListener('keydown', e => {
         konamiIdx = e.key === KONAMI[0] ? 1 : 0;
     }
 });
+
+// ── ENTRY LIGHTBOX SWIPE ──
+(function() {
+    let _tx = null;
+    const el = document.getElementById('ep-lightbox');
+    el.addEventListener('touchstart', e => { _tx = e.touches[0].clientX; }, { passive: true });
+    el.addEventListener('touchend', e => {
+        if (_tx === null) return;
+        const dx = e.changedTouches[0].clientX - _tx;
+        if (Math.abs(dx) > 44) epLbNav(dx < 0 ? 1 : -1);
+        _tx = null;
+    });
+})();
 
 // Compatibility aliases
 function openEntryById(id) { openStrip(id); }
@@ -2070,7 +2133,7 @@ Object.assign(window, {
     publishPhoto, deletePhoto, openLightbox, closeLightbox,
     openEntryById, openStrip, closeReadModal, scrollToSection,
     deleteEntry, toggleStrip,
-    handleEntryPhotoSelect, removeEntryPhoto, openEntryPhoto
+    handleEntryPhotoSelect, removeEntryPhoto, openEntryPhoto, epLbNav
 });
 </script>
 </body>
