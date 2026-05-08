@@ -1329,13 +1329,14 @@ const lastReadRef = ref(db, 'lastread');
 // ── SAVE HELPERS ──
 function saveEntries() {
     if (!entries.length) return;
+    localStorage.setItem('ozi-entries-backup', JSON.stringify(entries));
+    if (!firebaseLoaded) return; // Firebase未接続時は上書きしない
     const obj = {};
     entries.forEach(e => { obj[String(e.id)] = e; });
     set(diaryRef, obj).catch(err => {
         console.error('Firebase write error:', err);
         showToast('SAVE FAILED · ' + (err.code || 'CHECK LOGIN'));
     });
-    localStorage.setItem('ozi-entries-backup', JSON.stringify(entries));
 }
 function savePhotos() {
     const obj = {};
@@ -1363,6 +1364,7 @@ let editingId  = null;
 let photos = [];
 let pendingPhotoSrc = null;
 let entryPhotos = [];
+let firebaseLoaded = false;
 
 // ── ADMIN ──
 let isAdmin = sessionStorage.getItem('ozi-admin') === '1';
@@ -1914,6 +1916,7 @@ runTransaction(visitsRef, (current) => (current || 0) + 1)
 
 // ── REAL-TIME LISTENERS (Firebase) ──
 onValue(diaryRef, snap => {
+    firebaseLoaded = true;
     const data = snap.val();
     if (data) {
         entries = Object.values(data).sort((a, b) => b.id - a.id);
@@ -1985,6 +1988,18 @@ function toggleTheme() {
 })();
 
 // ── INIT ──
+// localStorageバックアップから即時プレロード（Firebaseの応答を待たずに表示）
+(function() {
+    const backup = localStorage.getItem('ozi-entries-backup');
+    if (backup) {
+        try {
+            entries = JSON.parse(backup).sort((a, b) => b.id - a.id);
+            renderFeatured();
+            renderStrips();
+            renderContinue();
+        } catch(e) {}
+    }
+})();
 renderDateline();
 applyAdminState();
 
