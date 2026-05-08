@@ -3,6 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="愛犬チョコの観察日誌とアルバム。">
+<meta property="og:title" content="チョコの部屋">
+<meta property="og:description" content="愛犬チョコの観察日誌とアルバム。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kodomo-no-boyaki.com/choco.html">
+<meta property="og:image" content="https://kodomo-no-boyaki.com/choco-main.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="チョコの部屋">
+<meta name="twitter:image" content="https://kodomo-no-boyaki.com/choco-main.jpg">
 <title>Welcome to チョコの部屋</title>
 <script>if(localStorage.getItem('ozi-theme')==='dark'){document.documentElement.classList.add('dark-mode')}</script>
 <style>
@@ -453,11 +462,15 @@ body.admin-mode #admin-badge { opacity: 1; }
 #lb-prev { left:4vw; }
 #lb-next { right:4vw; }
 
+@media (max-width:600px) {
+  #frame { padding: 16px 12px 40px; }
+  .nav-btn { min-height: 44px; padding: 12px 6px; }
+}
 @media (max-width:480px) {
   .srow { grid-template-columns:repeat(2,1fr); }
   .pgrid { grid-template-columns:repeat(2,1fr); }
   .fg { grid-template-columns:1fr; }
-  .nav-btn { flex:0 0 50%; border-bottom:1px solid #e8c0cc; }
+  .nav-btn { flex:0 0 50%; border-bottom:1px solid #e8c0cc; min-height:44px; padding:12px 6px; }
 }
 
 /* ── THEME TOGGLE BTN ── */

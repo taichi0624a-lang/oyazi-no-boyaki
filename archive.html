@@ -3,6 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="観た映画の記録。感想、スコア、ポスター。">
+    <meta property="og:title" content="drop off | 映画アーカイブ">
+    <meta property="og:description" content="観た映画の記録。感想、スコア、ポスター。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://kodomo-no-boyaki.com/archive.html">
+    <meta property="og:image" content="https://kodomo-no-boyaki.com/choco-main.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="drop off | 映画アーカイブ">
+    <meta name="twitter:image" content="https://kodomo-no-boyaki.com/choco-main.jpg">
     <title>drop off</title>
     <link rel="icon" href="favicon.png" type="image/png">
     <link rel="apple-touch-icon" href="favicon.png">
@@ -171,15 +180,20 @@
 
         /* ── スマホ ── */
         @media (max-width:600px) {
-            #app-wrapper { padding:40px 15px 100px; }
+            #app-wrapper { padding:40px 15px 100px 15px; }
             .brand-logo { font-size:3.5rem; margin-bottom:30px; letter-spacing:10px; }
-            .gallery-grid { grid-template-columns:repeat(2,1fr); gap:15px; }
+            .gallery-grid { grid-template-columns:repeat(2,1fr); gap:10px; }
             .c-info { padding:10px 0; }
             .c-title { font-size:0.85rem; height:2.6em; }
-            .back-to-diary { top:15px; left:15px; font-size:0; padding:10px 14px; }
+            .back-to-diary { top:15px; left:15px; font-size:0; padding:12px 16px; min-height:44px; min-width:44px; }
             .back-to-diary::before { content:'←'; font-size:0.9rem; }
-            .theme-toggle { top:15px; right:15px; font-size:0; padding:10px 14px; }
+            .theme-toggle { top:15px; right:15px; font-size:0; padding:12px 16px; min-height:44px; min-width:44px; }
             .theme-toggle::before { content:'◐'; font-size:0.9rem; }
+            #director-panel { width:100%; height:80vh; top:auto; bottom:0; right:0; border-left:none; border-top:1px solid rgba(255,255,255,0.08); transform:translateY(100%); border-radius:16px 16px 0 0; }
+            #director-panel.open { transform:translateY(0); }
+        }
+        @media (max-width:430px) {
+            .gallery-grid { grid-template-columns:1fr; gap:12px; }
         }
 
         /* ── モーダル ── */

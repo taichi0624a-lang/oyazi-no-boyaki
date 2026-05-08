@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="このサイトと管理人について。">
+    <meta property="og:title" content="ABOUT | 親父より親父な子供のぼやき">
+    <meta property="og:description" content="このサイトと管理人について。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://kodomo-no-boyaki.com/about.html">
+    <meta property="og:image" content="https://kodomo-no-boyaki.com/choco-main.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ABOUT | 親父より親父な子供のぼやき">
+    <meta name="twitter:image" content="https://kodomo-no-boyaki.com/choco-main.jpg">
+    <title>ABOUT | 親父より親父な子供のぼやき</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <script>if(localStorage.getItem('ozi-theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&display=swap');
+
+:root {
+    --bg:    #f5f2ec;
+    --paper: #faf9f5;
+    --ink:   #0e0d0c;
+    --red:   #aa1414;
+    --rule:  #ddd8ce;
+    --dim:   #918d86;
+    --warm:  #eae5dc;
+}
+html.dark-mode body, body.dark-mode {
+    --bg:    #111009;
+    --paper: #1a1815;
+    --ink:   #ede8df;
+    --red:   #cc2828;
+    --rule:  #2e2b25;
+    --dim:   #7a756e;
+    --warm:  #1e1c18;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+a, button { -webkit-tap-highlight-color:transparent; }
+
+body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* ── HEADER ── */
+#masthead {
+    position: sticky; top:0; z-index:500;
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+}
+.mh-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 6vw 14px; gap: 12px;
+}
+.mh-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1rem, 1.8vw, 1.6rem);
+    font-weight: 400; letter-spacing: 0.01em;
+    color: var(--ink); text-decoration: none;
+    white-space: nowrap;
+}
+.mh-brand em { font-style: italic; color: var(--red); }
+.mh-nav { display: flex; align-items: center; gap: 8px; }
+.mh-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: 2px;
+    background: transparent; border: 1px solid var(--rule);
+    color: var(--dim); padding: 6px 14px; cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+.mh-btn:hover { border-color: var(--ink); color: var(--ink); }
+
+/* ── WRAP ── */
+#wrap { max-width: 720px; margin: 0 auto; padding: 60px 6vw 80px; }
+
+/* ── KICKER ── */
+.kicker {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 4px; color: var(--dim);
+    margin-bottom: 16px;
+}
+
+/* ── TITLE ── */
+.page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 300; line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 40px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--rule);
+}
+
+/* ── SECTION ── */
+.about-section { margin-bottom: 52px; }
+.section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; letter-spacing: 3px; color: var(--dim);
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px;
+}
+.section-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--rule);
+}
+.about-text {
+    font-size: 0.95rem; line-height: 1.9; color: var(--ink);
+}
+.about-text p { margin-bottom: 1em; }
+.about-text p:last-child { margin-bottom: 0; }
+
+/* ── PROFILE TABLE ── */
+.profile-table { width: 100%; border-collapse: collapse; }
+.profile-table tr { border-bottom: 1px solid var(--rule); }
+.profile-table td {
+    padding: 12px 0; font-size: 0.9rem; vertical-align: top;
+}
+.profile-table .k {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; letter-spacing: 2px; color: var(--dim);
+    width: 120px; padding-top: 14px;
+}
+
+/* ── SITE MAP ── */
+.site-links { display: flex; flex-direction: column; gap: 0; }
+.site-link {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 14px 0; border-bottom: 1px solid var(--rule);
+    text-decoration: none; color: var(--ink);
+    transition: color 0.15s;
+    gap: 12px;
+}
+.site-link:hover { color: var(--red); }
+.site-link-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem; font-weight: 600;
+}
+.site-link-desc {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; letter-spacing: 1px; color: var(--dim);
+}
+.site-link-arr {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; color: var(--dim);
+    transition: transform 0.15s;
+}
+.site-link:hover .site-link-arr { transform: translateX(4px); color: var(--red); }
+
+/* ── FOOTER ── */
+#site-footer {
+    border-top: 1px solid var(--rule);
+    margin-top: 60px; padding: 16px 0;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; letter-spacing: 2px; color: var(--dim);
+    gap: 12px; flex-wrap: wrap;
+}
+.footer-links { display: flex; gap: 16px; }
+.footer-links a { color: var(--dim); text-decoration: none; transition: color 0.15s; }
+.footer-links a:hover { color: var(--ink); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+    #wrap { padding: 40px 5vw 60px; }
+    .mh-top { padding: 12px 5vw 10px; }
+    .profile-table .k { width: 90px; font-size: 7px; }
+    .mh-btn { min-height: 44px; padding: 10px 12px; }
+}
+    </style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header id="masthead">
+    <div class="mh-top">
+        <a class="mh-brand" href="index.html">親父より親父な<em>子供</em>のぼやき</a>
+        <nav class="mh-nav">
+            <button class="mh-btn" onclick="toggleTheme()">◐</button>
+        </nav>
+    </div>
+</header>
+
+<div id="wrap">
+
+    <div class="kicker">ABOUT THIS SITE</div>
+    <h1 class="page-title">About</h1>
+
+    <!-- SELF INTRO -->
+    <div class="about-section">
+        <div class="section-label">PROFILE</div>
+        <table class="profile-table">
+            <tr><td class="k">NAME</td><td>Taichi</td></tr>
+            <tr><td class="k">LOCATION</td><td>Japan</td></tr>
+            <tr><td class="k">INTERESTS</td><td>映画 · 音楽 · 本 · 犬</td></tr>
+        </table>
+    </div>
+
+    <!-- ABOUT SITE -->
+    <div class="about-section">
+        <div class="section-label">ABOUT</div>
+        <div class="about-text">
+            <p>映える情報も有益なスキルも一切ない。映画の感想、無価値な日記、思考のカスみたいな独り言。</p>
+            <p>暇すぎて壁のシミを数えるのに飽きたら、たまには覗きに来てくれ。</p>
+        </div>
+    </div>
+
+    <!-- SITE MAP -->
+    <div class="about-section">
+        <div class="section-label">PAGES</div>
+        <div class="site-links">
+            <a href="index.html" class="site-link">
+                <span class="site-link-name">Diary</span>
+                <span class="site-link-desc">日記 · 雑記</span>
+                <span class="site-link-arr">→</span>
+            </a>
+            <a href="archive.html" class="site-link">
+                <span class="site-link-name">Film</span>
+                <span class="site-link-desc">映画アーカイブ</span>
+                <span class="site-link-arr">→</span>
+            </a>
+            <a href="books.html" class="site-link">
+                <span class="site-link-name">Shelf</span>
+                <span class="site-link-desc">書評 · 読書記録</span>
+                <span class="site-link-arr">→</span>
+            </a>
+            <a href="videos.html" class="site-link">
+                <span class="site-link-name">Boost</span>
+                <span class="site-link-desc">動画アーカイブ</span>
+                <span class="site-link-arr">→</span>
+            </a>
+            <a href="choco.html" class="site-link">
+                <span class="site-link-name">Choco</span>
+                <span class="site-link-desc">愛犬チョコの部屋</span>
+                <span class="site-link-arr">→</span>
+            </a>
+        </div>
+    </div>
+
+    <footer id="site-footer">
+        <span>© 2024 親父より親父な子供のぼやき</span>
+        <div class="footer-links">
+            <a href="index.html">HOME</a>
+            <a href="archive.html">FILM</a>
+            <a href="books.html">SHELF</a>
+        </div>
+    </footer>
+</div>
+
+<script>
+function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    document.documentElement.classList.toggle('dark-mode', isDark);
+    localStorage.setItem('ozi-theme', isDark ? 'dark' : 'light');
+}
+(function() {
+    if (localStorage.getItem('ozi-theme') === 'dark') document.body.classList.add('dark-mode');
+})();
+</script>
+</body>
+</html>

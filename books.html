@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="読んだ本の記録。感想、スコア、表紙。">
+    <meta property="og:title" content="SHELF | 書評アーカイブ">
+    <meta property="og:description" content="読んだ本の記録。感想、スコア、表紙。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://kodomo-no-boyaki.com/books.html">
+    <meta property="og:image" content="https://kodomo-no-boyaki.com/choco-main.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SHELF | 書評アーカイブ">
+    <meta name="twitter:image" content="https://kodomo-no-boyaki.com/choco-main.jpg">
+    <title>SHELF | 書評</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <script>if(localStorage.getItem('ozi-theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&display=swap');
+
+:root {
+    --bg:    #f5f2ec;
+    --paper: #faf9f5;
+    --ink:   #0e0d0c;
+    --red:   #aa1414;
+    --rule:  #ddd8ce;
+    --dim:   #918d86;
+    --warm:  #eae5dc;
+}
+html.dark-mode body, body.dark-mode {
+    --bg:    #111009;
+    --paper: #1a1815;
+    --ink:   #ede8df;
+    --red:   #cc2828;
+    --rule:  #2e2b25;
+    --dim:   #7a756e;
+    --warm:  #1e1c18;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+a, button { -webkit-tap-highlight-color:transparent; }
+
+body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* ── HEADER ── */
+#masthead {
+    position: sticky; top:0; z-index:500;
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+}
+.mh-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 6vw 14px;
+    gap: 12px;
+}
+.mh-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1rem, 1.8vw, 1.6rem);
+    font-weight: 400; letter-spacing: 0.01em;
+    color: var(--ink); text-decoration: none;
+    white-space: nowrap;
+}
+.mh-brand em { font-style: italic; color: var(--red); }
+.mh-nav { display: flex; align-items: center; gap: 8px; }
+.mh-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: 2px;
+    background: transparent; border: 1px solid var(--rule);
+    color: var(--dim); padding: 6px 14px; cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+.mh-btn:hover { border-color: var(--ink); color: var(--ink); }
+.mh-btn.red { border-color: var(--red); color: var(--red); }
+.mh-btn.red:hover { background: var(--red); color: #fff; }
+
+/* ── WRAP ── */
+#wrap { max-width: 960px; margin: 0 auto; padding: 0 6vw 80px; }
+
+/* ── PAGE HEADER ── */
+.page-hd {
+    padding: 52px 0 36px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 40px;
+}
+.page-kicker {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 4px; color: var(--dim);
+    margin-bottom: 12px;
+}
+.page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 300; line-height: 1.1;
+    letter-spacing: -0.01em;
+}
+.page-desc {
+    margin-top: 14px;
+    font-size: 0.9rem; color: var(--dim); line-height: 1.7;
+}
+.page-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; letter-spacing: 2px; color: var(--dim);
+    margin-top: 10px;
+}
+
+/* ── ADD BUTTON ── */
+.add-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 2px;
+    background: transparent; border: 1px solid var(--red);
+    color: var(--red); padding: 10px 20px; cursor: pointer;
+    transition: 0.15s; margin-bottom: 36px; display: inline-block;
+}
+.add-btn:hover { background: var(--red); color: #fff; }
+
+/* ── BOOK GRID ── */
+#book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 28px;
+}
+
+/* ── BOOK CARD ── */
+.book-card {
+    cursor: pointer;
+    transition: transform 0.18s;
+}
+.book-card:hover { transform: translateY(-4px); }
+.book-cover {
+    width: 100%; aspect-ratio: 2/3;
+    background: var(--warm);
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    position: relative;
+    margin-bottom: 12px;
+}
+.book-cover img {
+    width: 100%; height: 100%; object-fit: cover;
+    display: block;
+    transition: opacity 0.3s;
+}
+.book-cover-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.5rem; color: var(--rule);
+}
+.book-score {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--ink); color: var(--bg);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 1px;
+    padding: 3px 7px;
+}
+.book-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem; font-weight: 600;
+    line-height: 1.35; margin-bottom: 4px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.book-author {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; letter-spacing: 1px; color: var(--dim);
+    margin-bottom: 6px;
+}
+.book-tag {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 7px; letter-spacing: 2px;
+    border: 1px solid var(--rule); color: var(--dim);
+    padding: 2px 7px;
+}
+.book-del {
+    display: block; margin-top: 8px;
+    background: transparent; border: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 7px; letter-spacing: 2px; color: var(--rule);
+    cursor: pointer; transition: color 0.15s; padding: 0;
+    text-align: left;
+}
+.book-del:hover { color: var(--red); }
+
+/* ── MODAL (add form) ── */
+.modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-inner {
+    background: var(--paper); border: 1px solid var(--rule);
+    padding: 32px 28px; width: 90vw; max-width: 480px;
+    max-height: 90vh; overflow-y: auto;
+}
+.modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 600; margin-bottom: 24px;
+}
+.form-row { margin-bottom: 16px; }
+.form-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; letter-spacing: 2px; color: var(--dim);
+    display: block; margin-bottom: 6px;
+}
+.form-input, .form-select, .form-textarea {
+    width: 100%; padding: 10px 12px;
+    background: var(--bg); border: 1px solid var(--rule);
+    color: var(--ink); font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; outline: none;
+    transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--ink); }
+.form-textarea { resize: vertical; min-height: 100px; }
+.form-actions { display: flex; gap: 10px; margin-top: 24px; }
+.btn-primary {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 2px;
+    background: var(--ink); color: var(--bg);
+    border: none; padding: 12px 24px; cursor: pointer;
+    transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.8; }
+.btn-cancel {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 2px;
+    background: transparent; border: 1px solid var(--rule);
+    color: var(--dim); padding: 12px 20px; cursor: pointer;
+    transition: 0.15s;
+}
+.btn-cancel:hover { border-color: var(--ink); color: var(--ink); }
+
+/* ── DETAIL MODAL ── */
+#detail-modal {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+    align-items: center; justify-content: center;
+}
+#detail-modal.open { display: flex; }
+.detail-inner {
+    background: var(--paper); border: 1px solid var(--rule);
+    width: 90vw; max-width: 560px; max-height: 90vh;
+    overflow-y: auto; display: flex; flex-direction: column;
+}
+.detail-cover {
+    width: 100%; aspect-ratio: 16/9;
+    background: var(--warm); overflow: hidden;
+    position: relative;
+}
+.detail-cover img { width: 100%; height: 100%; object-fit: cover; }
+.detail-cover-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 4rem; color: var(--rule);
+}
+.detail-body { padding: 28px 28px 36px; }
+.detail-meta {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px; flex-wrap: wrap;
+}
+.detail-score {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: 1px;
+    background: var(--ink); color: var(--bg);
+    padding: 4px 10px;
+}
+.detail-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; letter-spacing: 2px;
+    border: 1px solid var(--rule); color: var(--dim);
+    padding: 3px 8px;
+}
+.detail-date {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; letter-spacing: 1px; color: var(--dim);
+    margin-left: auto;
+}
+.detail-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 600; line-height: 1.2;
+    margin-bottom: 6px;
+}
+.detail-author {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 2px; color: var(--dim);
+    margin-bottom: 20px;
+}
+.detail-memo {
+    font-size: 0.92rem; line-height: 1.85;
+    color: var(--ink); white-space: pre-wrap;
+    border-top: 1px solid var(--rule); padding-top: 20px;
+}
+.detail-close {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+    color: #fff; width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; cursor: pointer; border-radius: 50%;
+    transition: 0.2s;
+}
+.detail-close:hover { background: rgba(0,0,0,0.8); }
+#detail-modal .detail-inner { position: relative; }
+
+/* ── EMPTY ── */
+.empty-msg {
+    text-align: center; padding: 60px 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 3px; color: var(--rule);
+}
+
+/* ── FOOTER ── */
+#site-footer {
+    border-top: 1px solid var(--rule);
+    margin: 60px 0 40px; padding: 16px 0;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; letter-spacing: 2px; color: var(--dim);
+    gap: 12px; flex-wrap: wrap;
+}
+.footer-links { display: flex; gap: 16px; }
+.footer-links a { color: var(--dim); text-decoration: none; transition: color 0.15s; }
+.footer-links a:hover { color: var(--ink); }
+
+/* ── TOAST ── */
+#toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9000;
+    background: var(--ink); color: var(--bg);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 2px;
+    padding: 12px 20px; opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+
+/* ── ADMIN ONLY ── */
+.admin-only { display: none; }
+body.admin .admin-only { display: block; }
+body.admin .add-btn { display: inline-block; }
+body.admin button.add-btn { display: inline-block; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 720px) {
+    #wrap { padding: 0 5vw 60px; }
+    .mh-top { padding: 12px 5vw 10px; }
+    #book-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; }
+    .page-hd { padding: 36px 0 28px; }
+    .modal-inner { padding: 24px 20px; }
+    .detail-body { padding: 20px 20px 28px; }
+}
+@media (max-width: 430px) {
+    #book-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .mh-btn { padding: 10px 10px; font-size: 9px; min-height: 44px; }
+}
+    </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- MASTHEAD -->
+<header id="masthead">
+    <div class="mh-top">
+        <a class="mh-brand" href="index.html">親父より親父な<em>子供</em>のぼやき</a>
+        <nav class="mh-nav">
+            <button class="mh-btn red admin-only" onclick="openAddModal()">+ ADD</button>
+            <button class="mh-btn" onclick="toggleTheme()">◐</button>
+        </nav>
+    </div>
+</header>
+
+<div id="wrap">
+
+    <!-- PAGE HEADER -->
+    <div class="page-hd">
+        <div class="page-kicker">PERSONAL LIBRARY</div>
+        <h1 class="page-title">Shelf</h1>
+        <p class="page-desc">読んだ本の記録。感想、スコア、表紙。</p>
+        <div class="page-count">TOTAL &nbsp;<span id="book-count">—</span> &nbsp;BOOKS</div>
+    </div>
+
+    <button class="add-btn admin-only" onclick="openAddModal()">+ 本を追加する</button>
+
+    <div id="book-grid"></div>
+
+    <!-- FOOTER -->
+    <footer id="site-footer">
+        <span>SHELF · BOOK ARCHIVE</span>
+        <div class="footer-links">
+            <a href="index.html">HOME</a>
+            <a href="archive.html">FILM</a>
+            <a href="about.html">ABOUT</a>
+        </div>
+    </footer>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="add-modal">
+    <div class="modal-inner">
+        <div class="modal-title">本を追加する</div>
+        <div class="form-row">
+            <label class="form-label">TITLE</label>
+            <input type="text" class="form-input" id="f-title" placeholder="タイトル">
+        </div>
+        <div class="form-row">
+            <label class="form-label">AUTHOR</label>
+            <input type="text" class="form-input" id="f-author" placeholder="著者">
+        </div>
+        <div class="form-row">
+            <label class="form-label">GENRE</label>
+            <select class="form-select" id="f-tag">
+                <option value="小説">小説</option>
+                <option value="エッセイ">エッセイ</option>
+                <option value="ノンフィクション">ノンフィクション</option>
+                <option value="哲学">哲学</option>
+                <option value="歴史">歴史</option>
+                <option value="科学">科学</option>
+                <option value="漫画">漫画</option>
+                <option value="その他">その他</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label class="form-label">SCORE (1–10)</label>
+            <input type="number" class="form-input" id="f-score" min="1" max="10" placeholder="8">
+        </div>
+        <div class="form-row">
+            <label class="form-label">COVER IMAGE URL</label>
+            <input type="url" class="form-input" id="f-cover" placeholder="https://...">
+        </div>
+        <div class="form-row">
+            <label class="form-label">MEMO / REVIEW</label>
+            <textarea class="form-textarea" id="f-memo" placeholder="感想を書く…"></textarea>
+        </div>
+        <div class="form-actions">
+            <button class="btn-primary" id="add-submit-btn" onclick="submitBook()">PUBLISH →</button>
+            <button class="btn-cancel" onclick="closeAddModal()">CANCEL</button>
+        </div>
+    </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div id="detail-modal">
+    <div class="detail-inner">
+        <button class="detail-close" onclick="closeDetail()">×</button>
+        <div class="detail-cover" id="detail-cover"></div>
+        <div class="detail-body">
+            <div class="detail-meta">
+                <span class="detail-score" id="detail-score"></span>
+                <span class="detail-tag" id="detail-tag"></span>
+                <span class="detail-date" id="detail-date"></span>
+            </div>
+            <div class="detail-title" id="detail-title"></div>
+            <div class="detail-author" id="detail-author"></div>
+            <div class="detail-memo" id="detail-memo"></div>
+            <button class="book-del admin-only" id="detail-del-btn" onclick="deleteCurrentBook()" style="margin-top:24px;">✕ DELETE</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyC84FjbrkhiTVQvU0sS9QO52VAu-Jv53Gs",
+    authDomain: "ozi-blog.firebaseapp.com",
+    databaseURL: "https://ozi-blog-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "ozi-blog",
+    storageBucket: "ozi-blog.firebasestorage.app",
+    messagingSenderId: "871002428547",
+    appId: "1:871002428547:web:9d70c40bb5aff60bafb7b6"
+};
+
+const app  = initializeApp(firebaseConfig);
+const db   = getDatabase(app);
+const auth = getAuth(app);
+const booksRef = ref(db, 'books');
+
+let books = [];
+let firebaseLoaded = false;
+let currentDetailId = null;
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function saveBooks() {
+    if (!firebaseLoaded) return;
+    const obj = {};
+    books.forEach(b => { obj[String(b.id)] = b; });
+    set(booksRef, books.length ? obj : null)
+        .catch(err => showToast('SAVE FAILED · ' + (err.code || 'ERROR')));
+}
+
+function renderBooks() {
+    const grid = document.getElementById('book-grid');
+    document.getElementById('book-count').textContent = books.length;
+    if (!books.length) {
+        grid.innerHTML = '<div class="empty-msg">まだ本がありません</div>';
+        return;
+    }
+    grid.innerHTML = books.map(b => {
+        const coverHtml = b.cover
+            ? `<img src="${esc(b.cover)}" alt="${esc(b.title)}" loading="lazy">`
+            : `<div class="book-cover-placeholder">📖</div>`;
+        return `<div class="book-card" onclick="openDetail(${b.id})">
+            <div class="book-cover">
+                ${coverHtml}
+                ${b.score ? `<span class="book-score">${esc(b.score)}/10</span>` : ''}
+            </div>
+            <div class="book-title">${esc(b.title)}</div>
+            <div class="book-author">${esc(b.author || '—')}</div>
+            ${b.tag ? `<span class="book-tag">${esc(b.tag)}</span>` : ''}
+        </div>`;
+    }).join('');
+}
+
+onValue(booksRef, snap => {
+    const data = snap.val();
+    books = data ? Object.values(data).sort((a,b) => b.id - a.id) : [];
+    firebaseLoaded = true;
+    renderBooks();
+});
+
+onAuthStateChanged(auth, user => {
+    document.body.classList.toggle('admin', !!user);
+});
+
+// ── ADD MODAL ──
+window.openAddModal = function() {
+    document.getElementById('add-modal').classList.add('open');
+};
+window.closeAddModal = function() {
+    document.getElementById('add-modal').classList.remove('open');
+};
+window.submitBook = function() {
+    const title = document.getElementById('f-title').value.trim();
+    if (!title) { showToast('タイトルを入力してね'); return; }
+    const btn = document.getElementById('add-submit-btn');
+    btn.disabled = true; btn.textContent = '保存中...';
+    const book = {
+        id:     Date.now(),
+        title,
+        author: document.getElementById('f-author').value.trim(),
+        tag:    document.getElementById('f-tag').value,
+        score:  document.getElementById('f-score').value.trim(),
+        cover:  document.getElementById('f-cover').value.trim(),
+        memo:   document.getElementById('f-memo').value.trim(),
+        date:   new Date().toLocaleDateString('ja-JP')
+    };
+    books.unshift(book);
+    saveBooks();
+    renderBooks();
+    closeAddModal();
+    ['f-title','f-author','f-score','f-cover','f-memo'].forEach(id => document.getElementById(id).value = '');
+    btn.disabled = false; btn.textContent = 'PUBLISH →';
+    showToast('PUBLISHED');
+};
+
+// ── DETAIL MODAL ──
+window.openDetail = function(id) {
+    const b = books.find(x => x.id === id);
+    if (!b) return;
+    currentDetailId = id;
+    const coverEl = document.getElementById('detail-cover');
+    coverEl.innerHTML = b.cover
+        ? `<img src="${esc(b.cover)}" alt="${esc(b.title)}">`
+        : `<div class="detail-cover-placeholder">📖</div>`;
+    document.getElementById('detail-score').textContent  = b.score ? b.score + '/10' : '—';
+    document.getElementById('detail-tag').textContent    = b.tag || '';
+    document.getElementById('detail-date').textContent   = b.date || '';
+    document.getElementById('detail-title').textContent  = b.title;
+    document.getElementById('detail-author').textContent = b.author || '';
+    document.getElementById('detail-memo').textContent   = b.memo || '';
+    document.getElementById('detail-modal').classList.add('open');
+};
+window.closeDetail = function() {
+    document.getElementById('detail-modal').classList.remove('open');
+    currentDetailId = null;
+};
+window.deleteCurrentBook = function() {
+    if (!currentDetailId) return;
+    if (!confirm('この本を削除しますか？')) return;
+    books = books.filter(b => b.id !== currentDetailId);
+    saveBooks(); renderBooks(); closeDetail();
+    showToast('DELETED');
+};
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeDetail(); closeAddModal(); }
+});
+document.getElementById('detail-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('detail-modal')) closeDetail();
+});
+document.getElementById('add-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('add-modal')) closeAddModal();
+});
+
+// ── THEME ──
+function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    document.documentElement.classList.toggle('dark-mode', isDark);
+    localStorage.setItem('ozi-theme', isDark ? 'dark' : 'light');
+}
+(function() {
+    if (localStorage.getItem('ozi-theme') === 'dark') document.body.classList.add('dark-mode');
+})();
+window.toggleTheme = toggleTheme;
+
+// ── KONAMI (admin login) ──
+const KONAMI = [38,38,40,40,37,39,37,39,66,65];
+let ki = 0;
+document.addEventListener('keydown', e => {
+    if (e.keyCode === KONAMI[ki]) { ki++; if (ki === KONAMI.length) { ki=0; showToast('ADMIN MODE'); } }
+    else ki = 0;
+});
+</script>
+</body>
+</html>
