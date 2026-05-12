@@ -1333,7 +1333,7 @@ const lastReadRef = ref(db, 'lastread');
 // ── SAVE HELPERS ──
 function saveEntries() {
     if (!entries.length) return;
-    localStorage.setItem('ozi-entries-backup', JSON.stringify(entries));
+    try { localStorage.setItem('ozi-entries-backup', JSON.stringify(entries)); } catch(e) {}
     if (!firebaseLoaded) return; // Firebase未接続時は上書きしない
     const obj = {};
     entries.forEach(e => { obj[String(e.id)] = e; });
@@ -2002,7 +2002,7 @@ onValue(diaryRef, snap => {
             tags:   Array.isArray(e.tags)   ? e.tags   : Object.values(e.tags   || {}),
             photos: Array.isArray(e.photos) ? e.photos : Object.values(e.photos || {})
         }));
-        localStorage.setItem('ozi-entries-backup', JSON.stringify(entries));
+        try { localStorage.setItem('ozi-entries-backup', JSON.stringify(entries)); } catch(e) {}
     } else {
         // Firebaseが空 → localStorageバックアップを確認
         const backup = localStorage.getItem('ozi-entries-backup');
