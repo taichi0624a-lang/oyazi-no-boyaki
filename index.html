@@ -1309,7 +1309,7 @@ body {
 <script type="module">
 // ── FIREBASE ──
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, onDisconnect, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, set, remove, onValue, onDisconnect, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -1633,7 +1633,10 @@ function deleteEntry(id) {
     if (!confirm('\u3053\u306e\u30a8\u30f3\u30c8\u30ea\u30fc\u3092\u524a\u9664\u3057\u307e\u3059\u304b\uff1f')) return;
     entries = entries.filter(x => x.id !== id);
     if (openId === id) openId = null;
-    saveEntries();
+    try { localStorage.setItem('ozi-entries-backup', JSON.stringify(entries)); } catch(e) {}
+    remove(ref(db, 'diary/' + String(id))).catch(err => {
+        showToast('DELETE FAILED \u00b7 ' + (err.code || 'CHECK LOGIN'));
+    });
     renderDateline();
     renderFeatured();
     renderStrips();
@@ -1727,7 +1730,10 @@ async function publishEntry() {
         const idx = entries.findIndex(x => x.id === editingId);
         if (idx !== -1) {
             entries[idx] = { ...entries[idx], title, content, tags: [...selTags], photos };
-            saveEntries();
+            try { localStorage.setItem('ozi-entries-backup', JSON.stringify(entries)); } catch(e) {}
+            set(ref(db, 'diary/' + String(editingId)), entries[idx]).catch(err => {
+                showToast('SAVE FAILED · ' + (err.code || 'CHECK LOGIN'));
+            });
             closeWriter();
             renderFeatured();
             renderStrips();
@@ -1738,8 +1744,12 @@ async function publishEntry() {
     }
 
     const date = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' });
-    entries.unshift({ id: Date.now(), title, content, date, tags: [...selTags], photos });
-    saveEntries();
+    const newEntry = { id: Date.now(), title, content, date, tags: [...selTags], photos };
+    entries.unshift(newEntry);
+    try { localStorage.setItem('ozi-entries-backup', JSON.stringify(entries)); } catch(e) {}
+    set(ref(db, 'diary/' + String(newEntry.id)), newEntry).catch(err => {
+        showToast('SAVE FAILED · ' + (err.code || 'CHECK LOGIN'));
+    });
     closeWriter();
     btn.disabled = false;
     renderDateline();
