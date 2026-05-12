@@ -1997,7 +1997,11 @@ onValue(diaryRef, snap => {
     firebaseLoaded = true;
     const data = snap.val();
     if (data) {
-        entries = Object.values(data).sort((a, b) => b.id - a.id);
+        entries = Object.values(data).sort((a, b) => b.id - a.id).map(e => ({
+            ...e,
+            tags:   Array.isArray(e.tags)   ? e.tags   : Object.values(e.tags   || {}),
+            photos: Array.isArray(e.photos) ? e.photos : Object.values(e.photos || {})
+        }));
         localStorage.setItem('ozi-entries-backup', JSON.stringify(entries));
     } else {
         // Firebaseが空 → localStorageバックアップを確認
