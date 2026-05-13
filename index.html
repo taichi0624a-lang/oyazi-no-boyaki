@@ -421,6 +421,10 @@ body {
     color: rgba(170,20,20,0.3);
 }
 .s-del:hover { border-color: var(--red); color: var(--red); }
+.s-del-head {
+    font-size: 14px; padding: 2px 8px;
+    margin-right: 6px; line-height: 1;
+}
 .s-edit {
     border: 1px solid var(--rule);
     color: var(--dim);
@@ -1534,6 +1538,7 @@ function renderStrips() {
                     <div class="s-date">${e.date}</div>
                 </div>
                 <div class="strip-toggle-col">
+                    ${isAdmin ? `<button class="s-del s-del-head" onclick="deleteEntry(${e.id});event.stopPropagation()">×</button>` : ''}
                     <div class="s-toggle">+</div>
                 </div>
             </div>
