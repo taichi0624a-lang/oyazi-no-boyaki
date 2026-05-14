@@ -715,7 +715,7 @@ body.dark-mode #op-skip:hover, html.dark-mode body #op-skip:hover { color: #c080
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, set, remove, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -927,8 +927,10 @@ function addEntry() {
   const body   = document.getElementById('f-body').value.trim();
   const tag    = document.getElementById('f-tag').value;
   const photos = pendingPhotos.filter(p => p !== null);
-  diaryEntries.push({title, body, tag, photos, date: new Date().toISOString()});
-  saveEntries();
+  const newEntry = {title, body, tag, photos, date: new Date().toISOString()};
+  const newKey = String(Date.now());
+  diaryEntries.push(newEntry);
+  set(ref(db, 'choco/diary/' + newKey), newEntry).catch(err => console.error('save error:', err));
   document.getElementById('f-title').value = '';
   document.getElementById('f-body').value  = '';
   document.getElementById('photo-previews').innerHTML = '';
@@ -939,8 +941,11 @@ function addEntry() {
 
 function deleteEntry(i) {
   if (!confirm('この記録を削除しますか？')) return;
+  const entry = diaryEntries[i];
   diaryEntries.splice(i, 1);
-  saveEntries();
+  if (entry && entry._key) {
+    remove(ref(db, 'choco/diary/' + entry._key)).catch(err => console.error('delete error:', err));
+  }
   renderDiary(); renderPhotos();
 }
 
@@ -1089,8 +1094,13 @@ function renderAll() { renderDiary(); renderPhotos(); }
 // ── FIREBASE リスナー ──
 onValue(diaryRef, snap => {
   const data = snap.val();
-  diaryEntries = data ? Object.values(data).sort((a, b) => new Date(a.date) - new Date(b.date)) : [];
-  renderDiary(); renderPhotos();
+  diaryEntries = data ? Object.entries(data).sort(([,a],[,b]) => new Date(a.date) - new Date(b.date)).map(([key, e]) => ({
+    ...e,
+    _key: key,
+    photos: Array.isArray(e.photos) ? e.photos : Object.values(e.photos || {})
+  })) : [];
+  try { renderDiary(); } catch(err) { console.error('renderDiary error:', err); }
+  try { renderPhotos(); } catch(err) { console.error('renderPhotos error:', err); }
 });
 
 // ── GLOBAL EXPORTS (onclick から呼べるように) ──
