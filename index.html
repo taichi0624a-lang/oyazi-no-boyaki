@@ -177,25 +177,51 @@ body {
 
 /* ─── FEATURED ─── */
 #featured {
-    padding: 60px 0 52px;
+    position: relative;
+    overflow: hidden;
+    padding: 72px 0 64px;
     border-bottom: 1px solid var(--rule);
     text-align: center;
-    max-width: 640px;
-    margin: 0 auto;
 }
 
-.ft-left { margin-bottom: 0; }
-.ft-right { margin-top: 28px; }
+.ft-title {
+    position: absolute;
+    inset: 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(4rem, 14vw, 13rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    opacity: 0.055;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    word-break: break-all;
+    padding: 0 16px;
+    animation: none;
+    cursor: default;
+}
+
+.ft-overlay {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
 
 .ft-kicker {
     font-family: 'Space Mono', monospace;
     font-size: 9px;
     letter-spacing: 3.5px;
     color: var(--red);
-    margin-bottom: 22px;
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 12px;
 }
 .ft-kicker::before, .ft-kicker::after {
@@ -206,45 +232,24 @@ body {
     background: var(--red);
 }
 
-.ft-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(2rem, 5vw, 4.8rem);
-    font-weight: 700;
-    line-height: 1.08;
-    overflow-wrap: break-word;
-    color: var(--ink);
-    letter-spacing: -0.02em;
-    cursor: pointer;
-    transition: color 0.22s;
-    margin-bottom: 18px;
-    animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.05s both;
-}
-.ft-title:hover { color: var(--red); }
-
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(18px); }
-    to   { opacity: 1; transform: none; }
-}
-
 .ft-meta {
     font-family: 'Space Mono', monospace;
     font-size: 9px;
     letter-spacing: 2px;
     color: var(--dim);
+    margin-top: -14px;
 }
 
-.ft-right-top {
-    border-top: 1px solid var(--rule);
-    padding-top: 24px;
-    padding-bottom: 0;
-    margin-bottom: 24px;
-}
 .ft-excerpt {
     font-size: 0.975rem;
     line-height: 1.88;
     color: #504c47;
     font-weight: 300;
+    max-width: 520px;
+    border-top: 1px solid var(--rule);
+    padding-top: 22px;
 }
+
 .ft-read {
     display: inline-flex;
     align-items: center;
@@ -262,6 +267,11 @@ body {
 .ft-read:hover { background: var(--red); color: #fff; }
 .ft-read-arr { transition: transform 0.2s; }
 .ft-read:hover .ft-read-arr { transform: translateX(5px); }
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: none; }
+}
 
 /* ─── SECTION RULE ─── */
 .sec-rule {
@@ -995,10 +1005,8 @@ body {
     .mh-dateline { padding: 5px 5vw; flex-wrap: wrap; gap: 2px 12px; font-size: 7.5px; justify-content: flex-start; }
 
     /* ── Featured ── */
-    #featured { grid-template-columns: 1fr; gap: 0; padding: 28px 0 22px; }
-    .ft-title { font-size: clamp(1.65rem, 7.5vw, 2.8rem); margin-bottom: 14px; }
-    .ft-kicker { margin-bottom: 12px; }
-    .ft-right-top { border-bottom: none; padding-bottom: 12px; }
+    #featured { padding: 48px 0 40px; }
+    .ft-title { font-size: clamp(3rem, 18vw, 7rem); }
     .ft-excerpt { font-size: 0.9rem; line-height: 1.82; }
     .ft-read { padding: 10px 18px; min-height: 44px; }
 
@@ -1122,15 +1130,11 @@ body {
 
     <!-- FEATURED -->
     <section id="featured">
-        <div class="ft-left">
+        <h1 class="ft-title" id="ft-title">—</h1>
+        <div class="ft-overlay">
             <div class="ft-kicker">LATEST ENTRY</div>
-            <h1 class="ft-title" id="ft-title">—</h1>
             <div class="ft-meta" id="ft-meta"></div>
-        </div>
-        <div class="ft-right">
-            <div class="ft-right-top">
-                <p class="ft-excerpt" id="ft-excerpt"></p>
-            </div>
+            <p class="ft-excerpt" id="ft-excerpt"></p>
             <button class="ft-read" id="ft-read">
                 READ ENTRY <span class="ft-read-arr">→</span>
             </button>
