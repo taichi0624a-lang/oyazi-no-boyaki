@@ -40,7 +40,6 @@ body.dark-mode, html.dark-mode body {
     --warm:  #1e1c18;
 }
 body.dark-mode .s-body-text, html.dark-mode .s-body-text { color: #c8c2b8; }
-body.dark-mode .ft-excerpt,  html.dark-mode .ft-excerpt  { color: #b0aa9f; }
 body.dark-mode .strip-body-content, html.dark-mode .strip-body-content { background: var(--paper); }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -174,104 +173,6 @@ body {
     color: var(--ink);
 }
 .cb-arr { color: var(--red); margin-left: auto; }
-
-/* ─── FEATURED ─── */
-#featured {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: 320px;
-    border-bottom: 1px solid var(--rule);
-}
-
-.ft-dark {
-    background: #7dd3fc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 52px 44px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: background 0.28s;
-}
-.ft-dark:hover { background: #5abde8; }
-
-.ft-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(1.5rem, 2.8vw, 3rem);
-    font-weight: 700;
-    line-height: 1.18;
-    letter-spacing: -0.02em;
-    color: #0d1a2e;
-    text-align: center;
-    overflow-wrap: break-word;
-    transition: opacity 0.22s;
-}
-.ft-dark:hover .ft-title { opacity: 0.65; }
-
-.ft-light {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 20px;
-    padding: 52px 44px;
-    border-left: 1px solid var(--rule);
-}
-
-.ft-kicker {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 3.5px;
-    color: var(--red);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.ft-kicker::before, .ft-kicker::after {
-    content: '';
-    display: inline-block;
-    width: 22px;
-    height: 1px;
-    background: var(--red);
-}
-
-.ft-meta {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 2px;
-    color: var(--dim);
-    margin-top: -6px;
-}
-
-.ft-excerpt {
-    font-size: 0.94rem;
-    line-height: 1.88;
-    color: #504c47;
-    font-weight: 300;
-}
-
-.ft-read {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--red);
-    background: transparent;
-    border: 1px solid currentColor;
-    padding: 9px 18px;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-    align-self: flex-start;
-}
-.ft-read:hover { background: var(--red); color: #fff; }
-.ft-read-arr { transition: transform 0.2s; }
-.ft-read:hover .ft-read-arr { transform: translateX(5px); }
-
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(18px); }
-    to   { opacity: 1; transform: none; }
-}
 
 /* ─── SECTION RULE ─── */
 .sec-rule {
@@ -1004,14 +905,6 @@ body {
     .mh-brand { font-size: clamp(0.82rem, 4vw, 1.3rem); white-space: normal; line-height: 1.25; }
     .mh-dateline { padding: 5px 5vw; flex-wrap: wrap; gap: 2px 12px; font-size: 7.5px; justify-content: flex-start; }
 
-    /* ── Featured ── */
-    #featured { grid-template-columns: 1fr; min-height: 0; }
-    .ft-dark { min-height: 160px; padding: 36px 28px; }
-    .ft-title { font-size: clamp(1.3rem, 5.5vw, 2rem); }
-    .ft-light { padding: 32px 28px; border-left: none; border-top: 1px solid #2e2b25; }
-    .ft-excerpt { font-size: 0.9rem; line-height: 1.82; }
-    .ft-read { padding: 10px 18px; min-height: 44px; }
-
     /* ── Entry strips ── */
     .strip-head { grid-template-columns: 44px 1fr 48px; min-height: 70px; }
     .strip-num-col { padding: 18px 12px 18px 0; }
@@ -1129,21 +1022,6 @@ body {
 
 <!-- ══════════ MAIN ══════════ -->
 <div id="wrap">
-
-    <!-- FEATURED -->
-    <section id="featured">
-        <div class="ft-dark" id="ft-dark-panel">
-            <h1 class="ft-title" id="ft-title">—</h1>
-        </div>
-        <div class="ft-light">
-            <div class="ft-kicker">LATEST ENTRY</div>
-            <div class="ft-meta" id="ft-meta"></div>
-            <p class="ft-excerpt" id="ft-excerpt"></p>
-            <button class="ft-read" id="ft-read">
-                READ ENTRY <span class="ft-read-arr">→</span>
-            </button>
-        </div>
-    </section>
 
     <!-- DIARY STRIPS -->
     <section>
@@ -1508,17 +1386,6 @@ function renderDateline() {
     if (in_) in_.textContent = String(entries.length).padStart(3,'0');
 }
 
-// ── FEATURED ──
-function renderFeatured() {
-    if (!entries.length) return;
-    const e = entries[0];
-    document.getElementById('ft-title').textContent = e.title;
-    document.getElementById('ft-meta').textContent  = e.date + (e.tags?.length ? '  \u00b7  ' + e.tags.join(' / ') : '');
-    document.getElementById('ft-excerpt').textContent = e.content.replace(/\n/g,' ').slice(0, 160) + (e.content.length > 160 ? '\u2026' : '');
-    document.getElementById('ft-dark-panel').onclick = () => openStrip(e.id);
-    document.getElementById('ft-read').onclick  = () => openStrip(e.id);
-}
-
 // ── STRIPS ──
 function renderStrips() {
     const list = document.getElementById('entries-list');
@@ -1655,7 +1522,6 @@ function deleteEntry(id) {
         showToast('DELETE FAILED \u00b7 ' + (err.code || 'CHECK LOGIN'));
     });
     renderDateline();
-    renderFeatured();
     renderStrips();
     renderContinue();
     showToast('DELETED');
@@ -1752,7 +1618,6 @@ async function publishEntry() {
                 showToast('SAVE FAILED · ' + (err.code || 'CHECK LOGIN'));
             });
             closeWriter();
-            renderFeatured();
             renderStrips();
             showToast('SAVED');
         }
@@ -1770,7 +1635,6 @@ async function publishEntry() {
     closeWriter();
     btn.disabled = false;
     renderDateline();
-    renderFeatured();
     renderStrips();
     showToast('PUBLISHED');
 }
@@ -2044,7 +1908,6 @@ onValue(diaryRef, snap => {
         }
     }
     renderDateline();
-    renderFeatured();
     renderStrips();
     renderContinue();
 });
@@ -2107,7 +1970,6 @@ function toggleTheme() {
                 tags:   Array.isArray(e.tags)   ? e.tags   : Object.values(e.tags   || {}),
                 photos: Array.isArray(e.photos) ? e.photos : Object.values(e.photos || {})
             }));
-            renderFeatured();
             renderStrips();
             renderContinue();
         } catch(e) {}
