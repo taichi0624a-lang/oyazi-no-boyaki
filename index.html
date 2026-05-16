@@ -179,16 +179,18 @@ body {
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 32px 0 0;
+    padding: 38px 0 20px;
 }
 .sec-rule-lbl {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--dim);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--ink);
     flex-shrink: 0;
 }
-.sec-rule-line { flex: 1; height: 1px; background: var(--rule); }
+.sec-rule-line { flex: 1; height: 1px; background: var(--red); opacity: 0.35; }
 .sec-rule-cnt {
     font-family: 'Space Mono', monospace;
     font-size: 8px;
@@ -202,14 +204,21 @@ body {
 .entry-strip {
     border-bottom: 1px solid var(--rule);
     background: var(--bg);
-    transition: background 0.2s;
+    transition: background 0.2s, box-shadow 0.22s;
+    animation: stripIn 0.55s cubic-bezier(0.16,1,0.3,1) both;
 }
 .entry-strip:first-child { border-top: 1px solid var(--rule); }
+.entry-strip:not(.open):hover { box-shadow: inset 3px 0 0 var(--red); }
 .entry-strip.open { background: var(--paper); }
+
+@keyframes stripIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
+}
 
 .strip-head {
     display: grid;
-    grid-template-columns: 56px 1fr auto;
+    grid-template-columns: 68px 1fr auto;
     align-items: center;
     cursor: pointer;
     gap: 0;
@@ -217,30 +226,36 @@ body {
 }
 
 .strip-num-col {
-    padding: 22px 16px 22px 0;
+    padding: 22px 18px 22px 0;
     border-right: 1px solid var(--rule);
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    justify-content: flex-start;
     gap: 3px;
     transition: border-color 0.2s;
 }
 .entry-strip.open .strip-num-col { border-right-color: var(--ink); }
 
 .s-num {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 1.55rem;
     color: var(--red);
-    letter-spacing: 1px;
+    line-height: 1;
 }
 
 .strip-main-col { padding: 22px 24px; }
-.s-tags { display: flex; gap: 8px; margin-bottom: 5px; }
+.s-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
 .s-tag {
     font-family: 'Space Mono', monospace;
-    font-size: 8px;
-    letter-spacing: 2px;
+    font-size: 7.5px;
+    letter-spacing: 1.5px;
     color: var(--dim);
+    border: 1px solid var(--rule);
+    padding: 2px 6px;
+    border-radius: 2px;
 }
 .s-title {
     font-family: 'Cormorant Garamond', serif;
@@ -906,8 +921,9 @@ body {
     .mh-dateline { padding: 5px 5vw; flex-wrap: wrap; gap: 2px 12px; font-size: 7.5px; justify-content: flex-start; }
 
     /* ── Entry strips ── */
-    .strip-head { grid-template-columns: 44px 1fr 48px; min-height: 70px; }
-    .strip-num-col { padding: 18px 12px 18px 0; }
+    .strip-head { grid-template-columns: 56px 1fr 48px; min-height: 70px; }
+    .strip-num-col { padding: 18px 14px 18px 0; }
+    .s-num { font-size: 1.25rem; }
     .strip-main-col { padding: 15px 14px; }
     .strip-toggle-col { padding: 0; display: flex; align-items: center; justify-content: center; min-height: 70px; }
     .s-toggle { width: 30px; height: 30px; font-size: 1.1rem; }
@@ -953,9 +969,10 @@ body {
 @media (max-width: 430px) {
     .mh-brand { font-size: clamp(0.78rem, 4vw, 1rem); }
     .mh-btn { padding: 10px 12px; font-size: 9px; letter-spacing: 1px; min-height: 44px; }
-    .strip-head { grid-template-columns: 36px 1fr 44px; }
-    .strip-num-col { padding: 16px 10px 16px 0; }
-    .strip-body-inner { grid-template-columns: 36px 1fr; }
+    .strip-head { grid-template-columns: 48px 1fr 44px; }
+    .strip-num-col { padding: 16px 12px 16px 0; }
+    .s-num { font-size: 1.1rem; }
+    .strip-body-inner { grid-template-columns: 48px 1fr; }
     .c-char { font-size: clamp(3.6rem, 21vw, 18rem); }
 }
     </style>
@@ -1397,6 +1414,7 @@ function renderStrips() {
         const strip = document.createElement('div');
         strip.className = 'entry-strip' + (e.id === openId ? ' open' : '');
         strip.dataset.id = e.id;
+        strip.style.animationDelay = (i * 0.06) + 's';
 
         const tags = (e.tags||[]).map(t => `<span class="s-tag">${t}</span>`).join('');
         const bodyTags = (e.tags||[]).map(t => `<span class="s-body-tag">${t}</span>`).join('');
