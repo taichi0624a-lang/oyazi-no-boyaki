@@ -695,7 +695,8 @@ body {
     z-index: 99999; overflow: hidden;
     pointer-events: all;
 }
-#chic-loader { transition: opacity 2s ease; }
+#chic-loader { transition: opacity 2s ease; animation: loaderFadeIn 1.2s ease both; }
+@keyframes loaderFadeIn { from { opacity: 0; } to { opacity: 1; } }
 #chic-loader.hiding { opacity: 0; pointer-events: none; }
 #chic-loader.done { display: none; }
 
