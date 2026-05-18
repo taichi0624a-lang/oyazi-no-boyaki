@@ -695,8 +695,7 @@ body {
     z-index: 99999; overflow: hidden;
     pointer-events: all;
 }
-#chic-loader { animation: loaderFadeIn 2s ease both; transition: opacity 3s ease; }
-@keyframes loaderFadeIn { from { opacity: 0; } to { opacity: 1; } }
+#chic-loader { transition: opacity 3s ease; }
 #chic-loader.hiding { opacity: 0; pointer-events: none; }
 #chic-loader.done { display: none; }
 
@@ -709,7 +708,9 @@ body {
     display: flex; gap: 3vw; align-items: baseline;
     position: relative; z-index: 1;
     flex-wrap: nowrap;
+    animation: logoFadeIn 2s ease both;
 }
+@keyframes logoFadeIn { from { opacity: 0; } to { opacity: 1; } }
 .c-char {
     font-family: 'Playfair Display', serif;
     font-size: clamp(6rem, 20vw, 18rem);
