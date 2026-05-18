@@ -1957,11 +1957,6 @@ onValue(lastReadRef, snap => {
 // ── CHIC LOADER ──
 (function() {
     const loader = document.getElementById('chic-loader');
-    if (localStorage.getItem('ozi-visited')) {
-        loader.classList.add('done');
-        return;
-    }
-    localStorage.setItem('ozi-visited', '1');
     document.body.style.overflow = 'hidden';
     setTimeout(() => {
         loader.classList.add('hiding');
