@@ -695,7 +695,7 @@ body {
     z-index: 99999; overflow: hidden;
     pointer-events: all;
 }
-#chic-loader { transition: opacity 0.5s ease; }
+#chic-loader { transition: opacity 2s ease; }
 #chic-loader.hiding { opacity: 0; pointer-events: none; }
 #chic-loader.done { display: none; }
 
@@ -1961,7 +1961,7 @@ onValue(lastReadRef, snap => {
     setTimeout(() => {
         loader.classList.add('hiding');
         document.body.style.overflow = '';
-        setTimeout(() => loader.classList.add('done'), 500);
+        setTimeout(() => loader.classList.add('done'), 2000);
     }, 4360);
 })();
 
