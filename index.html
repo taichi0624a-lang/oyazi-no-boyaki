@@ -1427,7 +1427,7 @@ function renderStrips() {
         strip.innerHTML = `
             <div class="strip-head" onclick="toggleStrip(${e.id})">
                 <div class="strip-num-col">
-                    <span class="s-num">${String(entries.length - i).padStart(2,'0')}</span>
+                    <span class="s-num">No.${String(entries.length - i).padStart(2,'0')}</span>
                 </div>
                 <div class="strip-main-col">
                     <div class="s-tags">${tags || '<span class="s-tag">\u2014</span>'}</div>
