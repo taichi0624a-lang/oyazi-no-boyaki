@@ -695,6 +695,8 @@ body {
     z-index: 99999; overflow: hidden;
     pointer-events: all;
 }
+#chic-loader { transition: opacity 0.38s ease; }
+#chic-loader.hiding { opacity: 0; pointer-events: none; }
 #chic-loader.done { display: none; }
 
 .cl-dots {
@@ -713,12 +715,26 @@ body {
     color: #0a0a0a;
     font-weight: 400;
     line-height: 1;
+    opacity: 0;
+    animation: charIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.c-char:nth-child(1) { --cx: -55px; animation-delay: 0s; }
+.c-char:nth-child(2) { --cx: 0px;   animation-delay: 0.14s; }
+.c-char:nth-child(3) { --cx: 55px;  animation-delay: 0.28s; }
+@keyframes charIn {
+    from { opacity: 0; transform: translateX(var(--cx, 0px)) scale(1.12); }
+    to   { opacity: 1; transform: none; }
 }
 #loader-progress {
     position: absolute; bottom: 0; left: 0;
     width: 100%; height: 1px;
     background: linear-gradient(90deg, transparent 0%, #0a0a0a 30%, #0a0a0a 70%, transparent 100%);
-    transform-origin: left center; transform: scaleX(0);
+    transform-origin: left center;
+    animation: progressIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes progressIn {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
 }
 
 /* ─── KONAMI EFFECT ─── */
@@ -976,7 +992,6 @@ body {
     .c-char { font-size: clamp(3.6rem, 21vw, 18rem); }
 }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
 
@@ -1941,28 +1956,18 @@ onValue(lastReadRef, snap => {
 
 // ── CHIC LOADER ──
 (function() {
-    document.body.style.overflow = 'hidden';
     const loader = document.getElementById('chic-loader');
-    const xOffset = Math.min(110, window.innerWidth * 0.26);
-
-    const tl = gsap.timeline({
-        onComplete: () => {
-            loader.classList.add('done');
-            document.body.style.overflow = '';
-        }
-    });
-
-    tl.fromTo('.c-char',
-        { opacity: 0, filter: 'blur(28px)', x: (i) => (i - 1) * xOffset, scale: 1.15 },
-        { opacity: 1, filter: 'blur(0px)', x: 0, scale: 1, duration: 2.8, stagger: 0.18, ease: 'power2.out' }
-    )
-    .fromTo('#loader-progress',
-        { scaleX: 0 },
-        { scaleX: 1, duration: 4.2, ease: 'expo.out' },
-        0
-    )
-    .to({}, { duration: 1.2 })
-    .to('#chic-loader', { opacity: 0, duration: 0.5, ease: 'power1.in' });
+    if (localStorage.getItem('ozi-visited')) {
+        loader.classList.add('done');
+        return;
+    }
+    localStorage.setItem('ozi-visited', '1');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => {
+        loader.classList.add('hiding');
+        document.body.style.overflow = '';
+        setTimeout(() => loader.classList.add('done'), 380);
+    }, 1550);
 })();
 
 // ── THEME ──
