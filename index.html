@@ -1413,7 +1413,9 @@ function renderStrips() {
     const cnt = document.getElementById('diary-count');
     if (cnt) cnt.textContent = entries.length + ' ENTRIES';
 
-    entries.forEach((e, i) => {
+    const numMap = new Map(entries.map((e, i) => [e.id, entries.length - i]));
+    const display = [...entries].sort(() => Math.random() - 0.5);
+    display.forEach((e, i) => {
         const strip = document.createElement('div');
         strip.className = 'entry-strip' + (e.id === openId ? ' open' : '');
         strip.dataset.id = e.id;
@@ -1430,7 +1432,7 @@ function renderStrips() {
         strip.innerHTML = `
             <div class="strip-head" onclick="toggleStrip(${e.id})">
                 <div class="strip-num-col">
-                    <span class="s-num">No.${String(entries.length - i).padStart(2,'0')}</span>
+                    <span class="s-num">No.${String(numMap.get(e.id)).padStart(2,'0')}</span>
                 </div>
                 <div class="strip-main-col">
                     <div class="s-tags">${tags || '<span class="s-tag">\u2014</span>'}</div>
