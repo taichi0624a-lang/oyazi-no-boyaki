@@ -731,18 +731,31 @@
         }
 
         async function loadFromSheet() {
-            const t = '&t=' + Date.now();
+            const t = Date.now();
 
-            // WATCHED（メイン）を先に確実に読み込む
+            // まず movies_watched.json を試みる（Filmarks自動同期データ）
+            let watchedLoaded = false;
             try {
-                const watchedRes = await fetch(SHEET_CSV_URL + t);
-                const watchedText = await watchedRes.text();
-                await Promise.allSettled(parseSheetCSV(watchedText, 'watched'));
-            } catch(e) { console.error('WATCHEDシート読み込み失敗', e); }
+                const r = await fetch('./movies_watched.json?t=' + t);
+                if (r.ok) {
+                    const movies = await r.json();
+                    movies.forEach(m => allMovies.push(m));
+                    watchedLoaded = true;
+                }
+            } catch(e) {}
 
-            // TOWATCHは失敗しても全体に影響させない
+            // JSONがなければ従来のSheetsから読み込み
+            if (!watchedLoaded) {
+                try {
+                    const watchedRes = await fetch(SHEET_CSV_URL + '&t=' + t);
+                    const watchedText = await watchedRes.text();
+                    await Promise.allSettled(parseSheetCSV(watchedText, 'watched'));
+                } catch(e) { console.error('WATCHEDシート読み込み失敗', e); }
+            }
+
+            // TOWATCHは引き続きSheetsから
             try {
-                const towatchRes = await fetch(TOWATCH_CSV_URL + t);
+                const towatchRes = await fetch(TOWATCH_CSV_URL + '&t=' + t);
                 const towatchText = await towatchRes.text();
                 await Promise.allSettled(parseSheetCSV(towatchText, 'towatch'));
             } catch(e) { console.error('TOWATCHシート読み込み失敗（公開設定を確認してください）', e); }
@@ -753,7 +766,6 @@
                 const m = allMovies.find(m => m.id === window._openMovieId);
                 if (m) openImmersive(m);
             }
-            // TOWATCHのサブスク情報をバックグラウンドで取得
             prefetchProviders();
         }
 

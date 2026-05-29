@@ -1,4 +1,4 @@
-name: Filmarks → Sheets 自動同期
+name: Filmarks 自動同期
 
 on:
   schedule:
@@ -8,8 +8,11 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write        # movies_watched.json をコミットするために必要
+
     steps:
-      - name: リポジトリをチェックアウト
+      - name: チェックアウト
         uses: actions/checkout@v4
 
       - name: Python セットアップ
@@ -18,9 +21,14 @@ jobs:
           python-version: '3.12'
 
       - name: 依存ライブラリをインストール
-        run: pip install requests beautifulsoup4 google-auth google-auth-httplib2 google-api-python-client
+        run: pip install requests beautifulsoup4
 
-      - name: Filmarks → Sheets 同期実行
+      - name: Filmarks → movies_watched.json 同期
         run: python sync_filmarks.py
-        env:
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+
+      - name: 変更があればコミット & プッシュ
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add movies_watched.json
+          git diff --cached --quiet && echo "変更なし" || (git commit -m "自動同期: movies_watched.json を更新" && git push)

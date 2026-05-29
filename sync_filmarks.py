@@ -1,185 +1,196 @@
 """
-Filmarks → Google Sheets 差分同期スクリプト
-新しく鑑賞した映画だけをシートに追記する（TMDB メタデータ付き）
+Filmarks → movies_watched.json 同期スクリプト
+GitHub Actions で自動実行。Google 認証不要。
 """
-
 import requests
 from bs4 import BeautifulSoup
-import json, os, re, time, sys
+import json, re, time, os, sys, io
 
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
-# ===== 設定 =====
-FILMARKS_USER  = "sally0624"
-SPREADSHEET_ID = "1Kqff4ogYLk6L5W-vIby1CijrOmCxLF1_axpZaWZNr80"
-SHEET_NAME     = "シート1"
-TMDB_API_KEY   = "c6dc0382ae920c2cb5143ff6a7ce97e6"
-SCOPES         = ["https://www.googleapis.com/auth/spreadsheets"]
-HEADERS        = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-MAX_PAGES      = 5  # 最大何ページまでチェックするか
+FILMARKS_USER = "sally0624"
+TMDB_API_KEY  = "c6dc0382ae920c2cb5143ff6a7ce97e6"
+OUTPUT_FILE   = "movies_watched.json"
+HEADERS       = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-# ===== Google Sheets 接続 =====
-def get_sheets_service():
-    sa_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
-    if not sa_json:
-        raise RuntimeError("環境変数 GOOGLE_SERVICE_ACCOUNT_JSON が設定されていません")
-    info = json.loads(sa_json)
-    creds = service_account.Credentials.from_service_account_info(info, scopes=SCOPES)
-    return build("sheets", "v4", credentials=creds)
-
-def get_existing_titles(service):
-    result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID,
-        range=f"{SHEET_NAME}!A2:A"
-    ).execute()
-    rows = result.get("values", [])
-    return set(r[0].strip() for r in rows if r)
-
-def append_to_sheet(service, rows):
-    if not rows:
-        return 0
-    result = service.spreadsheets().values().append(
-        spreadsheetId=SPREADSHEET_ID,
-        range=f"{SHEET_NAME}!A1",
-        valueInputOption="RAW",
-        insertDataOption="INSERT_ROWS",
-        body={"values": rows}
-    ).execute()
-    return result.get("updates", {}).get("updatedRows", 0)
-
-# ===== Filmarks スクレイプ =====
-def scrape_filmarks_page(page_num):
-    url = f"https://filmarks.com/users/{FILMARKS_USER}?page={page_num}"
-    r = requests.get(url, headers=HEADERS, timeout=15)
-    if r.status_code != 200:
-        print(f"  ページ {page_num} 取得失敗: {r.status_code}")
-        return []
-
-    soup = BeautifulSoup(r.text, "html.parser")
+# ─── Filmarks スクレイプ ───────────────────────────────────────
+def scrape_filmarks_all():
+    """watched 全件をスクレイプ"""
     marks = []
+    page  = 1
 
-    for card in soup.select(".c-content-card"):
-        title_el = card.select_one(".c-content-card__title a")
-        if not title_el:
-            continue
+    while True:
+        url = f"https://filmarks.com/users/{FILMARKS_USER}?page={page}"
+        print(f"  Filmarks page {page}...", end=" ", flush=True)
+        r = requests.get(url, headers=HEADERS, timeout=15)
 
-        span = title_el.select_one("span")
-        year = ""
-        if span:
-            m = re.search(r"(\d{4})年", span.get_text())
-            if m:
-                year = m.group(1)
-            span.decompose()
-        title = title_el.get_text(strip=True)
+        if r.status_code != 200:
+            print(f"失敗 ({r.status_code})")
+            break
 
-        score_el  = card.select_one(".c-rating__score")
-        score     = score_el.get_text(strip=True) if score_el else ""
+        soup  = BeautifulSoup(r.text, "html.parser")
+        cards = soup.select(".c-content-card")
+        if not cards:
+            print("記事なし → 終了")
+            break
 
-        review_el = card.select_one(".c-content-card__review span")
-        comment   = review_el.get_text(strip=True) if review_el else ""
+        page_marks = []
+        for card in cards:
+            title_el = card.select_one(".c-content-card__title a")
+            if not title_el:
+                continue
 
-        link = ""
-        if title_el.get("href"):
-            link = "https://filmarks.com" + title_el["href"]
+            span = title_el.select_one("span")
+            year = ""
+            if span:
+                m = re.search(r"(\d{4})年", span.get_text())
+                if m:
+                    year = m.group(1)
+                span.decompose()
 
-        marks.append({"title": title, "year": year, "score": score, "comment": comment, "url": link})
+            title     = title_el.get_text(strip=True)
+            score_el  = card.select_one(".c-rating__score")
+            score     = score_el.get_text(strip=True) if score_el else ""
+            review_el = card.select_one(".c-content-card__review span")
+            comment   = review_el.get_text(strip=True) if review_el else ""
+            link      = ("https://filmarks.com" + title_el["href"]) if title_el.get("href") else ""
+
+            page_marks.append({"title": title, "year": year,
+                                "score": score, "comment": comment, "url": link})
+
+        marks.extend(page_marks)
+        print(f"{len(page_marks)} 件")
+
+        # 次ページがなければ終了
+        if not soup.select_one("a[rel='next'], .c2-pagination__next"):
+            break
+        page += 1
+        time.sleep(0.8)
 
     return marks
 
-# ===== TMDB メタデータ取得 =====
-def fetch_tmdb_metadata(title, year=""):
-    try:
-        q = requests.utils.quote(title)
-        url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={q}&language=ja-JP"
-        if year:
-            url += f"&year={year}"
 
-        r = requests.get(url, timeout=10)
-        results = r.json().get("results", [])
+# ─── TMDB メタデータ ──────────────────────────────────────────
+def fetch_tmdb(title, year=""):
+    try:
+        q   = requests.utils.quote(title)
+        url = (f"https://api.themoviedb.org/3/search/movie"
+               f"?api_key={TMDB_API_KEY}&query={q}&language=ja-JP"
+               + (f"&year={year}" if year else ""))
+        results = requests.get(url, timeout=10).json().get("results", [])
         if not results:
-            return {}
+            return None
 
         tmdb_id = results[0]["id"]
-        detail = requests.get(
+        d = requests.get(
             f"https://api.themoviedb.org/3/movie/{tmdb_id}"
-            f"?api_key={TMDB_API_KEY}&language=ja-JP&append_to_response=credits",
+            f"?api_key={TMDB_API_KEY}&language=ja-JP&append_to_response=credits,images",
             timeout=10
         ).json()
 
         director = next(
-            (c["name"] for c in detail.get("credits", {}).get("crew", []) if c.get("job") == "Director"),
-            ""
-        )
-        country  = ", ".join(c.get("name", "") for c in detail.get("production_countries", []))
-        runtime  = str(detail.get("runtime", ""))
-        genre    = ", ".join(g.get("name", "") for g in detail.get("genres", []))
-        poster   = detail.get("poster_path", "")
+            (c["name"] for c in d.get("credits", {}).get("crew", [])
+             if c.get("job") == "Director"), "")
+        country  = ", ".join(c.get("name","") for c in d.get("production_countries", []))
+        runtime  = str(d.get("runtime","")) if d.get("runtime") else ""
+        genres   = [g.get("name","") for g in d.get("genres", [])]
+        genre    = ", ".join(genres)
+
+        # ポスター（英語優先）
+        poster_path   = d.get("poster_path","") or ""
+        en_posters = [p["file_path"] for p in d.get("images",{}).get("posters",[])
+                      if p.get("iso_639_1") in ("en", None)]
+        if en_posters:
+            poster_path = en_posters[0]
 
         return {
-            "director": director, "country": country,
-            "runtime": runtime, "genre": genre,
-            "tmdb_id": str(tmdb_id), "poster_path": poster
+            "id":            tmdb_id,
+            "poster_path":   poster_path,
+            "backdrop_path": d.get("backdrop_path","") or "",
+            "overview":      d.get("overview","") or "",
+            "release_date":  d.get("release_date","") or "",
+            "genre_ids":     [g["id"] for g in d.get("genres", [])],
+            "appDirector":   director,
+            "appCountry":    country,
+            "appRuntime":    f"{runtime}分" if runtime else "",
+            "appGenre":      genre,
         }
     except Exception as e:
-        print(f"    TMDB取得失敗 ({title}): {e}")
-        return {}
+        print(f"TMDB失敗: {e}")
+        return None
 
-# ===== メイン =====
+
+# ─── メイン ──────────────────────────────────────────────────
 def main():
-    print("=== Filmarks → Sheets 差分同期 ===\n")
+    print("=== Filmarks → movies_watched.json ===\n")
 
-    service  = get_sheets_service()
-    existing = get_existing_titles(service)
-    print(f"既存タイトル数: {len(existing)}\n")
+    # 既存データ読み込み（差分更新用）
+    existing = {}
+    if os.path.exists(OUTPUT_FILE):
+        with open(OUTPUT_FILE, "r", encoding="utf-8") as f:
+            try:
+                for m in json.load(f):
+                    existing[m["title"]] = m
+                print(f"既存: {len(existing)} 件\n")
+            except Exception:
+                pass
 
-    new_marks = []
-    for page in range(1, MAX_PAGES + 1):
-        print(f"Filmarks ページ {page} を確認中...")
-        marks = scrape_filmarks_page(page)
-        if not marks:
-            break
+    # Filmarks スクレイプ
+    print("Filmarks をスクレイプ中...")
+    filmarks = scrape_filmarks_all()
+    print(f"\nFilmarks 合計: {len(filmarks)} 件\n")
 
-        page_new = [m for m in marks if m["title"] not in existing]
-        new_marks.extend(page_new)
-        print(f"  → {len(page_new)} 件が新規")
+    all_movies = []
+    new_count  = 0
 
-        # 全件が既存 → それ以降もないので終了
-        if len(page_new) == 0:
-            print("  全件既存のため終了")
-            break
+    for fm in filmarks:
+        title = fm["title"]
 
-        time.sleep(1)
+        if title in existing:
+            # 既存データ再利用・Filmarks情報だけ更新
+            m = dict(existing[title])
+            m["filmarksScore"]   = fm["score"]
+            m["filmarksComment"] = fm["comment"]
+            m["filmarksUrl"]     = fm["url"]
+            m["filmarksYear"]    = fm["year"]
+            m["year"]            = fm["year"] or m.get("year","")
+            m["appStatus"]       = "watched"
+            all_movies.append(m)
+        else:
+            print(f"  [新規] {title}", end=" ... ", flush=True)
+            tmdb = fetch_tmdb(title, fm["year"])
+            time.sleep(0.4)
 
-    print(f"\n新規エントリー合計: {len(new_marks)} 件\n")
-    if not new_marks:
-        print("追加なし。終了します。")
-        return
+            base = {
+                "title":          title,
+                "filmarksScore":  fm["score"],
+                "filmarksComment":fm["comment"],
+                "filmarksUrl":    fm["url"],
+                "filmarksYear":   fm["year"],
+                "year":           fm["year"],
+                "appStatus":      "watched",
+            }
 
-    rows = []
-    for m in new_marks:
-        print(f"  [{m['title']}] TMDB取得中...", end=" ", flush=True)
-        tmdb = fetch_tmdb_metadata(m["title"], m["year"])
-        print("OK" if tmdb else "データなし")
-        rows.append([
-            m["title"],
-            m["year"],
-            m["score"],
-            m["comment"],
-            m["url"],
-            tmdb.get("director", ""),
-            tmdb.get("country", ""),
-            tmdb.get("runtime", ""),
-            tmdb.get("genre", ""),
-            tmdb.get("tmdb_id", ""),
-            tmdb.get("poster_path", "")
-        ])
-        time.sleep(0.5)
+            if tmdb:
+                base.update(tmdb)
+                base["year"] = fm["year"] or tmdb.get("release_date","")[:4]
+                print("OK")
+            else:
+                base.update({"id": 0, "poster_path":"", "backdrop_path":"",
+                             "overview":"", "release_date":"", "genre_ids":[],
+                             "appDirector":"", "appCountry":"",
+                             "appRuntime":"", "appGenre":""})
+                print("TMDBなし")
 
-    added = append_to_sheet(service, rows)
-    print(f"\n✅ 完了: {added} 件をシートに追加しました")
-    for r in rows:
-        print(f"  - {r[0]} ({r[1]})")
+            all_movies.append(base)
+            new_count += 1
+
+    # 書き出し
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(all_movies, f, ensure_ascii=False, indent=2)
+
+    print(f"\n✅ 完了: {len(all_movies)} 件 (新規 {new_count} 件) → {OUTPUT_FILE}")
+
 
 if __name__ == "__main__":
     main()
