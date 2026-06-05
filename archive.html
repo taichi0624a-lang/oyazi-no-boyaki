@@ -38,68 +38,31 @@
         body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; transition: background 0.4s, color 0.4s; }
 
         /* ── ローダー ── */
-        /* ── LOADER ── */
+        /* ── LOADER (A24 style) ── */
         #chic-loader {
             position:fixed; inset:0; z-index:9999; overflow:hidden;
-            background: radial-gradient(ellipse at 50% 0%, #0a2a35 0%, #020d14 45%, #010608 100%);
+            background:#080808;
             display:flex; align-items:center; justify-content:center;
+            opacity:0;
         }
-        /* 水面からの光 */
-        #chic-loader::before {
-            content:''; position:absolute; top:0; left:0; right:0; height:50%;
-            background: radial-gradient(ellipse at 50% -10%, rgba(127,212,232,0.13) 0%, transparent 65%);
+        #grain-canvas {
+            position:absolute; inset:0; width:100%; height:100%;
             pointer-events:none; z-index:1;
+            opacity:0.08; mix-blend-mode:screen;
         }
-        /* 海底の暗さ */
-        #chic-loader::after {
-            content:''; position:absolute; bottom:0; left:0; right:0; height:45%;
-            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
-            pointer-events:none; z-index:1;
-        }
-        /* 粒子キャンバス */
-        #loader-canvas { position:absolute; inset:0; z-index:2; pointer-events:none; }
-        /* 光の筋 */
-        .light-rays { position:absolute; inset:0; z-index:2; pointer-events:none; overflow:hidden; }
-        .ray {
-            position:absolute; top:-5%; transform-origin:top center;
-            width:clamp(40px,6vw,90px); height:70%;
-            background:linear-gradient(to bottom, rgba(127,212,232,0.08) 0%, rgba(127,212,232,0.03) 50%, transparent 100%);
-            filter:blur(16px); opacity:0;
-        }
-        /* 水面フラッシュ */
-        #surface-flash {
-            position:absolute; inset:0; z-index:4;
-            background:linear-gradient(to bottom, rgba(160,235,248,0.55) 0%, rgba(30,110,145,0.15) 35%, transparent 70%);
-        }
-        /* タイトル */
-        .tc-center { position:relative; z-index:5; text-align:center; }
+        .tc-center { position:relative; z-index:2; text-align:center; }
         #loader-title {
             font-family:'Playfair Display',serif;
             font-size:clamp(4rem,13vw,11rem);
             font-style:italic; font-weight:400;
-            color:#c8e8f0; letter-spacing:0.04em; line-height:1;
-            text-shadow: 0 0 40px rgba(127,212,232,0.22), 0 0 80px rgba(127,212,232,0.08);
+            color:#e8e0d0; letter-spacing:0.04em; line-height:1;
             opacity:0;
-            animation: water-drift 5s ease-in-out infinite;
-        }
-        @keyframes water-drift {
-            0%,100% { transform:skewX(0deg); }
-            30%     { transform:skewX(0.25deg); }
-            70%     { transform:skewX(-0.2deg); }
-        }
-        #loader-hline {
-            width:0; height:1px; margin:clamp(14px,2.5vw,20px) auto 0;
-            background:linear-gradient(90deg, transparent, rgba(127,212,232,0.4), transparent);
         }
         #loader-label {
             font-family:'Space Mono',monospace;
-            font-size:clamp(6px,1.1vw,8px); letter-spacing:5px;
-            color:rgba(127,212,232,0.35); margin-top:12px; opacity:0;
+            font-size:clamp(7px,1.1vw,9px); letter-spacing:6px;
+            color:rgba(232,224,208,0.32); margin-top:16px; opacity:0;
         }
-        .c-word { display:inline; }
-        .c-char { display:none; }
-        .curtain { display:none; }
-        .lbox-bar { display:none; }
 
         /* ── フィルムストリップ スクロールバー ── */
         #film-scroll { position:fixed; left:0; top:0; width:18px; height:100vh; z-index:400; pointer-events:none; background:#0d0d0d; background-image: radial-gradient(circle, rgba(255,255,255,0.18) 3px, transparent 3px); background-size:18px 18px; background-position:center; }
@@ -342,19 +305,10 @@
 
     <!-- ローダー -->
     <section id="chic-loader">
-        <div id="surface-flash"></div>
-        <canvas id="loader-canvas"></canvas>
-        <div class="light-rays">
-            <div class="ray" style="left:12%"></div>
-            <div class="ray" style="left:28%; transform:rotate(3deg)"></div>
-            <div class="ray" style="left:48%; transform:rotate(-2deg)"></div>
-            <div class="ray" style="left:65%; transform:rotate(4deg)"></div>
-            <div class="ray" style="left:82%; transform:rotate(-3deg)"></div>
-        </div>
+        <canvas id="grain-canvas"></canvas>
         <div class="tc-center">
             <div id="loader-title">drop off</div>
-            <div id="loader-hline"></div>
-            <div id="loader-label">深海 · FILM ARCHIVE</div>
+            <div id="loader-label">FILM ARCHIVE</div>
         </div>
     </section>
 
@@ -607,40 +561,6 @@
             document.getElementById('film-progress').style.height = (pct * 100) + '%';
         });
 
-        // 気泡パーティクル
-        (function() {
-            const canvas = document.getElementById('loader-canvas');
-            const ctx = canvas.getContext('2d');
-            function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-            resize();
-            const pts = Array.from({ length: 65 }, () => ({
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
-                r: Math.random() * 1.4 + 0.2,
-                vy: -(Math.random() * 0.35 + 0.08),
-                vx: (Math.random() - 0.5) * 0.12,
-                o: Math.random() * 0.28 + 0.05,
-                wo: Math.random() * Math.PI * 2,
-            }));
-            let t = 0, aid;
-            function draw() {
-                t++;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                pts.forEach(p => {
-                    const wx = p.x + Math.sin(t * 0.012 + p.wo) * 0.8;
-                    ctx.beginPath();
-                    ctx.arc(wx, p.y, p.r, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(127,212,232,${p.o})`;
-                    ctx.fill();
-                    p.y += p.vy; p.x += p.vx;
-                    if (p.y < -4) { p.y = canvas.height + 4; p.x = Math.random() * canvas.width; }
-                });
-                aid = requestAnimationFrame(draw);
-            }
-            draw();
-            window._stopBubbles = () => cancelAnimationFrame(aid);
-        })();
-
         document.addEventListener('DOMContentLoaded', () => {
             document.body.style.overflow = 'hidden';
             renderSkeletons('towatch-grid');
@@ -649,33 +569,50 @@
             const urlId = new URLSearchParams(location.search).get('id');
             if (urlId) window._openMovieId = parseInt(urlId);
 
-            const tl = gsap.timeline({
-                onComplete: () => {
-                    window._stopBubbles?.();
-                    document.getElementById('chic-loader').style.display = 'none';
-                    document.body.style.overflow = 'auto';
+            // ── フィルムグレイン ──
+            const gc = document.getElementById('grain-canvas');
+            const gctx = gc.getContext('2d');
+            let gaid;
+            function drawGrain() {
+                gc.width = window.innerWidth;
+                gc.height = window.innerHeight;
+                const id = gctx.createImageData(gc.width, gc.height);
+                const d = id.data;
+                for (let i = 0; i < d.length; i += 4) {
+                    const v = Math.random() * 255 | 0;
+                    d[i] = d[i+1] = d[i+2] = v;
+                    d[i+3] = Math.random() * 30 | 0;
                 }
+                gctx.putImageData(id, 0, 0);
+                gaid = requestAnimationFrame(drawGrain);
+            }
+            drawGrain();
+
+            // ── プロジェクターフリッカー → タイトル ──
+            const loader = document.getElementById('chic-loader');
+            const flickers = [0, 1, 0.15, 0.95, 0.4, 1, 0.75, 1];
+            let ft = 0;
+            flickers.forEach(v => {
+                setTimeout(() => { loader.style.opacity = v; }, ft);
+                ft += 35 + (Math.random() * 55 | 0);
             });
-            tl
-              // 水面から沈んでいく
-              .to('#surface-flash', { opacity:0, duration:1.6, ease:'power3.in' })
-              // 光の筋が現れる
-              .to('.ray', { opacity:1, duration:2.2, stagger:0.18, ease:'power1.out' }, 0.4)
-              // タイトルが上から静かに沈んでくる
-              .fromTo('#loader-title',
-                { opacity:0, y:-28, filter:'blur(14px)' },
-                { opacity:1, y:0, filter:'blur(0px)', duration:1.9, ease:'power1.out' },
-                0.9
-              )
-              // ラインが伸びる
-              .to('#loader-hline', { width:'80px', duration:1.1, ease:'power2.out' }, '-=0.8')
-              // ラベル
-              .to('#loader-label', { opacity:1, duration:0.9 }, '-=0.6')
-              // ホールド（気泡が漂う）
-              .to({}, { duration:1.8 })
-              // フェードアウト
-              .set('#app-wrapper', { visibility:'visible', opacity:1 })
-              .to('#chic-loader', { opacity:0, duration:0.9, ease:'power1.in' });
+
+            setTimeout(() => {
+                gsap.to('#loader-title', { opacity:1, duration:1.6, ease:'power1.out' });
+                gsap.to('#loader-label', { opacity:1, duration:1.0, delay:1.0, ease:'power1.out' });
+
+                setTimeout(() => {
+                    cancelAnimationFrame(gaid);
+                    gsap.set('#app-wrapper', { visibility:'visible', opacity:1 });
+                    gsap.to('#chic-loader', {
+                        opacity:0, duration:0.85, ease:'power2.in',
+                        onComplete: () => {
+                            loader.style.display = 'none';
+                            document.body.style.overflow = 'auto';
+                        }
+                    });
+                }, 3400);
+            }, ft + 150);
         });
 
         function renderSkeletons(gridId) {
