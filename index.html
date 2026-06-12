@@ -361,6 +361,44 @@ body {
 }
 .s-edit:hover { border-color: var(--ink); color: var(--ink); }
 
+/* ── ENGAGE (reaction + share) ── */
+.s-engage {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+.s-react {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 4px 9px;
+    cursor: pointer;
+    transition: 0.18s;
+}
+.s-react .s-react-heart { font-size: 11px; line-height: 1; transition: 0.18s; }
+.s-react:hover { border-color: var(--red); color: var(--red); }
+.s-react.reacted { border-color: rgba(170,20,20,0.4); color: var(--red); }
+.s-react.reacted .s-react-heart { color: var(--red); }
+.s-share {
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 2px;
+    padding: 4px 9px;
+    cursor: pointer;
+    transition: 0.18s;
+}
+.s-share:hover { border-color: var(--ink); color: var(--ink); }
+
 /* ADD strip */
 .add-strip {
     border-bottom: 1px solid var(--rule);
@@ -938,6 +976,8 @@ body {
     .s-body-text { font-size: 0.92rem; line-height: 1.9; }
     .s-body-meta { margin-top: 18px; padding-top: 14px; flex-wrap: wrap; gap: 10px; }
     .s-del, .s-edit { padding: 10px 14px; font-size: 9px; min-height: 44px; }
+    .s-engage { margin-left: 0; flex-wrap: wrap; }
+    .s-react, .s-share { min-height: 38px; padding: 8px 12px; }
 
     /* ── Archives ── */
     .arc-grid { grid-template-columns: 1fr; }
@@ -1243,6 +1283,7 @@ const diaryRef    = ref(db, 'diary');
 const visitsRef   = ref(db, 'visits');
 const photosRef   = ref(db, 'photos');
 const lastReadRef = ref(db, 'lastread');
+const reactionsRef = ref(db, 'reactions');
 
 // ── SAVE HELPERS ──
 function saveEntries() {
@@ -1284,6 +1325,7 @@ let pendingPhotoSrc = null;
 let entryPhotos = [];
 let firebaseLoaded = false;
 let firebaseUser = null;
+let reactionCounts = {};
 
 // ── ADMIN ──
 let isAdmin = sessionStorage.getItem('ozi-admin') === '1';
@@ -1417,6 +1459,7 @@ function renderStrips() {
         const strip = document.createElement('div');
         strip.className = 'entry-strip' + (e.id === openId ? ' open' : '');
         strip.dataset.id = e.id;
+        strip.id = 'entry-' + e.id;
         strip.style.animationDelay = (i * 0.06) + 's';
 
         const tags = (e.tags||[]).map(t => `<span class="s-tag">${t}</span>`).join('');
@@ -1454,6 +1497,14 @@ function renderStrips() {
                         })() : ''}
                         <div class="s-body-meta">
                             <div class="s-body-tags-full">${bodyTags}</div>
+                            <div class="s-engage">
+                                <button class="s-react${localStorage.getItem('ozi-reacted-'+e.id) ? ' reacted' : ''}" onclick="toggleReaction(${e.id});event.stopPropagation()">
+                                    <span class="s-react-heart">&#9829;</span>
+                                    <span class="s-react-cnt" data-react="${e.id}">${reactionCounts[e.id] || 0}</span>
+                                </button>
+                                <button class="s-share" onclick="shareEntry(${e.id});event.stopPropagation()">X</button>
+                                <button class="s-share" onclick="copyEntryLink(${e.id});event.stopPropagation()">LINK</button>
+                            </div>
                             ${adminBtns}
                         </div>
                     </div>
@@ -1899,6 +1950,48 @@ onValue(visitsRef, snap => {
     runTransaction(visitsRef, c => (c || 0) + 1).catch(() => {});
 }, { once: true });
 
+// ── REACTIONS (Firebase) ──
+onValue(reactionsRef, snap => {
+    reactionCounts = snap.val() || {};
+    document.querySelectorAll('[data-react]').forEach(el => {
+        el.textContent = reactionCounts[el.dataset.react] || 0;
+    });
+});
+
+function toggleReaction(id) {
+    const key = 'ozi-reacted-' + id;
+    if (localStorage.getItem(key)) { showToast('ALREADY LIKED'); return; }
+    localStorage.setItem(key, '1');
+    document.querySelectorAll('.entry-strip[data-id="' + id + '"] .s-react').forEach(b => b.classList.add('reacted'));
+    runTransaction(ref(db, 'reactions/' + String(id)), c => (c || 0) + 1).catch(() => {
+        localStorage.removeItem(key);
+        showToast('LIKE FAILED');
+    });
+}
+
+function entryUrl(id) {
+    return 'https://kodomo-no-boyaki.com/#entry-' + id;
+}
+
+function shareEntry(id) {
+    const e = entries.find(x => x.id === id);
+    const text = e ? e.title : '親父より親父な子供のぼやき';
+    const url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(entryUrl(id));
+    window.open(url, '_blank', 'noopener');
+}
+
+function copyEntryLink(id) {
+    const link = entryUrl(id);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(() => showToast('LINK COPIED')).catch(() => showToast('COPY FAILED'));
+    } else {
+        const ta = document.createElement('textarea');
+        ta.value = link; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); showToast('LINK COPIED'); } catch (e) { showToast('COPY FAILED'); }
+        document.body.removeChild(ta);
+    }
+}
+
 // ── AUTH STATE ──
 onAuthStateChanged(auth, user => {
     firebaseUser = user;
@@ -1931,7 +2024,25 @@ onValue(diaryRef, snap => {
     renderDateline();
     renderStrips();
     renderContinue();
+    applyDeepLink();
 });
+
+// ── DEEP LINK (#entry-{id}) ──
+let deepLinkDone = false;
+function applyDeepLink() {
+    if (deepLinkDone) return;
+    const m = (location.hash || '').match(/^#entry-(\d+)$/);
+    if (!m) return;
+    const id = Number(m[1]);
+    if (!entries.some(e => e.id === id)) return;
+    deepLinkDone = true;
+    setTimeout(() => {
+        const el = document.getElementById('entry-' + id);
+        if (!el) return;
+        if (!el.classList.contains('open')) toggleStrip(id);
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 400);
+}
 
 onValue(photosRef, snap => {
     photos = snap.val() ? Object.values(snap.val()).sort((a, b) => b.id - a.id) : [];
@@ -1996,6 +2107,7 @@ Object.assign(window, {
     publishPhoto, deletePhoto, openLightbox, closeLightbox,
     openEntryById, openStrip, closeReadModal, scrollToSection,
     deleteEntry, toggleStrip,
+    toggleReaction, shareEntry, copyEntryLink,
     handleEntryPhotoSelect, removeEntryPhoto, openEntryPhoto, epLbNav
 });
 </script>
