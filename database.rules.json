@@ -1,0 +1,28 @@
+{
+  "rules": {
+    "diary": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "photos": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "visits": {
+      ".read": true,
+      ".write": true
+    },
+    "reactions": {
+      ".read": true,
+      ".write": true
+    },
+    "lastread": {
+      ".read": true,
+      ".write": true
+    },
+    "ideas": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}
