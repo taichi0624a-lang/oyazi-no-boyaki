@@ -399,6 +399,82 @@ body {
 }
 .s-share:hover { border-color: var(--ink); color: var(--ink); }
 
+/* ── IDEAS / ネタ帳 ── */
+#ideas-section { margin-bottom: 40px; }
+.ideas-add {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+.ideas-input {
+    flex: 1 1 200px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.18s;
+}
+.ideas-input:focus { border-color: var(--ink); }
+.ideas-input-memo { flex: 1 1 160px; font-size: 13px; color: var(--dim); }
+.ideas-add-btn {
+    background: transparent;
+    border: 1px solid var(--red);
+    color: var(--red);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 0 16px;
+    cursor: pointer;
+    transition: 0.18s;
+}
+.ideas-add-btn:hover { background: var(--red); color: var(--bg); }
+.ideas-empty {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--dim);
+    padding: 14px 4px;
+}
+.ideas-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--rule);
+}
+.ideas-item-main { flex: 1; min-width: 0; }
+.ideas-item-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    color: var(--ink);
+    line-height: 1.3;
+}
+.ideas-item-memo {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--dim);
+    margin-top: 3px;
+}
+.ideas-del {
+    flex-shrink: 0;
+    background: transparent;
+    border: 1px solid rgba(170,20,20,0.15);
+    color: rgba(170,20,20,0.35);
+    font-size: 12px;
+    line-height: 1;
+    padding: 6px 9px;
+    cursor: pointer;
+    transition: 0.18s;
+}
+.ideas-del:hover { border-color: var(--red); color: var(--red); }
+@media (max-width: 640px) {
+    .ideas-add-btn { flex: 1 1 100%; min-height: 44px; padding: 10px; }
+    .ideas-del { min-height: 40px; min-width: 40px; }
+}
+
 /* ADD strip */
 .add-strip {
     border-bottom: 1px solid var(--rule);
@@ -1083,6 +1159,21 @@ body {
 <!-- ══════════ MAIN ══════════ -->
 <div id="wrap">
 
+    <!-- IDEAS / ネタ帳 (admin only) -->
+    <section id="ideas-section" class="admin-only" style="display:none">
+        <div class="sec-rule" style="margin-bottom:16px">
+            <span class="sec-rule-lbl">IDEAS · ネタ帳</span>
+            <div class="sec-rule-line"></div>
+            <span class="sec-rule-cnt" id="ideas-count"></span>
+        </div>
+        <div class="ideas-add">
+            <input id="idea-text" class="ideas-input" type="text" placeholder="書きたいネタ..." autocomplete="off">
+            <input id="idea-memo" class="ideas-input ideas-input-memo" type="text" placeholder="一言メモ（任意）" autocomplete="off">
+            <button class="ideas-add-btn" onclick="addIdea()">+ ADD</button>
+        </div>
+        <div id="ideas-list"></div>
+    </section>
+
     <!-- DIARY STRIPS -->
     <section>
         <div class="sec-rule">
@@ -1284,6 +1375,7 @@ const visitsRef   = ref(db, 'visits');
 const photosRef   = ref(db, 'photos');
 const lastReadRef = ref(db, 'lastread');
 const reactionsRef = ref(db, 'reactions');
+const ideasRef = ref(db, 'ideas');
 
 // ── SAVE HELPERS ──
 function saveEntries() {
@@ -1326,6 +1418,8 @@ let entryPhotos = [];
 let firebaseLoaded = false;
 let firebaseUser = null;
 let reactionCounts = {};
+let ideas = [];
+let ideasSubscribed = false;
 
 // ── ADMIN ──
 let isAdmin = sessionStorage.getItem('ozi-admin') === '1';
@@ -1995,7 +2089,66 @@ function copyEntryLink(id) {
 // ── AUTH STATE ──
 onAuthStateChanged(auth, user => {
     firebaseUser = user;
+    if (user) subscribeIdeas();
 });
+
+// ── IDEAS / ネタ帳 (admin only, auth-protected) ──
+function subscribeIdeas() {
+    if (ideasSubscribed) return;
+    ideasSubscribed = true;
+    onValue(ideasRef, snap => {
+        const data = snap.val();
+        ideas = data ? Object.values(data).sort((a, b) => (b.created || b.id) - (a.created || a.id)) : [];
+        renderIdeas();
+    });
+}
+
+function renderIdeas() {
+    const list = document.getElementById('ideas-list');
+    if (!list) return;
+    const cnt = document.getElementById('ideas-count');
+    if (cnt) cnt.textContent = ideas.length + ' IDEAS';
+    if (!ideas.length) {
+        list.innerHTML = '<div class="ideas-empty">まだネタがありません。思いついたら書き留めておこう。</div>';
+        return;
+    }
+    list.innerHTML = ideas.map(it => `
+        <div class="ideas-item">
+            <div class="ideas-item-main">
+                <div class="ideas-item-text">${escapeHtml(it.text)}</div>
+                ${it.memo ? `<div class="ideas-item-memo">${escapeHtml(it.memo)}</div>` : ''}
+            </div>
+            <button class="ideas-del" onclick="deleteIdea(${it.id})" title="削除">✕</button>
+        </div>`).join('');
+}
+
+function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function addIdea() {
+    const tEl = document.getElementById('idea-text');
+    const mEl = document.getElementById('idea-memo');
+    const text = tEl.value.trim();
+    const memo = mEl.value.trim();
+    if (!text) { showToast('ネタを入力してください'); return; }
+    if (!firebaseUser) { showToast('セッション切れ · 再ログインしてください'); return; }
+    const id = Date.now();
+    set(ref(db, 'ideas/' + String(id)), { id, text, memo, created: id }).then(() => {
+        tEl.value = ''; mEl.value = '';
+        tEl.focus();
+        showToast('IDEA SAVED');
+    }).catch(err => showToast('SAVE FAILED · ' + (err.code || '')));
+}
+
+function deleteIdea(id) {
+    remove(ref(db, 'ideas/' + String(id))).then(() => showToast('IDEA DELETED'))
+        .catch(err => showToast('DELETE FAILED · ' + (err.code || '')));
+}
+
+// ネタ入力欄: Enterで追加
+document.getElementById('idea-text').addEventListener('keydown', e => { if (e.key === 'Enter') addIdea(); });
+document.getElementById('idea-memo').addEventListener('keydown', e => { if (e.key === 'Enter') addIdea(); });
 
 // ── REAL-TIME LISTENERS (Firebase) ──
 onValue(diaryRef, snap => {
@@ -2108,6 +2261,7 @@ Object.assign(window, {
     openEntryById, openStrip, closeReadModal, scrollToSection,
     deleteEntry, toggleStrip,
     toggleReaction, shareEntry, copyEntryLink,
+    addIdea, deleteIdea,
     handleEntryPhotoSelect, removeEntryPhoto, openEntryPhoto, epLbNav
 });
 </script>
