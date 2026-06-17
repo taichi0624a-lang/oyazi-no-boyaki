@@ -1,4 +1,4 @@
-name: Filmarks 自動同期
+name: Notion 自動同期
 
 on:
   schedule:
@@ -21,14 +21,16 @@ jobs:
           python-version: '3.12'
 
       - name: 依存ライブラリをインストール
-        run: pip install requests beautifulsoup4
+        run: pip install requests
 
-      - name: Filmarks → movies_watched.json 同期
-        run: python sync_filmarks.py
+      - name: Notion → movies_watched.json 同期
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: python sync_notion.py
 
       - name: 変更があればコミット & プッシュ
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add movies_watched.json
-          git diff --cached --quiet && echo "変更なし" || (git commit -m "自動同期: movies_watched.json を更新" && git push)
+          git diff --cached --quiet && echo "変更なし" || (git commit -m "自動同期: movies_watched.json を更新 (Notion)" && git push)
