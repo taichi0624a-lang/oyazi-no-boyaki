@@ -890,6 +890,12 @@
                 }
             } catch(e) {}
 
+            // TMDB未紐付け（id=0）の映画をTMDB検索で補完 → ポスター・予告を復活
+            if (watchedLoaded) {
+                const missing = allMovies.filter(m => !m.id || m.id === 0 || !m.poster_path);
+                await Promise.allSettled(missing.map(backfillMovieFromTMDB));
+            }
+
             // JSONがなければ従来のSheetsから読み込み
             if (!watchedLoaded) {
                 try {
@@ -973,6 +979,35 @@
                     allMovies.push(movie);
                 }
             } catch(e) { console.error(e); }
+        }
+
+        // タイトルからTMDB検索を邪魔する語尾・注釈を除去
+        function cleanTitleForSearch(t) {
+            return String(t || '')
+                .replace(/[【\[（(].*?[】\]）)]/g, '')                 // 【】[]（）内を除去
+                .replace(/(4K)?\s*デジタル(・)?リマスター(版)?/g, '')  // デジタルリマスター系
+                .replace(/修復版|完全版|特別篇|特別版|劇場版|オリジナル(・)?バージョン|ディレクターズ(・)?カット|公開\s*\d+\s*周年記念版|\d+周年記念版/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        // id=0 等の映画をTMDBタイトル検索で補完（poster_path・id・backdrop）
+        async function backfillMovieFromTMDB(m) {
+            const q = cleanTitleForSearch(m.title) || m.title;
+            if (!q) return;
+            try {
+                const yr = m.year || m.filmarksYear || '';
+                const url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&language=ja-JP&query=${encodeURIComponent(q)}` + (yr ? `&primary_release_year=${yr}` : '');
+                const r = await fetch(url);
+                const d = await r.json();
+                const hit = (d.results && d.results[0]) || null;
+                if (hit) {
+                    if (!m.id || m.id === 0) m.id = hit.id;              // 予告取得に必要
+                    if (!m.poster_path)   m.poster_path   = hit.poster_path   || '';
+                    if (!m.backdrop_path) m.backdrop_path = hit.backdrop_path || m.poster_path || '';
+                    if (!m.overview)      m.overview      = hit.overview      || '';
+                }
+            } catch(e) {}
         }
 
         function effectiveStatus(movie) {
