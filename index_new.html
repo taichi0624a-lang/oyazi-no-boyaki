@@ -1262,6 +1262,94 @@ body {
         .arc-card-name { font-size: 1.5rem; }
         .mh-brand { font-size: clamp(1.05rem, 5vw, 1.4rem); }
     }
+
+    /* ═══════════════════════════════════════════════
+       CINEMA-TYPO LAYER — タイポそのものが作品。映画プログラム的
+       ═══════════════════════════════════════════════ */
+    /* 見出しは"プログラム表"の小見出しに格下げ → 記事タイトルが主役 */
+    .sec-rule { margin-bottom: 8px; gap: 14px; }
+    .sec-rule-lbl {
+        font-family: 'Space Mono', monospace !important;
+        font-weight: 400 !important; font-size: 11px !important;
+        letter-spacing: 5px !important; text-transform: uppercase;
+        color: var(--dim) !important;
+    }
+    .sec-rule-line { background: var(--ink); opacity: 0.12; }
+    .sec-rule-cnt { font-size: 11px; letter-spacing: 3px; }
+    #wrap > section { margin-top: 130px; }
+    #wrap > section:first-child { margin-top: 78px; }
+
+    /* 記事＝一場面。縦に大きく呼吸させる */
+    .entry-strip { border-bottom: 1px solid var(--rule); }
+    .entry-strip:not(.open):hover { background: transparent; }
+    .strip-head {
+        display: block !important;
+        position: relative;
+        padding: 6vh 72px 6vh 0 !important;
+        min-height: 0 !important;
+        grid-template-columns: none !important;
+    }
+    .strip-num-col {
+        display: block !important; border: none !important;
+        padding: 0 !important; margin: 0 0 18px 0 !important;
+    }
+    .s-num {
+        font-family: 'Space Mono', monospace !important;
+        font-size: 12px !important; letter-spacing: 3px; color: var(--dim) !important;
+        text-transform: uppercase;
+    }
+    .strip-main-col { display: block !important; }
+    .s-tags { margin: 0 0 20px 0 !important; }
+    .s-tag {
+        font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 3px;
+        text-transform: uppercase; color: var(--ink);
+        border: none; border-bottom: 1px solid var(--ink); border-radius: 0;
+        padding: 0 0 2px 0; background: transparent; opacity: 0.55;
+    }
+    .s-title {
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: clamp(2.4rem, 7.4vw, 6.4rem) !important;
+        line-height: 1.02 !important;
+        letter-spacing: -0.035em !important;
+        color: var(--ink) !important;
+        margin: 0;
+        transition: opacity 0.3s, letter-spacing 0.4s cubic-bezier(0.2,0.7,0.3,1);
+    }
+    .entry-strip:not(.open) .strip-head:hover .s-title {
+        color: var(--ink) !important; opacity: 0.42; letter-spacing: -0.02em !important;
+    }
+    .s-date {
+        font-family: 'Space Mono', monospace !important;
+        font-size: 12px !important; letter-spacing: 2px; color: var(--dim) !important;
+        margin-top: 26px !important; text-transform: uppercase;
+    }
+    /* トグルは右上に映画的な小マーク */
+    .strip-toggle-col {
+        position: absolute !important; top: 6vh; right: 0;
+        display: block !important; border: none !important;
+    }
+    .s-toggle {
+        width: 30px; height: 30px; border: 1px solid var(--rule);
+        color: var(--dim); border-radius: 0; font-weight: 300;
+    }
+    .strip-head:hover .s-toggle,
+    .entry-strip.open .s-toggle { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+    .s-del-head { position: static; }
+
+    /* マストヘッド：映画プログラムの表紙 */
+    .mh-dateline::before { content: "◈ NOW SHOWING"; margin-right: auto; color: var(--dim); }
+    .mh-dateline { justify-content: space-between; }
+
+    /* アーカイブは"別プログラム"として据える */
+    .arc-hd-title { font-family: 'Space Mono', monospace !important; font-size: 11px !important; letter-spacing: 5px !important; color: var(--dim) !important; font-weight: 400 !important; }
+    .arc-card-name { font-size: clamp(1.8rem, 4vw, 2.8rem) !important; }
+
+    @media (max-width: 640px) {
+        .strip-head { padding: 6vh 44px 6vh 0 !important; }
+        .s-title { font-size: clamp(2rem, 10vw, 3.4rem) !important; }
+        #wrap > section { margin-top: 90px; }
+    }
     </style>
 </head>
 <body>
