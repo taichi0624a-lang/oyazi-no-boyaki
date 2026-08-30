@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="元気が出る動画、好きな動画のアーカイブ。">
-    <meta property="og:title" content="BOOST | Video Archive">
+    <meta property="og:title" content="LOOP | Video Archive">
     <meta property="og:description" content="元気が出る動画、好きな動画のアーカイブ。">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://kodomo-no-boyaki.com/videos.html">
     <meta property="og:image" content="https://kodomo-no-boyaki.com/choco-main.jpg">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="BOOST | Video Archive">
+    <meta name="twitter:title" content="LOOP | Video Archive">
     <meta name="twitter:image" content="https://kodomo-no-boyaki.com/choco-main.jpg">
-    <title>BOOST | Video Archive</title>
+    <title>LOOP | Video Archive</title>
     <link rel="icon" href="favicon.png" type="image/png">
     <script>if(localStorage.getItem('ozi-theme')==='light'){document.documentElement.classList.add('light-mode')}</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -34,25 +34,32 @@
 
         /* ── LOADER ── */
         #loader {
-            position: fixed; inset: 0; background: #0a0a0a;
+            position: fixed; inset: 0; background: #060606;
             display: flex; align-items: center; justify-content: center;
-            z-index: 9999; flex-direction: column; gap: 24px;
+            z-index: 9999;
         }
+        .loader-ring { position: relative; width: 168px; height: 168px; }
+        .loader-ring svg { width: 100%; height: 100%; display: block; }
+        .loader-ring .ring-track { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 1; }
+        .loader-ring .ring-arc {
+            fill: none; stroke: var(--turq); stroke-width: 1.3; stroke-linecap: round;
+            stroke-dasharray: 130 400; transform-origin: 84px 84px;
+            animation: ringSpin 1.05s cubic-bezier(0.6,0,0.4,1) infinite;
+            filter: drop-shadow(0 0 6px rgba(69,181,170,0.5));
+        }
+        @keyframes ringSpin { to { transform: rotate(360deg); } }
         .loader-title {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
             font-family: 'Playfair Display', serif;
-            font-size: clamp(4rem, 12vw, 8rem);
-            color: #fff; letter-spacing: 20px; opacity: 0;
+            font-size: 1.9rem; letter-spacing: 9px; text-indent: 9px;
+            color: #fff; opacity: 0;
         }
-        .loader-bar {
-            width: 120px; height: 1px; background: rgba(255,255,255,0.1);
-            position: relative; overflow: hidden;
+        .loader-tag {
+            position: absolute; left: 50%; bottom: -34px; transform: translateX(-50%);
+            font-family: 'Inter', sans-serif; font-size: 0.55rem; letter-spacing: 5px;
+            color: var(--text-sub); opacity: 0; white-space: nowrap;
         }
-        .loader-bar::after {
-            content: ''; position: absolute; inset: 0;
-            background: var(--turq);
-            animation: barLoad 1.2s ease forwards;
-        }
-        @keyframes barLoad { from { transform: scaleX(0); transform-origin: left; } to { transform: scaleX(1); transform-origin: left; } }
 
         /* ── HEADER ── */
         #site-header {
@@ -361,22 +368,28 @@
 <body>
 
 <div id="loader">
-    <div class="loader-title" id="loader-title">BOOST</div>
-    <div class="loader-bar"></div>
+    <div class="loader-ring">
+        <svg viewBox="0 0 168 168" aria-hidden="true">
+            <circle class="ring-track" cx="84" cy="84" r="82"/>
+            <circle class="ring-arc" cx="84" cy="84" r="82"/>
+        </svg>
+        <span class="loader-title" id="loader-title">LOOP</span>
+        <span class="loader-tag" id="loader-tag">VIDEO ARCHIVE — 何度でも、巡る</span>
+    </div>
 </div>
 
 <div id="admin-indicator"></div>
 
 <header id="site-header">
     <a class="back-link" href="index.html">← DIARY</a>
-    <span class="header-label">BOOST / VIDEO ARCHIVE</span>
+    <span class="header-label">LOOP / VIDEO ARCHIVE</span>
     <button class="theme-toggle-btn" onclick="toggleTheme()">◐</button>
 </header>
 
 <section id="hero">
     <div class="hero-left">
         <div class="hero-code">V.01 — VIDEO ARCHIVE</div>
-        <h1 class="hero-title">BOOST</h1>
+        <h1 class="hero-title">LOOP</h1>
     </div>
     <div class="hero-right">
         <div class="hero-num" id="hero-count">000</div>
@@ -397,7 +410,7 @@
 <div id="video-grid"></div>
 
 <footer>
-    <span class="footer-label">BOOST — VIDEO ARCHIVE</span>
+    <span class="footer-label">LOOP — VIDEO ARCHIVE</span>
     <span class="footer-label">© 2026</span>
 </footer>
 
@@ -683,9 +696,10 @@ function saveVideos(v) {
 
     // ── ローダー ──
     window.addEventListener('load', () => {
-        gsap.to('#loader-title', { opacity: 1, duration: 0.8, ease: 'power2.out' });
+        gsap.to('#loader-title', { opacity: 1, duration: 0.7, ease: 'power2.out' });
+        gsap.to('#loader-tag', { opacity: 1, duration: 0.7, delay: 0.35, ease: 'power2.out' });
         gsap.to('#loader', {
-            opacity: 0, duration: 0.6, delay: 1.4, ease: 'power2.in',
+            opacity: 0, duration: 0.6, delay: 2.0, ease: 'power2.in',
             onComplete: () => {
                 document.getElementById('loader').style.display = 'none';
                 gsap.from('#hero', { opacity: 0, y: 30, duration: 0.8, ease: 'power2.out' });
