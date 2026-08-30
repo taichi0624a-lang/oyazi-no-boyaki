@@ -1,0 +1,2439 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="LffLifb4bpNzh61pb0Qoe-mXE2KApfhomD5MyTS2F60" />
+    <meta name="description" content="映える情報も有益なスキルも一切ない。映画の感想、無価値な日記、思考のカスみたいな独り言。暇すぎて壁のシミを数えるのに飽きたら、たまには覗きに来てくれ。">
+    <meta property="og:title" content="親父より親父な子供のぼやき">
+    <meta property="og:description" content="映える情報も有益なスキルも一切ない。映画の感想、無価値な日記、思考のカスみたいな独り言。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://kodomo-no-boyaki.com/">
+    <meta property="og:image" content="https://kodomo-no-boyaki.com/choco-main.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="親父より親父な子供のぼやき">
+    <meta name="twitter:description" content="映える情報も有益なスキルも一切ない。映画の感想、無価値な日記、思考のカスみたいな独り言。">
+    <meta name="twitter:image" content="https://kodomo-no-boyaki.com/choco-main.jpg">
+    <title>親父より親父な子供のぼやき</title>
+    <!-- ダークモードのちらつき防止: CSSが読み込まれる前に適用 -->
+    <script>if(localStorage.getItem('ozi-theme')==='dark')document.documentElement.classList.add('dark-mode')</script>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&display=swap');
+
+:root {
+    --bg:    #f5f2ec;
+    --paper: #faf9f5;
+    --ink:   #0e0d0c;
+    --red:   #aa1414;
+    --rule:  #ddd8ce;
+    --dim:   #918d86;
+    --warm:  #eae5dc;
+}
+
+body.dark-mode, html.dark-mode body {
+    --bg:    #111009;
+    --paper: #1a1815;
+    --ink:   #ede8df;
+    --red:   #cc2828;
+    --rule:  #2e2b25;
+    --dim:   #7a756e;
+    --warm:  #1e1c18;
+}
+body.dark-mode .s-body-text, html.dark-mode .s-body-text { color: #c8c2b8; }
+body.dark-mode .strip-body-content, html.dark-mode .strip-body-content { background: var(--paper); }
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+a, button { -webkit-tap-highlight-color: transparent; }
+
+body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* ─── READING PROGRESS ─── */
+#read-progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: var(--red);
+    z-index: 9999;
+    width: 0%;
+    transition: width 0.08s linear;
+    pointer-events: none;
+}
+
+/* ─── MASTHEAD ─── */
+#masthead {
+    position: sticky;
+    top: 0;
+    z-index: 500;
+    background: var(--bg);
+}
+
+.mh-top {
+    padding: 16px 6vw 14px;
+    border-bottom: 1px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.mh-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1rem, 1.8vw, 1.6rem);
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.015em;
+    text-decoration: none;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.mh-brand em { font-style: italic; color: var(--red); font-weight: 400; }
+
+.mh-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.mh-btn {
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: border-color 0.18s, color 0.18s, background 0.18s;
+    line-height: 1;
+    white-space: nowrap;
+}
+.mh-btn:hover { border-color: var(--ink); color: var(--ink); }
+.mh-btn.red  { background: var(--red); border-color: var(--red); color: #fff; }
+.mh-btn.red:hover { opacity: 0.82; }
+.mh-btn.active { border-color: var(--red); color: var(--red); }
+
+.mh-dateline {
+    padding: 5px 6vw;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--dim);
+}
+
+/* ─── WRAPPER ─── */
+#wrap { max-width: 1200px; margin: 0 auto; padding: 0 6vw; }
+
+/* ─── CONTINUE STRIP ─── */
+#continue-bar {
+    display: none;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+}
+.cb-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 6vw;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+.cb-inner:hover { background: var(--warm); }
+.cb-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 2px;
+    flex-shrink: 0;
+}
+.cb-lbl {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: var(--dim);
+    margin-bottom: 2px;
+}
+.cb-ttl {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    font-style: italic;
+    color: var(--ink);
+}
+.cb-arr { color: var(--red); margin-left: auto; }
+
+/* ─── SECTION RULE ─── */
+.sec-rule {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 38px 0 20px;
+}
+.sec-rule-lbl {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    flex-shrink: 0;
+}
+.sec-rule-line { flex: 1; height: 1px; background: var(--red); opacity: 0.35; }
+.sec-rule-cnt {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    color: var(--dim);
+    flex-shrink: 0;
+}
+
+/* ─── ENTRY STRIPS ─── */
+#entries-list { margin-bottom: 0; }
+
+.entry-strip {
+    border-bottom: 1px solid var(--rule);
+    background: var(--bg);
+    transition: background 0.2s, box-shadow 0.22s;
+    animation: stripIn 0.55s cubic-bezier(0.16,1,0.3,1) both;
+}
+.entry-strip:first-child { border-top: 1px solid var(--rule); }
+.entry-strip:not(.open):hover { box-shadow: inset 3px 0 0 var(--red); }
+.entry-strip.open { background: var(--paper); }
+
+@keyframes stripIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.strip-head {
+    display: grid;
+    grid-template-columns: 68px 1fr auto;
+    align-items: center;
+    cursor: pointer;
+    gap: 0;
+    user-select: none;
+}
+
+.strip-num-col {
+    padding: 22px 18px 22px 0;
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: 3px;
+    transition: border-color 0.2s;
+}
+.entry-strip.open .strip-num-col { border-right-color: var(--ink); }
+
+.s-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 1.55rem;
+    color: var(--red);
+    line-height: 1;
+}
+
+.strip-main-col { padding: 22px 24px; }
+.s-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.s-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 7.5px;
+    letter-spacing: 1.5px;
+    color: var(--dim);
+    border: 1px solid var(--rule);
+    padding: 2px 6px;
+    border-radius: 2px;
+}
+.s-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.1rem, 2vw, 1.45rem);
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    transition: color 0.15s;
+    overflow-wrap: break-word;
+}
+.entry-strip:not(.open) .strip-head:hover .s-title { color: var(--red); }
+.s-date {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    color: var(--dim);
+    margin-top: 5px;
+    letter-spacing: 1px;
+}
+
+.strip-toggle-col { padding: 22px 4px 22px 20px; }
+.s-toggle {
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--dim);
+    line-height: 1;
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), color 0.18s, border-color 0.18s;
+}
+.strip-head:hover .s-toggle { border-color: var(--ink); color: var(--ink); }
+.entry-strip.open .s-toggle {
+    transform: rotate(45deg);
+    color: var(--red);
+    border-color: rgba(170,20,20,0.28);
+}
+
+/* Expandable body */
+.strip-body {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.strip-body-inner {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    border-top: 1px solid var(--rule);
+}
+.strip-body-gutter { border-right: 1px solid var(--ink); }
+.strip-body-content {
+    padding: 30px 24px 36px;
+    max-width: 720px;
+}
+.s-body-text {
+    font-size: 0.95rem;
+    line-height: 1.95;
+    color: #4a4640;
+    white-space: pre-wrap;
+    font-weight: 300;
+}
+.s-body-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+}
+.s-body-tags-full { display: flex; gap: 6px; flex-wrap: wrap; }
+.s-body-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: var(--red);
+    border: 1px solid rgba(170,20,20,0.2);
+    padding: 2px 8px;
+}
+.s-del, .s-edit {
+    background: transparent;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: 0.18s;
+}
+.s-del {
+    border: 1px solid rgba(170,20,20,0.15);
+    color: rgba(170,20,20,0.3);
+}
+.s-del:hover { border-color: var(--red); color: var(--red); }
+.s-del-head {
+    font-size: 14px; padding: 2px 8px;
+    margin-right: 6px; line-height: 1;
+}
+.s-edit {
+    border: 1px solid var(--rule);
+    color: var(--dim);
+}
+.s-edit:hover { border-color: var(--ink); color: var(--ink); }
+
+/* ── ENGAGE (reaction + share) ── */
+.s-engage {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+.s-react {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 4px 9px;
+    cursor: pointer;
+    transition: 0.18s;
+}
+.s-react .s-react-heart { font-size: 11px; line-height: 1; transition: 0.18s; }
+.s-react:hover { border-color: var(--red); color: var(--red); }
+.s-react.reacted { border-color: rgba(170,20,20,0.4); color: var(--red); }
+.s-react.reacted .s-react-heart { color: var(--red); }
+.s-share {
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 2px;
+    padding: 4px 9px;
+    cursor: pointer;
+    transition: 0.18s;
+}
+.s-share:hover { border-color: var(--ink); color: var(--ink); }
+
+/* ── IDEAS / ネタ帳 ── */
+#ideas-section { margin-bottom: 40px; }
+.ideas-add {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+.ideas-input {
+    flex: 1 1 200px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.18s;
+}
+.ideas-input:focus { border-color: var(--ink); }
+.ideas-input-memo { flex: 1 1 160px; font-size: 13px; color: var(--dim); }
+.ideas-add-btn {
+    background: transparent;
+    border: 1px solid var(--red);
+    color: var(--red);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 0 16px;
+    cursor: pointer;
+    transition: 0.18s;
+}
+.ideas-add-btn:hover { background: var(--red); color: var(--bg); }
+.ideas-empty {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--dim);
+    padding: 14px 4px;
+}
+.ideas-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--rule);
+}
+.ideas-item-main { flex: 1; min-width: 0; }
+.ideas-item-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    color: var(--ink);
+    line-height: 1.3;
+}
+.ideas-item-memo {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--dim);
+    margin-top: 3px;
+}
+.ideas-del {
+    flex-shrink: 0;
+    background: transparent;
+    border: 1px solid rgba(170,20,20,0.15);
+    color: rgba(170,20,20,0.35);
+    font-size: 12px;
+    line-height: 1;
+    padding: 6px 9px;
+    cursor: pointer;
+    transition: 0.18s;
+}
+.ideas-del:hover { border-color: var(--red); color: var(--red); }
+@media (max-width: 640px) {
+    .ideas-add-btn { flex: 1 1 100%; min-height: 44px; padding: 10px; }
+    .ideas-del { min-height: 40px; min-width: 40px; }
+}
+
+/* ADD strip */
+.add-strip {
+    border-bottom: 1px solid var(--rule);
+    border-top: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px;
+    cursor: pointer;
+    transition: background 0.18s;
+    background: var(--bg);
+    margin-top: -1px;
+}
+.add-strip:hover { background: var(--warm); }
+.add-icon { font-size: 0.9rem; color: rgba(170,20,20,0.35); }
+.add-lbl {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: rgba(170,20,20,0.4);
+}
+
+/* ─── ARCHIVES ─── */
+#arc-section {
+    padding: 56px 0 0;
+    border-top: 1px solid var(--rule);
+    margin-top: 52px;
+}
+.arc-hd {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.arc-hd-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+}
+.arc-hd-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--dim);
+}
+.arc-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+}
+.arc-card {
+    background: var(--bg);
+    padding: 28px 26px;
+    text-decoration: none;
+    display: block;
+    transition: background 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.arc-card:hover { background: var(--paper); }
+.arc-card.soon { opacity: 0.32; pointer-events: none; }
+.arc-card-lbl {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 4px;
+    color: var(--red);
+    margin-bottom: 10px;
+    display: block;
+}
+.arc-card-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    margin-bottom: 7px;
+}
+.arc-card-desc {
+    font-size: 0.67rem;
+    color: var(--dim);
+    line-height: 1.65;
+}
+.arc-card-link {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--rule);
+    transition: color 0.18s;
+}
+.arc-card:hover .arc-card-link { color: var(--red); }
+
+/* ─── FOOTER ─── */
+#site-footer {
+    border-top: 1px solid var(--ink);
+    padding: 20px 0;
+    margin: 56px 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.footer-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ink);
+    font-style: italic;
+}
+.footer-right {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--dim);
+    display: flex;
+    gap: 20px;
+}
+
+/* ─── SEARCH OVERLAY ─── */
+#search-overlay {
+    position: fixed; inset: 0;
+    background: rgba(245,242,236,0.97);
+    z-index: 600;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 100px 6vw 60px;
+    backdrop-filter: blur(16px);
+}
+#search-overlay.active { display: flex; }
+.s-ov-close {
+    position: fixed; top: 28px; right: 6vw;
+    background: transparent; border: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 3px;
+    color: var(--dim); cursor: pointer;
+    transition: color 0.15s;
+}
+.s-ov-close:hover { color: var(--ink); }
+.s-ov-wrap { width: 100%; max-width: 580px; margin-bottom: 40px; }
+.s-ov-wrap input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--ink);
+    color: var(--ink);
+    font-size: clamp(1.6rem, 4vw, 3rem);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    padding: 10px 0;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.s-ov-wrap input::placeholder { color: var(--rule); }
+.s-ov-wrap input:focus { border-color: var(--red); }
+.s-ov-results { width: 100%; max-width: 580px; }
+.s-ov-item {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+    cursor: pointer;
+    transition: padding-left 0.2s;
+}
+.s-ov-item:hover { padding-left: 10px; }
+.s-ov-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--ink);
+}
+.s-ov-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    color: var(--dim);
+    letter-spacing: 1px;
+    margin-top: 3px;
+}
+.s-ov-empty {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: var(--dim);
+    text-align: center;
+    padding: 28px 0;
+}
+
+/* ─── WRITE MODAL ─── */
+#write-modal {
+    position: fixed; inset: 0;
+    z-index: 800;
+    background: rgba(245,242,236,0.97);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(16px);
+}
+#write-modal.active { display: flex; }
+.wm-inner {
+    width: 100%; max-width: 620px;
+    max-height: 92vh; overflow-y: auto;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 44px 40px;
+}
+.wm-head {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--ink);
+}
+.wm-lbl {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: 5px; color: var(--red);
+}
+.wm-x {
+    background: transparent; border: none;
+    color: var(--dim); font-size: 1.1rem;
+    cursor: pointer; transition: color 0.15s; line-height: 1;
+}
+.wm-x:hover { color: var(--ink); }
+.wf { margin-bottom: 22px; }
+.wf label {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 3px;
+    color: var(--dim); margin-bottom: 8px;
+}
+.wf-title {
+    width: 100%; background: transparent;
+    border: none; border-bottom: 1px solid var(--rule);
+    color: var(--ink); font-size: 1.6rem;
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    padding: 6px 0; outline: none; transition: border-color 0.2s;
+}
+.wf-title:focus { border-color: var(--red); }
+.wf-title::placeholder { color: var(--rule); }
+.wf-body {
+    width: 100%; background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--ink); font-size: 0.92rem;
+    font-family: 'DM Sans', sans-serif;
+    padding: 12px 14px; outline: none; resize: none;
+    line-height: 1.9; transition: border-color 0.2s;
+}
+.wf-body:focus { border-color: var(--red); }
+.wf-body::placeholder { color: var(--rule); }
+.tag-sel { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag-opt {
+    padding: 4px 12px;
+    border: 1px solid var(--rule); color: var(--dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 2px;
+    cursor: pointer; background: transparent; transition: 0.15s;
+}
+.tag-opt.selected { border-color: var(--red); color: var(--red); background: rgba(170,20,20,0.04); }
+.wm-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; }
+.wm-chars {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; color: var(--dim); letter-spacing: 2px;
+}
+.wm-acts { display: flex; gap: 8px; }
+.w-cancel {
+    background: transparent; border: 1px solid var(--rule); color: var(--dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 2px;
+    padding: 8px 16px; cursor: pointer; transition: 0.15s;
+}
+.w-cancel:hover { border-color: var(--ink); color: var(--ink); }
+.w-pub {
+    background: var(--red); border: none; color: #fff;
+    font-family: 'Space Mono', monospace; font-weight: 700;
+    font-size: 9px; letter-spacing: 3px;
+    padding: 9px 22px; cursor: pointer; transition: opacity 0.15s;
+}
+.w-pub:hover { opacity: 0.82; }
+
+/* ─── ENTRY PHOTOS ─── */
+.wf-photo-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.wf-photo-thumb { position: relative; width: 72px; height: 72px; }
+.wf-photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wf-photo-thumb-del { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.6); color: #fff; border: none; cursor: pointer; font-size: 9px; line-height: 1; padding: 2px 4px; }
+.wf-photo-add-btn { border: 1px dashed var(--rule); color: var(--dim); background: transparent; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 2px; padding: 7px 14px; cursor: pointer; transition: 0.15s; }
+.wf-photo-add-btn:hover { border-color: var(--ink); color: var(--ink); }
+.s-entry-photos { display: grid; gap: 4px; margin-top: 18px; }
+.s-entry-photos.ph-1 { grid-template-columns: 1fr; }
+.s-entry-photos.ph-2 { grid-template-columns: 1fr 1fr; }
+.s-entry-photos.ph-3,
+.s-entry-photos.ph-many { grid-template-columns: repeat(3, 1fr); }
+.s-entry-photos img { width: 100%; height: 200px; object-fit: cover; display: block; cursor: zoom-in; }
+.s-entry-photos.ph-1 img { height: 320px; }
+#ep-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.93); z-index: 99998; display: none; align-items: center; justify-content: center; }
+#ep-lightbox.active { display: flex; }
+#ep-lightbox img { max-width: 90vw; max-height: 86vh; object-fit: contain; cursor: default; user-select: none; }
+#ep-lb-prev, #ep-lb-next {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+    color: #fff; font-size: 1.6rem; width: 44px; height: 44px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s; z-index: 1; line-height: 1;
+}
+#ep-lb-prev { left: 16px; }
+#ep-lb-next { right: 16px; }
+#ep-lb-prev:hover, #ep-lb-next:hover { background: rgba(255,255,255,0.22); }
+#ep-lb-prev[hidden], #ep-lb-next[hidden] { display: none; }
+#ep-lb-close {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+    color: #fff; font-size: 0.85rem; width: 36px; height: 36px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s; z-index: 1;
+}
+#ep-lb-close:hover { background: rgba(255,255,255,0.22); }
+#ep-lb-counter {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 3px;
+    color: rgba(255,255,255,0.5); pointer-events: none;
+}
+
+/* ─── CHIC LOADER (O24-era cinematic) ─── */
+#chic-loader {
+    position: fixed; inset: 0;
+    background: #ece8e1;
+    display: flex; justify-content: center; align-items: center;
+    z-index: 99999; overflow: hidden;
+    pointer-events: all;
+}
+#chic-loader { transition: opacity 3s ease; }
+#chic-loader.hiding { opacity: 0; pointer-events: none; }
+#chic-loader.done { display: none; }
+
+.cl-dots {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+}
+.chic-logo-wrap {
+    display: flex; gap: 3vw; align-items: baseline;
+    position: relative; z-index: 1;
+    flex-wrap: nowrap;
+    animation: logoFadeIn 2s ease both;
+}
+@keyframes logoFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.c-char {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(6rem, 20vw, 18rem);
+    color: #0a0a0a;
+    font-weight: 400;
+    line-height: 1;
+}
+#loader-progress {
+    position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent 0%, #0a0a0a 30%, #0a0a0a 70%, transparent 100%);
+    transform-origin: left center; transform: scaleX(1);
+}
+
+/* ─── KONAMI EFFECT ─── */
+#konami-overlay {
+    position: fixed; inset: 0; z-index: 9000;
+    display: none; pointer-events: none;
+}
+#konami-overlay.active { display: block; }
+
+/* --- Matrix --- */
+#konami-matrix-canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+}
+#konami-matrix-label {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(1rem, 4vw, 2rem);
+    letter-spacing: 8px; color: #0f0;
+    text-shadow: 0 0 20px #0f0, 0 0 40px #0f0;
+    animation: konami-pulse 0.5s ease infinite alternate;
+}
+@keyframes konami-pulse { from { opacity: 0.7; } to { opacity: 1; } }
+
+
+/* ─── TOAST ─── */
+#toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: var(--ink); color: var(--bg);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 3px;
+    padding: 9px 18px; z-index: 9999;
+    opacity: 0; pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.25s, transform 0.25s;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+
+/* ─── EMPTY ARC CARD ─── */
+.arc-empty { pointer-events: none; }
+
+/* ─── PHOTOS ─── */
+#photos-section { padding: 40px 0 0; }
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.photo-card {
+    position: relative;
+    overflow: hidden;
+    background: var(--warm);
+    cursor: pointer;
+}
+.photo-card::before { content: ''; display: block; padding-top: 100%; }
+.photo-card img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
+}
+.photo-card:hover img { transform: scale(1.04); }
+
+.photo-card-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(14,13,12,0.72) 0%, transparent 100%);
+    padding: 28px 12px 10px;
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+.photo-card:hover .photo-card-overlay { opacity: 1; }
+.photo-card-caption { font-size: 0.75rem; color: #fff; font-weight: 300; line-height: 1.4; }
+.photo-card-date {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; color: rgba(255,255,255,0.55);
+    letter-spacing: 1px; margin-top: 3px;
+}
+.photo-del {
+    position: absolute; top: 7px; right: 7px;
+    background: rgba(14,13,12,0.55); border: none;
+    color: rgba(255,255,255,0.75); font-family: 'Space Mono', monospace;
+    font-size: 8px; letter-spacing: 1px;
+    padding: 3px 7px; cursor: pointer; transition: background 0.15s;
+}
+.photo-del:hover { background: var(--red); color: #fff; }
+
+.photo-add {
+    background: var(--warm);
+    border: 1px dashed var(--rule);
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s;
+    position: relative;
+}
+.photo-add::before { content: ''; display: block; padding-top: 100%; }
+.photo-add-inner {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+}
+.photo-add:hover { background: var(--paper); border-color: var(--dim); }
+.photo-add-icon { font-size: 1.4rem; color: var(--rule); line-height: 1; transition: color 0.18s; }
+.photo-add:hover .photo-add-icon { color: var(--dim); }
+.photo-add-lbl {
+    font-family: 'Space Mono', monospace; font-size: 8px;
+    letter-spacing: 3px; color: var(--rule); transition: color 0.18s;
+}
+.photo-add:hover .photo-add-lbl { color: var(--dim); }
+
+/* ─── PHOTO MODAL ─── */
+#photo-modal {
+    position: fixed; inset: 0; z-index: 800;
+    background: rgba(245,242,236,0.97);
+    display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(16px);
+}
+#photo-modal.active { display: flex; }
+.pm-inner {
+    width: 100%; max-width: 500px;
+    background: var(--paper); border: 1px solid var(--rule);
+    padding: 40px 36px;
+}
+.pm-head {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 26px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--ink);
+}
+.pm-lbl { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 5px; color: var(--red); }
+.pm-x {
+    background: transparent; border: none; color: var(--dim);
+    font-size: 1.1rem; cursor: pointer; transition: color 0.15s; line-height: 1;
+}
+.pm-x:hover { color: var(--ink); }
+.pm-dropzone {
+    border: 1px dashed var(--rule); padding: 32px 20px;
+    text-align: center; cursor: pointer; position: relative;
+    transition: border-color 0.18s, background 0.18s; margin-bottom: 16px;
+}
+.pm-dropzone:hover, .pm-dropzone.drag { border-color: var(--ink); background: var(--warm); }
+.pm-dropzone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0;
+    cursor: pointer; width: 100%; height: 100%;
+}
+.pm-dz-icon { font-size: 1.6rem; color: var(--rule); margin-bottom: 8px; line-height: 1; }
+.pm-dz-txt { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--dim); }
+.pm-dz-sub { font-size: 0.7rem; color: var(--dim); margin-top: 5px; }
+#pm-preview-wrap { margin-bottom: 16px; position: relative; }
+#pm-preview { width: 100%; max-height: 200px; object-fit: cover; display: block; }
+.pm-preview-clear {
+    position: absolute; top: 7px; right: 7px;
+    background: rgba(14,13,12,0.55); border: none;
+    color: #fff; font-size: 0.85rem; width: 24px; height: 24px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+}
+.pm-preview-clear:hover { background: var(--red); }
+.pm-caption {
+    width: 100%; background: transparent; border: 1px solid var(--rule);
+    color: var(--ink); font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; padding: 10px 12px; outline: none;
+    resize: none; line-height: 1.7; transition: border-color 0.2s; margin-bottom: 18px;
+}
+.pm-caption:focus { border-color: var(--red); }
+.pm-caption::placeholder { color: var(--rule); }
+.pm-foot { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ─── LIGHTBOX ─── */
+#lightbox {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(14,13,12,0.96);
+    display: none; align-items: center; justify-content: center;
+    cursor: zoom-out; backdrop-filter: blur(4px);
+}
+#lightbox.active { display: flex; }
+#lb-img { max-width: 90vw; max-height: 86vh; object-fit: contain; display: block; cursor: default; }
+.lb-caption {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 16px 5vw; text-align: center;
+    font-size: 0.82rem; color: rgba(255,255,255,0.55);
+    font-weight: 300; pointer-events: none;
+}
+.lb-close {
+    position: fixed; top: 24px; right: 5vw;
+    background: transparent; border: none;
+    color: rgba(255,255,255,0.45); font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 3px; cursor: pointer; transition: color 0.15s;
+}
+.lb-close:hover { color: #fff; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 720px) {
+    /* ── Layout ── */
+    #wrap { padding: 0 5vw; }
+
+    /* ── Masthead ── */
+    .mh-top { padding: 12px 5vw 10px; gap: 8px; }
+    .mh-brand { font-size: clamp(0.82rem, 4vw, 1.3rem); white-space: normal; line-height: 1.25; }
+    .mh-dateline { padding: 5px 5vw; flex-wrap: wrap; gap: 2px 12px; font-size: 7.5px; justify-content: flex-start; }
+
+    /* ── Entry strips ── */
+    .strip-head { grid-template-columns: 56px 1fr 48px; min-height: 70px; }
+    .strip-num-col { padding: 18px 14px 18px 0; }
+    .s-num { font-size: 1.25rem; }
+    .strip-main-col { padding: 15px 14px; }
+    .strip-toggle-col { padding: 0; display: flex; align-items: center; justify-content: center; min-height: 70px; }
+    .s-toggle { width: 30px; height: 30px; font-size: 1.1rem; }
+    .s-title { font-size: clamp(1.05rem, 4.5vw, 1.4rem); }
+    .s-date { font-size: 8px; margin-top: 4px; }
+    .strip-body-inner { grid-template-columns: 44px 1fr; }
+    .strip-body-content { padding: 20px 14px 28px; }
+    .s-body-text { font-size: 0.92rem; line-height: 1.9; }
+    .s-body-meta { margin-top: 18px; padding-top: 14px; flex-wrap: wrap; gap: 10px; }
+    .s-del, .s-edit { padding: 10px 14px; font-size: 9px; min-height: 44px; }
+    .s-engage { margin-left: 0; flex-wrap: wrap; }
+    .s-react, .s-share { min-height: 38px; padding: 8px 12px; }
+
+    /* ── Archives ── */
+    .arc-grid { grid-template-columns: 1fr; }
+    .arc-card { padding: 20px 18px; }
+    #arc-section { margin-top: 36px; padding-top: 36px; }
+
+    /* ── Photos ── */
+    .photo-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .s-entry-photos.ph-3,
+    .s-entry-photos.ph-many { grid-template-columns: repeat(2, 1fr); }
+    .s-entry-photos img { height: 160px; }
+    .s-entry-photos.ph-1 img { height: 260px; }
+
+    /* ── Write modal ── */
+    .wm-inner { padding: 24px 18px; max-height: 96vh; }
+    .wf { margin-bottom: 18px; }
+    .wf-title { font-size: 1.3rem; }
+
+    /* ── Search ── */
+    #search-overlay { padding: 80px 5vw 40px; }
+
+    /* ── Footer ── */
+    #site-footer { margin: 36px 0 32px; padding: 14px 0; gap: 6px; }
+
+    /* ── Toast ── */
+    #toast { bottom: 18px; right: 5vw; left: 5vw; text-align: center; }
+
+    /* ── Loader ── */
+    .c-char { font-size: clamp(4rem, 21vw, 18rem); }
+    .chic-logo-wrap { gap: 3.5vw; }
+}
+
+@media (max-width: 430px) {
+    .mh-brand { font-size: clamp(0.78rem, 4vw, 1rem); }
+    .mh-btn { padding: 10px 12px; font-size: 9px; letter-spacing: 1px; min-height: 44px; }
+    .strip-head { grid-template-columns: 48px 1fr 44px; }
+    .strip-num-col { padding: 16px 12px 16px 0; }
+    .s-num { font-size: 1.1rem; }
+    .strip-body-inner { grid-template-columns: 48px 1fr; }
+    .c-char { font-size: clamp(3.6rem, 21vw, 18rem); }
+}
+    /* ═══════════════════════════════════════════════════════════
+       CINEMA — 「深夜の上映会」。A24映画のような驚きと体験
+       黒の劇場 / フィルムグレイン / ヴィネット / 文学的セリフ / 赤の一点
+       ═══════════════════════════════════════════════════════════ */
+    :root, body.dark-mode, html.dark-mode body {
+        --bg:    #0a0908;
+        --paper: #131110;
+        --ink:   #ece5d8;
+        --red:   #d8261a;
+        --rule:  #2a2521;
+        --dim:   #766c60;
+        --warm:  #16130f;
+    }
+    html { background: #0a0908; }
+    body { background: var(--bg); color: var(--ink); }
+
+    /* フィルムグレイン（全面・微動） */
+    body::before {
+        content: ""; position: fixed; inset: -50%;
+        width: 200%; height: 200%; pointer-events: none; z-index: 9996;
+        opacity: 0.055; mix-blend-mode: screen;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        animation: grain 0.5s steps(1) infinite;
+    }
+    @keyframes grain {
+        0%{transform:translate(0,0)} 20%{transform:translate(-6%,4%)} 40%{transform:translate(4%,-6%)}
+        60%{transform:translate(-4%,6%)} 80%{transform:translate(6%,-4%)} 100%{transform:translate(0,0)}
+    }
+    /* ヴィネット（劇場の暗がり） */
+    body::after {
+        content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9995;
+        background: radial-gradient(ellipse at 50% 42%, transparent 48%, rgba(0,0,0,0.5) 100%);
+    }
+
+    /* ローダーも暗転 */
+    #chic-loader { background: #0a0908 !important; }
+    .c-char { color: #ece5d8 !important; }
+    .cl-dots circle { fill: #d8261a !important; opacity: 0.14 !important; }
+    #loader-progress { background: linear-gradient(90deg, transparent, #d8261a 50%, transparent) !important; }
+
+    /* マストヘッド＝タイトルカード */
+    #masthead { background: rgba(10,9,8,0.85); backdrop-filter: blur(6px); border-bottom: 1px solid var(--rule); }
+    .mh-brand { font-family: 'Cormorant Garamond', serif; font-weight: 500; letter-spacing: 0.01em; color: var(--ink); }
+    .mh-brand em { color: var(--red); font-style: italic; }
+    .mh-btn { border-color: var(--rule); color: var(--dim); background: transparent; }
+    .mh-btn:hover { border-color: var(--red); color: var(--ink); background: transparent; }
+    .mh-dateline { color: var(--dim); border-color: var(--rule); }
+
+    /* セクション見出し＝上映プログラムのクレジット */
+    .sec-rule-lbl {
+        font-family: 'Space Mono', monospace !important; font-style: normal !important;
+        font-size: 10px !important; letter-spacing: 6px !important; text-transform: uppercase;
+        color: var(--dim) !important; opacity: 1 !important;
+    }
+    .sec-rule-line { background: var(--red); opacity: 0.28; }
+    .sec-rule-cnt { color: var(--dim); letter-spacing: 3px; }
+
+    /* 記事＝一本の作品。巨大な文学的セリフ */
+    .entry-strip { background: transparent; border-bottom: 1px solid var(--rule); }
+    .entry-strip:first-child { border-top: 1px solid var(--rule); }
+    .entry-strip.open { background: rgba(255,255,255,0.015); }
+    .entry-strip:not(.open):hover { box-shadow: inset 4px 0 0 var(--red); background: rgba(255,255,255,0.02); }
+    .strip-head { min-height: 132px; grid-template-columns: 96px 1fr 52px; }
+    .strip-num-col { border-right-color: var(--rule) !important; }
+    .s-num { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.5rem; color: var(--dim); }
+    .entry-strip.open .s-num, .strip-head:hover .s-num { color: var(--red); }
+    .s-tag {
+        font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 3px; text-transform: uppercase;
+        color: var(--dim); border: none; border-bottom: 1px solid var(--rule); border-radius: 0;
+        padding: 0 0 2px; background: transparent;
+    }
+    .s-title {
+        font-family: 'Cormorant Garamond', serif !important; font-style: normal !important;
+        font-weight: 400 !important; font-size: clamp(1.9rem, 4.6vw, 3.7rem) !important;
+        line-height: 1.08 !important; letter-spacing: 0 !important; color: var(--ink) !important;
+        transition: color 0.5s, text-shadow 0.6s;
+    }
+    .entry-strip:not(.open) .strip-head:hover .s-title {
+        color: #fff !important; text-shadow: 0 0 24px rgba(216,38,26,0.35);
+    }
+    .s-date { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--dim); text-transform: uppercase; }
+    .s-toggle { border: 1px solid var(--rule); color: var(--dim); }
+    .strip-head:hover .s-toggle, .entry-strip.open .s-toggle { border-color: var(--red); color: var(--red); background: transparent; }
+    .s-body-text { color: #cdc5b8; line-height: 1.95; font-size: 1.02rem; }
+
+    /* アーカイブ＝別プログラムの予告 */
+    .arc-hd-title { font-family: 'Cormorant Garamond', serif; color: var(--ink); font-style: italic; }
+    .arc-hd-sub { color: var(--dim); letter-spacing: 3px; }
+    .arc-card { background: var(--paper); border: 1px solid var(--rule); transition: transform 0.5s cubic-bezier(0.2,0.7,0.3,1), box-shadow 0.5s, border-color 0.4s; }
+    .arc-card:hover { background: var(--paper); border-color: var(--red); transform: translateY(-6px); box-shadow: 0 26px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(216,38,26,0.15); }
+    .arc-card-lbl { color: var(--red); letter-spacing: 3px; }
+    .arc-card-name { font-family: 'Cormorant Garamond', serif; color: var(--ink); }
+    .arc-card-desc { color: var(--dim); }
+    .arc-card-link { color: var(--dim); display: inline-block; transition: transform 0.42s cubic-bezier(0.2,0.7,0.3,1), color 0.3s; }
+    .arc-card:hover .arc-card-link { color: var(--red); transform: translateX(8px); }
+
+    #site-footer { border-top: 1px solid var(--rule); }
+    .footer-brand { font-family: 'Cormorant Garamond', serif; color: var(--ink); }
+    .footer-right { color: var(--dim); }
+    .ideas-item-text { font-family: 'Cormorant Garamond', serif; }
+
+    /* シネマ・モーション（スクロールで立ち上がる） */
+    @supports (animation-timeline: view()) {
+        @media (prefers-reduced-motion: no-preference) {
+            .entry-strip { animation: cRise linear both; animation-timeline: view(); animation-range: entry 2% cover 16%; }
+            .arc-card   { animation: cFade linear both; animation-timeline: view(); animation-range: entry 0% cover 22%; }
+        }
+    }
+    @keyframes cRise { from{opacity:0; transform:translateY(34px);} to{opacity:1; transform:translateY(0);} }
+    @keyframes cFade { from{opacity:0;} to{opacity:1;} }
+    @media (prefers-reduced-motion: reduce){ .entry-strip,.arc-card{animation:none!important;} }
+
+    @media (max-width: 640px){
+        .strip-head { grid-template-columns: 62px 1fr 44px; min-height: 96px; }
+        .s-title { font-size: clamp(1.6rem, 8vw, 2.4rem) !important; }
+        .s-num { font-size: 1.15rem; }
+    }
+    /* ═══ FORMAT D: スプリット（固定映像パネル） ═══ */
+    #split-panel {
+        position: fixed; top: 0; left: 0; width: 42vw; height: 100vh; z-index: 1;
+        background: #060504; overflow: hidden; border-right: 1px solid var(--rule);
+    }
+    #split-canvas { width: 100%; height: 100%; display: block; }
+    .split-cap {
+        position: absolute; bottom: 26px; left: 28px; z-index: 2;
+        font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 4px; color: var(--dim);
+    }
+    #masthead, #wrap { margin-left: 42vw; }
+    #masthead { width: auto; }
+    #site-footer { }
+    @media (max-width: 820px) {
+        #split-panel { position: relative; width: 100%; height: 40vh; border-right: none; border-bottom: 1px solid var(--rule); }
+        #masthead, #wrap { margin-left: 0; }
+    }
+    </style>
+</head>
+<body>
+
+<div id="split-panel">
+    <canvas id="split-canvas"></canvas>
+    <div class="split-cap">◈ REEL 006 — PROJECTION</div>
+</div>
+
+<div id="read-progress"></div>
+
+<!-- CHIC LOADER -->
+<div id="chic-loader">
+    <svg class="cl-dots" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="42"  cy="88"  r="28" fill="#7fd4e8" opacity="0.55"/>
+        <circle cx="190" cy="320" r="52" fill="#7fd4e8" opacity="0.35"/>
+        <circle cx="95"  cy="490" r="20" fill="#7fd4e8" opacity="0.5"/>
+        <circle cx="310" cy="55"  r="38" fill="#7fd4e8" opacity="0.4"/>
+        <circle cx="480" cy="510" r="44" fill="#7fd4e8" opacity="0.45"/>
+        <circle cx="650" cy="130" r="24" fill="#7fd4e8" opacity="0.5"/>
+        <circle cx="720" cy="430" r="60" fill="#7fd4e8" opacity="0.3"/>
+        <circle cx="870" cy="70"  r="34" fill="#7fd4e8" opacity="0.45"/>
+        <circle cx="950" cy="300" r="22" fill="#7fd4e8" opacity="0.55"/>
+        <circle cx="880" cy="530" r="46" fill="#7fd4e8" opacity="0.38"/>
+        <circle cx="380" cy="400" r="18" fill="#7fd4e8" opacity="0.5"/>
+        <circle cx="560" cy="260" r="30" fill="#7fd4e8" opacity="0.42"/>
+    </svg>
+    <div class="chic-logo-wrap">
+        <span class="c-char">O</span>
+        <span class="c-char">2</span>
+        <span class="c-char">4</span>
+    </div>
+    <div id="loader-progress"></div>
+</div>
+
+<!-- ══════════ MASTHEAD ══════════ -->
+<header id="masthead">
+    <div class="mh-top">
+        <a class="mh-brand" href="index.html">
+            親父より親父な<em>子供</em>のぼやき
+        </a>
+        <nav class="mh-nav">
+            <button class="mh-btn" onclick="toggleSearch()">SEARCH</button>
+            <button class="mh-btn red admin-only" onclick="openWriter()" style="display:none">+ NEW</button>
+            <button class="mh-btn" id="theme-btn" onclick="toggleTheme()">◐</button>
+        </nav>
+    </div>
+    <div class="mh-dateline">
+        <span id="today-str">—</span>
+        <span>PERSONAL DIARY &nbsp;·&nbsp; ISSUE <span id="issue-num">001</span></span>
+        <span>VISITORS &nbsp;<span id="vc-num">—</span></span>
+    </div>
+</header>
+
+<!-- ══════════ CONTINUE BAR ══════════ -->
+<div id="continue-bar">
+    <div class="cb-inner" id="cb-inner">
+        <span class="cb-pct" id="cb-pct">—%</span>
+        <div>
+            <div class="cb-lbl">CONTINUE READING</div>
+            <div class="cb-ttl" id="cb-ttl">—</div>
+        </div>
+        <span class="cb-arr">›</span>
+    </div>
+</div>
+
+<!-- ══════════ MAIN ══════════ -->
+<div id="wrap">
+
+    <!-- IDEAS / ネタ帳 (admin only) -->
+    <section id="ideas-section" class="admin-only" style="display:none">
+        <div class="sec-rule" style="margin-bottom:16px">
+            <span class="sec-rule-lbl">IDEAS · ネタ帳</span>
+            <div class="sec-rule-line"></div>
+            <span class="sec-rule-cnt" id="ideas-count"></span>
+        </div>
+        <div class="ideas-add">
+            <input id="idea-text" class="ideas-input" type="text" placeholder="書きたいネタ..." autocomplete="off">
+            <input id="idea-memo" class="ideas-input ideas-input-memo" type="text" placeholder="一言メモ（任意）" autocomplete="off">
+            <button class="ideas-add-btn" onclick="addIdea()">+ ADD</button>
+        </div>
+        <div id="ideas-list"></div>
+    </section>
+
+    <!-- DIARY STRIPS -->
+    <section>
+        <div class="sec-rule">
+            <span class="sec-rule-lbl">ALL ENTRIES</span>
+            <div class="sec-rule-line"></div>
+            <span class="sec-rule-cnt" id="diary-count"></span>
+        </div>
+        <div id="entries-list"></div>
+    </section>
+
+    <!-- PHOTOS -->
+    <section id="photos-section">
+        <div class="sec-rule" style="margin-bottom:16px">
+            <span class="sec-rule-lbl">PHOTOS</span>
+            <div class="sec-rule-line"></div>
+            <span class="sec-rule-cnt" id="photo-count"></span>
+        </div>
+        <div class="photo-grid" id="photo-grid"></div>
+    </section>
+
+    <!-- ARCHIVES -->
+    <section id="arc-section">
+        <div class="arc-hd">
+            <div class="arc-hd-title">Archives</div>
+            <div class="arc-hd-sub">CONNECTED PROJECTS</div>
+        </div>
+        <div class="arc-grid">
+            <a class="arc-card" href="archive.html">
+                <span class="arc-card-lbl">FILM ARCHIVE</span>
+                <div class="arc-card-name">O24</div>
+                <div class="arc-card-desc">Cinematic Archive — 観た映画・観たい映画を管理するパーソナルアーカイブ</div>
+                <span class="arc-card-link">→</span>
+            </a>
+            <a class="arc-card" href="videos.html">
+                <span class="arc-card-lbl">VIDEO ARCHIVE</span>
+                <div class="arc-card-name">BOOST</div>
+                <div class="arc-card-desc">Video Archive — 何度でも観たい動画だけを置いておく場所</div>
+                <span class="arc-card-link">→</span>
+            </a>
+            <a class="arc-card" href="choco.html">
+                <span class="arc-card-lbl">SECRET ROOM</span>
+                <div class="arc-card-name">チョコの部屋</div>
+                <div class="arc-card-desc">Choco's Room — チョコの秘密の部屋へようこそ ✦</div>
+                <span class="arc-card-link">→</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="site-footer">
+        <div class="footer-brand">親父より親父な子供のぼやき</div>
+        <div class="footer-right">
+            <span>© 2026 &nbsp;·&nbsp; SINCE 2026.04.01</span>
+        </div>
+    </footer>
+
+</div>
+
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- SEARCH -->
+<div id="search-overlay">
+    <button class="s-ov-close" onclick="toggleSearch()">ESC — CLOSE</button>
+    <div class="s-ov-wrap">
+        <input id="search-input" type="text" placeholder="検索..."
+               oninput="doSearch(this.value)" autocomplete="off">
+    </div>
+    <div class="s-ov-results" id="search-results"></div>
+</div>
+
+<!-- WRITE MODAL -->
+<div id="write-modal">
+    <div class="wm-inner">
+        <div class="wm-head">
+            <span class="wm-lbl" id="wm-lbl">NEW ENTRY</span>
+            <button class="wm-x" onclick="closeWriter()">×</button>
+        </div>
+        <div class="wf">
+            <label>TITLE</label>
+            <input id="w-title" class="wf-title" type="text" placeholder="タイトル...">
+        </div>
+        <div class="wf">
+            <label>TAGS</label>
+            <div class="tag-sel" id="tag-selector">
+                <button class="tag-opt" onclick="toggleTag(this,'日常')">日常</button>
+                <button class="tag-opt" onclick="toggleTag(this,'映画')">映画</button>
+                <button class="tag-opt" onclick="toggleTag(this,'音楽')">音楽</button>
+                <button class="tag-opt" onclick="toggleTag(this,'旅行')">旅行</button>
+                <button class="tag-opt" onclick="toggleTag(this,'食べ物')">食べ物</button>
+                <button class="tag-opt" onclick="toggleTag(this,'思考')">思考</button>
+            </div>
+        </div>
+        <div class="wf">
+            <label>CONTENT</label>
+            <textarea id="w-content" class="wf-body" rows="10"
+                placeholder="今日のことを書く..."
+                oninput="document.getElementById('w-chars').textContent=this.value.length+' CHARS'"></textarea>
+        </div>
+        <div class="wf">
+            <label>PHOTOS</label>
+            <div class="wf-photo-thumbs" id="w-photo-thumbs"></div>
+            <button class="wf-photo-add-btn" onclick="document.getElementById('w-photo-file').click()">+ ADD PHOTO</button>
+            <input type="file" id="w-photo-file" accept="image/*" multiple style="display:none" onchange="handleEntryPhotoSelect(this)">
+        </div>
+        <div class="wm-foot">
+            <span class="wm-chars" id="w-chars">0 CHARS</span>
+            <div class="wm-acts">
+                <button class="w-cancel" onclick="closeWriter()">CANCEL</button>
+                <button class="w-pub" id="w-pub" onclick="publishEntry()">PUBLISH →</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ENTRY PHOTO LIGHTBOX -->
+<div id="ep-lightbox" onclick="document.getElementById('ep-lightbox').classList.remove('active')">
+    <button id="ep-lb-prev" onclick="epLbNav(-1);event.stopPropagation()">&#8249;</button>
+    <img id="ep-lb-img" src="" alt="" onclick="event.stopPropagation()">
+    <button id="ep-lb-next" onclick="epLbNav(1);event.stopPropagation()">&#8250;</button>
+    <button id="ep-lb-close" onclick="document.getElementById('ep-lightbox').classList.remove('active');event.stopPropagation()">&#x2715;</button>
+    <div id="ep-lb-counter"></div>
+</div>
+
+<!-- AUTH MODAL -->
+<div id="auth-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99997;justify-content:center;align-items:center;">
+  <div style="background:#111;border:1px solid #2a2a2a;padding:2rem;width:300px;">
+    <div style="color:#ece8e1;letter-spacing:4px;font-size:0.75rem;margin-bottom:1.5rem;">PASSWORD</div>
+    <input id="auth-pass" type="password" placeholder="••••••••" autocomplete="current-password" style="display:block;width:100%;padding:10px;background:#0a0a0a;border:1px solid #333;color:#ece8e1;margin-bottom:12px;box-sizing:border-box;font-size:0.9rem;outline:none;">
+    <div id="auth-err" style="color:#ff6b6b;font-size:0.75rem;margin-bottom:10px;display:none;"></div>
+    <div style="display:flex;gap:8px;">
+      <button id="auth-cancel-btn" style="flex:1;padding:10px;background:transparent;border:1px solid #333;color:#666;cursor:pointer;font-size:0.75rem;letter-spacing:2px;">CANCEL</button>
+      <button id="auth-login-btn" style="flex:1;padding:10px;background:#ece8e1;border:none;color:#0a0a0a;cursor:pointer;font-size:0.75rem;letter-spacing:2px;font-weight:bold;">LOGIN</button>
+    </div>
+  </div>
+</div>
+
+<!-- KONAMI OVERLAY -->
+<div id="konami-overlay">
+    <!-- Matrix -->
+    <canvas id="konami-matrix-canvas"></canvas>
+    <div id="konami-matrix-label">ADMIN MODE UNLOCKED</div>
+</div>
+
+<!-- PHOTO MODAL -->
+<div id="photo-modal">
+    <div class="pm-inner">
+        <div class="pm-head">
+            <span class="pm-lbl">NEW PHOTO</span>
+            <button class="pm-x" onclick="closePhotoUpload()">×</button>
+        </div>
+        <div class="pm-dropzone" id="pm-dropzone">
+            <input type="file" id="pm-file" accept="image/*" onchange="handleFileSelect(this)">
+            <div class="pm-dz-icon">↑</div>
+            <div class="pm-dz-txt">UPLOAD PHOTO</div>
+            <div class="pm-dz-sub">クリックまたはドロップ</div>
+        </div>
+        <div id="pm-preview-wrap" style="display:none">
+            <img id="pm-preview" src="" alt="">
+            <button class="pm-preview-clear" onclick="clearPhotoPreview()">×</button>
+        </div>
+        <textarea id="pm-caption" class="pm-caption" rows="2" placeholder="キャプション（任意）..."></textarea>
+        <div class="pm-foot">
+            <button class="w-cancel" onclick="closePhotoUpload()">CANCEL</button>
+            <button class="w-pub" onclick="publishPhoto()">PUBLISH →</button>
+        </div>
+    </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox()">
+    <button class="lb-close" onclick="closeLightbox()">ESC — CLOSE</button>
+    <img id="lb-img" src="" alt="">
+    <div class="lb-caption" id="lb-caption"></div>
+</div>
+
+<script type="module">
+// ── FIREBASE ──
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, remove, onValue, onDisconnect, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyC84FjbrkhiTVQvU0sS9QO52VAu-Jv53Gs",
+    authDomain: "ozi-blog.firebaseapp.com",
+    databaseURL: "https://ozi-blog-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "ozi-blog",
+    storageBucket: "ozi-blog.firebasestorage.app",
+    messagingSenderId: "871002428547",
+    appId: "1:871002428547:web:9d70c40bb5aff60bafb7b6",
+    measurementId: "G-8S02NLB5B3"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
+const auth = getAuth(fbApp);
+const diaryRef    = ref(db, 'diary');
+const visitsRef   = ref(db, 'visits');
+const photosRef   = ref(db, 'photos');
+const lastReadRef = ref(db, 'lastread');
+const reactionsRef = ref(db, 'reactions');
+const ideasRef = ref(db, 'ideas');
+
+// ── SAVE HELPERS ──
+function saveEntries() {
+    if (!entries.length) return;
+    try { localStorage.setItem('ozi-entries-backup', JSON.stringify(entries)); } catch(e) {}
+    if (!firebaseLoaded) return; // Firebase未接続時は上書きしない
+    const obj = {};
+    entries.forEach(e => { obj[String(e.id)] = e; });
+    set(diaryRef, obj).catch(err => {
+        console.error('Firebase write error:', err);
+        showToast('SAVE FAILED · ' + (err.code || 'CHECK LOGIN'));
+    });
+}
+function savePhotos() {
+    const obj = {};
+    photos.forEach(p => { obj[String(p.id)] = p; });
+    set(photosRef, photos.length ? obj : null);
+}
+function saveLastRead() {
+    set(lastReadRef, lastRead || null);
+}
+
+// ── DATA ──
+const DEFAULT_ENTRIES = [{
+    id: 1,
+    title: "\u30db\u30fc\u30e0\u30da\u30fc\u30b8\u958b\u8a2d",
+    content: "\u672c\u65e5\u3001\u3053\u306e\u30db\u30fc\u30e0\u30da\u30fc\u30b8\u3092\u958b\u8a2d\u3057\u307e\u3057\u305f\u3002\n\n\u3053\u3053\u3067\u306f\u65e5\u3005\u306e\u601d\u3044\u3084\u8003\u3048\u305f\u3053\u3068\u3001\u6c17\u306b\u306a\u3063\u305f\u3053\u3068\u306a\u3069\u3092\u7db4\u3063\u3066\u3044\u304d\u305f\u3044\u3068\u601d\u3044\u307e\u3059\u3002\n\n\u6620\u753b\u306e\u3053\u3068\u3001\u97f3\u697d\u306e\u3053\u3068\u3001\u4f55\u3067\u3082\u306a\u3044\u65e5\u5e38\u306e\u3053\u3068\u3002\n\u89aa\u7236\u3088\u308a\u89aa\u7236\u306a\u81ea\u5206\u306e\u8a18\u9332\u3068\u3057\u3066\u3001\u6b8b\u3057\u3066\u3044\u304f\u5834\u6240\u306b\u3057\u305f\u3044\u3068\u601d\u3063\u3066\u3044\u307e\u3059\u3002\n\n\u3088\u308d\u3057\u304f\u304a\u9858\u3044\u3057\u307e\u3059\u3002",
+    date: "2026\u5e744\u67081\u65e5",
+    tags: ["\u65e5\u5e38"]
+}];
+
+let entries  = [];
+let lastRead = null;
+let selTags    = [];
+let openId     = null;
+let editingId  = null;
+let photos = [];
+let pendingPhotoSrc = null;
+let entryPhotos = [];
+let firebaseLoaded = false;
+let firebaseUser = null;
+let reactionCounts = {};
+let ideas = [];
+let ideasSubscribed = false;
+
+// ── ADMIN ──
+let isAdmin = sessionStorage.getItem('ozi-admin') === '1';
+
+function applyAdminState() {
+    document.querySelectorAll('.admin-only').forEach(el => {
+        el.style.display = isAdmin ? '' : 'none';
+    });
+    renderPhotos();
+}
+
+// ── KONAMI CODE ──
+const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let konamiIdx = 0;
+let matrixRAF = null;
+
+function runMatrixEffect(canvas) {
+    const ctx = canvas.getContext('2d');
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const cols = Math.floor(canvas.width / 16);
+    const drops = Array(cols).fill(1);
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*';
+    function draw() {
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0f0';
+        ctx.font = '15px monospace';
+        drops.forEach((y, i) => {
+            ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * 16, y * 16);
+            if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        });
+        matrixRAF = requestAnimationFrame(draw);
+    }
+    draw();
+}
+
+function showKonamiOverlay() {
+    const overlay = document.getElementById('konami-overlay');
+    overlay.classList.add('active');
+    runMatrixEffect(document.getElementById('konami-matrix-canvas'));
+}
+
+function hideKonamiOverlay() {
+    document.getElementById('konami-overlay').classList.remove('active');
+    if (matrixRAF) { cancelAnimationFrame(matrixRAF); matrixRAF = null; }
+    const ctx = document.getElementById('konami-matrix-canvas').getContext('2d');
+    ctx.clearRect(0, 0, 9999, 9999);
+}
+
+function triggerKonamiEffect() {
+    const modal = document.getElementById('auth-modal');
+    modal.style.display = 'flex';
+    document.getElementById('auth-pass').value = '';
+    document.getElementById('auth-err').style.display = 'none';
+    setTimeout(() => document.getElementById('auth-pass').focus(), 100);
+}
+
+async function triggerKonamiLogout() {
+    await signOut(auth);
+    const label = document.getElementById('konami-matrix-label');
+    label.textContent = 'LOGGED OUT';
+    showKonamiOverlay();
+    setTimeout(() => {
+        hideKonamiOverlay();
+        label.textContent = 'ADMIN MODE UNLOCKED';
+        isAdmin = false;
+        sessionStorage.removeItem('ozi-admin');
+        applyAdminState();
+        renderStrips();
+    }, 1000);
+}
+
+document.getElementById('auth-cancel-btn').addEventListener('click', () => {
+    document.getElementById('auth-modal').style.display = 'none';
+});
+document.getElementById('auth-login-btn').addEventListener('click', async () => {
+    const pass = document.getElementById('auth-pass').value;
+    const errEl = document.getElementById('auth-err');
+    try {
+        await signInWithEmailAndPassword(auth, 'kodomo.no.boyaki@gmail.com', pass);
+        document.getElementById('auth-modal').style.display = 'none';
+        // 一時マイグレーション: ホームページ開設エントリの日付修正
+        const e1 = entries.find(e => e.id === 1 && e.date === '2025年12月7日');
+        if (e1) { e1.date = '2026年4月1日'; saveEntries(); }
+        showKonamiOverlay();
+        setTimeout(() => {
+            hideKonamiOverlay();
+            isAdmin = true;
+            sessionStorage.setItem('ozi-admin', '1');
+            applyAdminState();
+            renderStrips();
+            showToast('ADMIN MODE');
+        }, 1800);
+    } catch(e) {
+        errEl.textContent = 'メールアドレスまたはパスワードが違います';
+        errEl.style.display = 'block';
+    }
+});
+document.getElementById('auth-pass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('auth-login-btn').click();
+});
+
+// ── TOAST ──
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ── DATELINE ──
+function renderDateline() {
+    const now = new Date();
+    const str = now.toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
+    const el = document.getElementById('today-str');
+    if (el) el.textContent = str;
+    const in_ = document.getElementById('issue-num');
+    if (in_) in_.textContent = String(entries.length).padStart(3,'0');
+}
+
+// ── STRIPS ──
+function renderStrips() {
+    const list = document.getElementById('entries-list');
+    list.innerHTML = '';
+    const cnt = document.getElementById('diary-count');
+    if (cnt) cnt.textContent = entries.length + ' ENTRIES';
+
+    entries.forEach((e, i) => {
+        const strip = document.createElement('div');
+        strip.className = 'entry-strip' + (e.id === openId ? ' open' : '');
+        strip.dataset.id = e.id;
+        strip.id = 'entry-' + e.id;
+        strip.style.animationDelay = (i * 0.06) + 's';
+
+        const tags = (e.tags||[]).map(t => `<span class="s-tag">${t}</span>`).join('');
+        const bodyTags = (e.tags||[]).map(t => `<span class="s-body-tag">${t}</span>`).join('');
+        const adminBtns = isAdmin ? `
+            <div style="display:flex;gap:6px">
+                <button class="s-edit" onclick="openEditor(${e.id});event.stopPropagation()">EDIT</button>
+                <button class="s-del"  onclick="deleteEntry(${e.id});event.stopPropagation()">DELETE</button>
+            </div>` : '';
+
+        strip.innerHTML = `
+            <div class="strip-head" onclick="toggleStrip(${e.id})">
+                <div class="strip-num-col">
+                    <span class="s-num">No.${String(entries.length - i).padStart(2,'0')}</span>
+                </div>
+                <div class="strip-main-col">
+                    <div class="s-tags">${tags || '<span class="s-tag">\u2014</span>'}</div>
+                    <div class="s-title">${e.title}</div>
+                    <div class="s-date">${e.date}</div>
+                </div>
+                <div class="strip-toggle-col">
+                    ${isAdmin ? `<button class="s-del s-del-head" onclick="deleteEntry(${e.id});event.stopPropagation()">×</button>` : ''}
+                    <div class="s-toggle">+</div>
+                </div>
+            </div>
+            <div class="strip-body">
+                <div class="strip-body-inner">
+                    <div class="strip-body-gutter"></div>
+                    <div class="strip-body-content">
+                        <div class="s-body-text">${e.content}</div>
+                        ${(e.photos && e.photos.length) ? (() => {
+                            const n = e.photos.length;
+                            const cls = n===1?'ph-1':n===2?'ph-2':n===3?'ph-3':'ph-many';
+                            return `<div class="s-entry-photos ${cls}">${e.photos.map((src,pi)=>`<img src="${src}" onclick="openEntryPhoto(${e.id},${pi});event.stopPropagation()">`).join('')}</div>`;
+                        })() : ''}
+                        <div class="s-body-meta">
+                            <div class="s-body-tags-full">${bodyTags}</div>
+                            <div class="s-engage">
+                                <button class="s-react${localStorage.getItem('ozi-reacted-'+e.id) ? ' reacted' : ''}" onclick="toggleReaction(${e.id});event.stopPropagation()">
+                                    <span class="s-react-heart">&#9829;</span>
+                                    <span class="s-react-cnt" data-react="${e.id}">${reactionCounts[e.id] || 0}</span>
+                                </button>
+                                <button class="s-share" onclick="shareEntry(${e.id});event.stopPropagation()">X</button>
+                                <button class="s-share" onclick="copyEntryLink(${e.id});event.stopPropagation()">LINK</button>
+                            </div>
+                            ${adminBtns}
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+        list.appendChild(strip);
+
+        if (e.id === openId) {
+            const body = strip.querySelector('.strip-body');
+            body.style.height = 'auto';
+        }
+    });
+
+    if (isAdmin) {
+        const add = document.createElement('div');
+        add.className = 'add-strip admin-only';
+        add.innerHTML = `<div class="add-icon">+</div><div class="add-lbl">NEW ENTRY</div>`;
+        add.onclick = openWriter;
+        list.appendChild(add);
+    }
+}
+
+// ── TOGGLE STRIP ──
+function toggleStrip(id) {
+    const el = document.querySelector(`.entry-strip[data-id="${id}"]`);
+    if (!el) return;
+    const body = el.querySelector('.strip-body');
+    const isOpen = el.classList.contains('open');
+
+    if (isOpen) {
+        body.style.height = body.scrollHeight + 'px';
+        body.offsetHeight;
+        body.style.height = '0';
+        el.classList.remove('open');
+        openId = null;
+    } else {
+        document.querySelectorAll('.entry-strip.open').forEach(s => {
+            const b = s.querySelector('.strip-body');
+            b.style.height = b.scrollHeight + 'px';
+            b.offsetHeight;
+            b.style.height = '0';
+            s.classList.remove('open');
+        });
+        el.classList.add('open');
+        body.style.height = body.scrollHeight + 'px';
+        body.addEventListener('transitionend', () => {
+            if (el.classList.contains('open')) body.style.height = 'auto';
+        }, { once: true });
+        openId = id;
+
+        const e = entries.find(x => x.id === id);
+        if (e) {
+            lastRead = { id: e.id, scroll: lastRead?.id === e.id ? lastRead.scroll : 0 };
+            saveLastRead();
+        }
+    }
+}
+
+function openStrip(id) {
+    const isAlreadyOpen = document.querySelector(`.entry-strip[data-id="${id}"]`)?.classList.contains('open');
+    if (!isAlreadyOpen) toggleStrip(id);
+    setTimeout(() => {
+        document.querySelector(`.entry-strip[data-id="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+}
+
+// ── CONTINUE BAR ──
+function renderContinue() {
+    if (!lastRead) return;
+    const e = entries.find(x => x.id === lastRead.id);
+    if (!e || lastRead.scroll < 5) return;
+    const pct = Math.min(Math.round(lastRead.scroll), 100);
+    document.getElementById('cb-pct').textContent  = pct + '%';
+    document.getElementById('cb-ttl').textContent  = e.title;
+    document.getElementById('cb-inner').onclick = () => openStrip(e.id);
+    document.getElementById('continue-bar').style.display = '';
+}
+
+// ── DELETE ──
+function deleteEntry(id) {
+    if (!confirm('\u3053\u306e\u30a8\u30f3\u30c8\u30ea\u30fc\u3092\u524a\u9664\u3057\u307e\u3059\u304b\uff1f')) return;
+    entries = entries.filter(x => x.id !== id);
+    if (openId === id) openId = null;
+    try { localStorage.setItem('ozi-entries-backup', JSON.stringify(entries)); } catch(e) {}
+    remove(ref(db, 'diary/' + String(id))).catch(err => {
+        showToast('DELETE FAILED \u00b7 ' + (err.code || 'CHECK LOGIN'));
+    });
+    renderDateline();
+    renderStrips();
+    renderContinue();
+    showToast('DELETED');
+}
+
+// ── WRITE ──
+function openWriter() {
+    editingId = null;
+    entryPhotos = [];
+    document.getElementById('w-title').value   = '';
+    document.getElementById('w-content').value = '';
+    document.getElementById('w-chars').textContent = '0 CHARS';
+    document.getElementById('wm-lbl').textContent  = 'NEW ENTRY';
+    const _pb = document.getElementById('w-pub');
+    _pb.textContent = 'PUBLISH \u2192'; _pb.disabled = false;
+    selTags = [];
+    document.querySelectorAll('.tag-opt').forEach(b => b.classList.remove('selected'));
+    renderEntryPhotoThumbs();
+    document.getElementById('write-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('w-title').focus(), 80);
+}
+function openEditor(id) {
+    const e = entries.find(x => x.id === id);
+    if (!e) return;
+    editingId = id;
+    entryPhotos = [...(e.photos || [])];
+    document.getElementById('w-title').value   = e.title;
+    document.getElementById('w-content').value = e.content;
+    document.getElementById('w-chars').textContent = e.content.length + ' CHARS';
+    document.getElementById('wm-lbl').textContent  = 'EDIT ENTRY';
+    const _pb2 = document.getElementById('w-pub');
+    _pb2.textContent = 'SAVE \u2192'; _pb2.disabled = false;
+    selTags = [...(e.tags || [])];
+    document.querySelectorAll('.tag-opt').forEach(b => {
+        b.classList.toggle('selected', selTags.includes(b.textContent));
+    });
+    renderEntryPhotoThumbs();
+    document.getElementById('write-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('w-title').focus(), 80);
+}
+function closeWriter() {
+    document.getElementById('write-modal').classList.remove('active');
+    document.body.style.overflow = '';
+    editingId = null;
+}
+function toggleTag(btn, tag) {
+    btn.classList.toggle('selected');
+    selTags.includes(tag) ? selTags = selTags.filter(t => t !== tag) : selTags.push(tag);
+}
+function compressDataUrl(dataUrl, maxPx, quality) {
+    return new Promise(resolve => {
+        if (!dataUrl || !dataUrl.startsWith('data:image')) { resolve(dataUrl); return; }
+        const img = new Image();
+        img.onload = () => {
+            let w = img.width, h = img.height;
+            if (w > maxPx || h > maxPx) {
+                if (w >= h) { h = Math.round(h * maxPx / w); w = maxPx; }
+                else        { w = Math.round(w * maxPx / h); h = maxPx; }
+            }
+            const c = document.createElement('canvas');
+            c.width = w; c.height = h;
+            c.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(c.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+    });
+}
+
+async function publishEntry() {
+    const title   = document.getElementById('w-title').value.trim();
+    const content = document.getElementById('w-content').value.trim();
+    if (!title || !content) { showToast('TITLE & CONTENT REQUIRED'); return; }
+    if (!firebaseUser) {
+        showToast('セッション切れ · 再ログインしてください');
+        closeWriter();
+        setTimeout(() => document.getElementById('auth-modal').style.display = 'flex', 400);
+        return;
+    }
+
+    const btn = document.getElementById('w-pub');
+    btn.disabled = true; btn.textContent = '保存中...';
+
+    const photos = await Promise.all(entryPhotos.map(p => compressDataUrl(p, 1200, 0.80)));
+
+    if (editingId) {
+        const idx = entries.findIndex(x => x.id === editingId);
+        if (idx !== -1) {
+            entries[idx] = { ...entries[idx], title, content, tags: [...selTags], photos };
+            try { localStorage.setItem('ozi-entries-backup', JSON.stringify(entries)); } catch(e) {}
+            set(ref(db, 'diary/' + String(editingId)), entries[idx]).catch(err => {
+                showToast('SAVE FAILED · ' + (err.code || 'CHECK LOGIN'));
+            });
+            closeWriter();
+            renderStrips();
+            showToast('SAVED');
+        }
+        btn.disabled = false;
+        return;
+    }
+
+    const date = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' });
+    const newEntry = { id: Date.now(), title, content, date, tags: [...selTags], photos };
+    entries.unshift(newEntry);
+    try { localStorage.setItem('ozi-entries-backup', JSON.stringify(entries)); } catch(e) {}
+    set(ref(db, 'diary/' + String(newEntry.id)), newEntry).catch(err => {
+        showToast('SAVE FAILED · ' + (err.code || 'CHECK LOGIN'));
+    });
+    closeWriter();
+    btn.disabled = false;
+    renderDateline();
+    renderStrips();
+    showToast('PUBLISHED');
+}
+
+// ── ENTRY PHOTOS ──
+function renderEntryPhotoThumbs() {
+    const wrap = document.getElementById('w-photo-thumbs');
+    wrap.innerHTML = entryPhotos.map((src, i) =>
+        `<div class="wf-photo-thumb"><img src="${src}"><button class="wf-photo-thumb-del" onclick="removeEntryPhoto(${i})">✕</button></div>`
+    ).join('');
+}
+function handleEntryPhotoSelect(input) {
+    Array.from(input.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const img = new Image();
+            img.onload = () => {
+                const MAX = 1200;
+                let w = img.width, h = img.height;
+                if (w > MAX || h > MAX) {
+                    if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
+                    else        { w = Math.round(w * MAX / h); h = MAX; }
+                }
+                const c = document.createElement('canvas');
+                c.width = w; c.height = h;
+                c.getContext('2d').drawImage(img, 0, 0, w, h);
+                entryPhotos.push(c.toDataURL('image/jpeg', 0.80));
+                renderEntryPhotoThumbs();
+            };
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+    input.value = '';
+}
+function removeEntryPhoto(i) {
+    entryPhotos.splice(i, 1);
+    renderEntryPhotoThumbs();
+}
+let _epPhotos = [], _epIdx = 0;
+function openEntryPhoto(entryId, idx) {
+    const e = entries.find(x => x.id === entryId);
+    if (!e || !e.photos || !e.photos.length) return;
+    _epPhotos = e.photos;
+    _epIdx = idx;
+    _renderEpLb();
+    document.getElementById('ep-lightbox').classList.add('active');
+}
+function _renderEpLb() {
+    document.getElementById('ep-lb-img').src = _epPhotos[_epIdx];
+    const n = _epPhotos.length;
+    document.getElementById('ep-lb-counter').textContent = n > 1 ? (_epIdx + 1) + ' / ' + n : '';
+    document.getElementById('ep-lb-prev').hidden = _epIdx === 0;
+    document.getElementById('ep-lb-next').hidden = _epIdx === n - 1;
+}
+function epLbNav(dir) {
+    _epIdx = Math.max(0, Math.min(_epPhotos.length - 1, _epIdx + dir));
+    _renderEpLb();
+}
+
+// ── SEARCH ──
+function toggleSearch() {
+    const o = document.getElementById('search-overlay');
+    const a = o.classList.toggle('active');
+    if (a) {
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => document.getElementById('search-input').focus(), 80);
+        document.getElementById('search-input').value = '';
+        document.getElementById('search-results').innerHTML = '';
+    } else {
+        document.body.style.overflow = '';
+    }
+}
+function doSearch(q) {
+    const c = document.getElementById('search-results');
+    if (!q.trim()) { c.innerHTML = ''; return; }
+    const r = entries.filter(e =>
+        e.title.includes(q) || e.content.includes(q) || e.tags?.some(t => t.includes(q)));
+    if (!r.length) { c.innerHTML = `<div class="s-ov-empty">\u2014 NO RESULTS \u2014</div>`; return; }
+    c.innerHTML = r.map(e => `
+        <div class="s-ov-item" onclick="toggleSearch(); openStrip(${e.id})">
+            <div class="s-ov-title">${e.title}</div>
+            <div class="s-ov-meta">${e.date}${e.tags?.length ? '  \u00b7  ' + e.tags.join(' / ') : ''}</div>
+        </div>`).join('');
+}
+
+// ── PHOTOS ──
+function renderPhotos() {
+    const grid = document.getElementById('photo-grid');
+    const cnt  = document.getElementById('photo-count');
+    if (!grid) return;
+    grid.innerHTML = '';
+    if (cnt) cnt.textContent = photos.length ? photos.length + ' PHOTOS' : '';
+
+    if (isAdmin) {
+        const add = document.createElement('div');
+        add.className = 'photo-add';
+        add.innerHTML = `<div class="photo-add-inner"><div class="photo-add-icon">+</div><div class="photo-add-lbl">ADD PHOTO</div></div>`;
+        add.onclick = openPhotoUpload;
+        grid.appendChild(add);
+    }
+
+    photos.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'photo-card';
+        const del = isAdmin
+            ? `<button class="photo-del" onclick="deletePhoto(${p.id});event.stopPropagation()">DELETE</button>`
+            : '';
+        card.innerHTML = `
+            <img src="${p.src}" alt="${p.caption || ''}">
+            <div class="photo-card-overlay">
+                ${p.caption ? `<div class="photo-card-caption">${p.caption}</div>` : ''}
+                <div class="photo-card-date">${p.date}</div>
+            </div>
+            ${del}`;
+        card.onclick = () => openLightbox(p.id);
+        grid.appendChild(card);
+    });
+}
+
+function openPhotoUpload() {
+    pendingPhotoSrc = null;
+    document.getElementById('pm-file').value = '';
+    document.getElementById('pm-caption').value = '';
+    document.getElementById('pm-preview-wrap').style.display = 'none';
+    document.getElementById('pm-dropzone').style.display = '';
+    document.getElementById('photo-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+function closePhotoUpload() {
+    document.getElementById('photo-modal').classList.remove('active');
+    document.body.style.overflow = '';
+    pendingPhotoSrc = null;
+}
+function handleFileSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        pendingPhotoSrc = e.target.result;
+        document.getElementById('pm-preview').src = pendingPhotoSrc;
+        document.getElementById('pm-preview-wrap').style.display = '';
+        document.getElementById('pm-dropzone').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+function clearPhotoPreview() {
+    pendingPhotoSrc = null;
+    document.getElementById('pm-file').value = '';
+    document.getElementById('pm-preview-wrap').style.display = 'none';
+    document.getElementById('pm-dropzone').style.display = '';
+}
+function publishPhoto() {
+    if (!pendingPhotoSrc) { showToast('PHOTO REQUIRED'); return; }
+    const caption = document.getElementById('pm-caption').value.trim();
+    const date = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' });
+    photos.unshift({ id: Date.now(), src: pendingPhotoSrc, caption, date });
+    savePhotos();
+    closePhotoUpload();
+    renderPhotos();
+    showToast('PHOTO ADDED');
+}
+function deletePhoto(id) {
+    if (!confirm('\u3053\u306e\u5199\u771f\u3092\u524a\u9664\u3057\u307e\u3059\u304b\uff1f')) return;
+    photos = photos.filter(p => p.id !== id);
+    savePhotos();
+    renderPhotos();
+    showToast('DELETED');
+}
+function openLightbox(id) {
+    const p = photos.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('lb-img').src = p.src;
+    document.getElementById('lb-caption').textContent = p.caption || '';
+    document.getElementById('lightbox').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+    const epLb = document.getElementById('ep-lightbox');
+    if (epLb.classList.contains('active')) {
+        if (e.key === 'ArrowLeft')  { epLbNav(-1); return; }
+        if (e.key === 'ArrowRight') { epLbNav(1);  return; }
+        if (e.key === 'Escape')     { epLb.classList.remove('active'); return; }
+    }
+    if (e.key === 'Escape') {
+        if (document.getElementById('lightbox').classList.contains('active'))           closeLightbox();
+        else if (document.getElementById('photo-modal').classList.contains('active'))   closePhotoUpload();
+        else if (document.getElementById('search-overlay').classList.contains('active')) toggleSearch();
+        else if (document.getElementById('write-modal').classList.contains('active'))   closeWriter();
+        else if (isAdmin) { triggerKonamiLogout(); }
+    }
+    // Konami code detection
+    if (e.key === KONAMI[konamiIdx]) {
+        konamiIdx++;
+        if (konamiIdx === KONAMI.length) {
+            konamiIdx = 0;
+            if (isAdmin) triggerKonamiLogout();
+            else triggerKonamiEffect();
+        }
+    } else {
+        konamiIdx = e.key === KONAMI[0] ? 1 : 0;
+    }
+});
+
+// ── ENTRY LIGHTBOX SWIPE ──
+(function() {
+    let _tx = null;
+    const el = document.getElementById('ep-lightbox');
+    el.addEventListener('touchstart', e => { _tx = e.touches[0].clientX; }, { passive: true });
+    el.addEventListener('touchend', e => {
+        if (_tx === null) return;
+        const dx = e.changedTouches[0].clientX - _tx;
+        if (Math.abs(dx) > 44) epLbNav(dx < 0 ? 1 : -1);
+        _tx = null;
+    });
+})();
+
+// Compatibility aliases
+function openEntryById(id) { openStrip(id); }
+function closeReadModal()  {}
+function scrollToSection(id) { document.getElementById(id)?.scrollIntoView({ behavior:'smooth' }); }
+
+// ── SCROLL PROGRESS ──
+window.addEventListener('scroll', () => {
+    const scrolled = document.documentElement.scrollTop;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    document.getElementById('read-progress').style.width = max > 0 ? (scrolled / max * 100) + '%' : '0%';
+}, { passive: true });
+
+
+// ── VISITOR COUNTER (Firebase) ──
+onValue(visitsRef, snap => {
+    const v = snap.val() || 0;
+    document.getElementById('vc-num').textContent = (v + 1).toLocaleString();
+    runTransaction(visitsRef, c => (c || 0) + 1).catch(() => {});
+}, { once: true });
+
+// ── REACTIONS (Firebase) ──
+onValue(reactionsRef, snap => {
+    reactionCounts = snap.val() || {};
+    document.querySelectorAll('[data-react]').forEach(el => {
+        el.textContent = reactionCounts[el.dataset.react] || 0;
+    });
+});
+
+function toggleReaction(id) {
+    const key = 'ozi-reacted-' + id;
+    if (localStorage.getItem(key)) { showToast('ALREADY LIKED'); return; }
+    localStorage.setItem(key, '1');
+    document.querySelectorAll('.entry-strip[data-id="' + id + '"] .s-react').forEach(b => b.classList.add('reacted'));
+    runTransaction(ref(db, 'reactions/' + String(id)), c => (c || 0) + 1).catch(() => {
+        localStorage.removeItem(key);
+        showToast('LIKE FAILED');
+    });
+}
+
+function entryUrl(id) {
+    return 'https://kodomo-no-boyaki.com/#entry-' + id;
+}
+
+function shareEntry(id) {
+    const e = entries.find(x => x.id === id);
+    const text = e ? e.title : '親父より親父な子供のぼやき';
+    const url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(entryUrl(id));
+    window.open(url, '_blank', 'noopener');
+}
+
+function copyEntryLink(id) {
+    const link = entryUrl(id);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(() => showToast('LINK COPIED')).catch(() => showToast('COPY FAILED'));
+    } else {
+        const ta = document.createElement('textarea');
+        ta.value = link; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); showToast('LINK COPIED'); } catch (e) { showToast('COPY FAILED'); }
+        document.body.removeChild(ta);
+    }
+}
+
+// ── AUTH STATE ──
+onAuthStateChanged(auth, user => {
+    firebaseUser = user;
+    if (user) subscribeIdeas();
+});
+
+// ── IDEAS / ネタ帳 (admin only, auth-protected) ──
+function subscribeIdeas() {
+    if (ideasSubscribed) return;
+    ideasSubscribed = true;
+    onValue(ideasRef, snap => {
+        const data = snap.val();
+        ideas = data ? Object.values(data).sort((a, b) => (b.created || b.id) - (a.created || a.id)) : [];
+        renderIdeas();
+    });
+}
+
+function renderIdeas() {
+    const list = document.getElementById('ideas-list');
+    if (!list) return;
+    const cnt = document.getElementById('ideas-count');
+    if (cnt) cnt.textContent = ideas.length + ' IDEAS';
+    if (!ideas.length) {
+        list.innerHTML = '<div class="ideas-empty">まだネタがありません。思いついたら書き留めておこう。</div>';
+        return;
+    }
+    list.innerHTML = ideas.map(it => `
+        <div class="ideas-item">
+            <div class="ideas-item-main">
+                <div class="ideas-item-text">${escapeHtml(it.text)}</div>
+                ${it.memo ? `<div class="ideas-item-memo">${escapeHtml(it.memo)}</div>` : ''}
+            </div>
+            <button class="ideas-del" onclick="deleteIdea(${it.id})" title="削除">✕</button>
+        </div>`).join('');
+}
+
+function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function addIdea() {
+    const tEl = document.getElementById('idea-text');
+    const mEl = document.getElementById('idea-memo');
+    const text = tEl.value.trim();
+    const memo = mEl.value.trim();
+    if (!text) { showToast('ネタを入力してください'); return; }
+    if (!firebaseUser) { showToast('セッション切れ · 再ログインしてください'); return; }
+    const id = Date.now();
+    set(ref(db, 'ideas/' + String(id)), { id, text, memo, created: id }).then(() => {
+        tEl.value = ''; mEl.value = '';
+        tEl.focus();
+        showToast('IDEA SAVED');
+    }).catch(err => showToast('SAVE FAILED · ' + (err.code || '')));
+}
+
+function deleteIdea(id) {
+    remove(ref(db, 'ideas/' + String(id))).then(() => showToast('IDEA DELETED'))
+        .catch(err => showToast('DELETE FAILED · ' + (err.code || '')));
+}
+
+// ネタ入力欄: Enterで追加
+document.getElementById('idea-text').addEventListener('keydown', e => { if (e.key === 'Enter') addIdea(); });
+document.getElementById('idea-memo').addEventListener('keydown', e => { if (e.key === 'Enter') addIdea(); });
+
+// ── REAL-TIME LISTENERS (Firebase) ──
+onValue(diaryRef, snap => {
+    firebaseLoaded = true;
+    const data = snap.val();
+    if (data) {
+        entries = Object.values(data).sort((a, b) => b.id - a.id).map(e => ({
+            ...e,
+            tags:   Array.isArray(e.tags)   ? e.tags   : Object.values(e.tags   || {}),
+            photos: Array.isArray(e.photos) ? e.photos : Object.values(e.photos || {})
+        }));
+        try { localStorage.setItem('ozi-entries-backup', JSON.stringify(entries)); } catch(e) {}
+    } else {
+        // Firebaseが空 → localStorageバックアップを確認
+        const backup = localStorage.getItem('ozi-entries-backup');
+        if (backup) {
+            try {
+                entries = JSON.parse(backup).sort((a, b) => b.id - a.id);
+                saveEntries(); // バックアップをFirebaseに復元
+            } catch { entries = [...DEFAULT_ENTRIES]; }
+        } else {
+            entries = [...DEFAULT_ENTRIES];
+            saveEntries();
+        }
+    }
+    renderDateline();
+    renderStrips();
+    renderContinue();
+    applyDeepLink();
+});
+
+// ── DEEP LINK (#entry-{id}) ──
+let deepLinkDone = false;
+function applyDeepLink() {
+    if (deepLinkDone) return;
+    const m = (location.hash || '').match(/^#entry-(\d+)$/);
+    if (!m) return;
+    const id = Number(m[1]);
+    if (!entries.some(e => e.id === id)) return;
+    deepLinkDone = true;
+    setTimeout(() => {
+        const el = document.getElementById('entry-' + id);
+        if (!el) return;
+        if (!el.classList.contains('open')) toggleStrip(id);
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 400);
+}
+
+onValue(photosRef, snap => {
+    photos = snap.val() ? Object.values(snap.val()).sort((a, b) => b.id - a.id) : [];
+    renderPhotos();
+});
+
+onValue(lastReadRef, snap => {
+    lastRead = snap.val() || null;
+});
+
+// ── CHIC LOADER ──
+(function() {
+    const loader = document.getElementById('chic-loader');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => {
+        loader.classList.add('hiding');
+        setTimeout(() => {
+            loader.classList.add('done');
+            document.body.style.overflow = '';
+        }, 3000);
+    }, 3000);
+})();
+
+// ── THEME ──
+function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    document.documentElement.classList.toggle('dark-mode', isDark);
+    localStorage.setItem('ozi-theme', isDark ? 'dark' : 'light');
+}
+(function() {
+    if (localStorage.getItem('ozi-theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
+})();
+
+// ── INIT ──
+// localStorageバックアップから即時プレロード（Firebaseの応答を待たずに表示）
+(function() {
+    const backup = localStorage.getItem('ozi-entries-backup');
+    if (backup) {
+        try {
+            entries = JSON.parse(backup).sort((a, b) => b.id - a.id).map(e => ({
+                ...e,
+                tags:   Array.isArray(e.tags)   ? e.tags   : Object.values(e.tags   || {}),
+                photos: Array.isArray(e.photos) ? e.photos : Object.values(e.photos || {})
+            }));
+            renderStrips();
+            renderContinue();
+        } catch(e) {}
+    }
+})();
+renderDateline();
+applyAdminState();
+
+// ── GLOBAL EXPOSURE (onclick\u5c5e\u6027\u304b\u3089\u547c\u3073\u51fa\u305b\u308b\u3088\u3046\u306b) ──
+Object.assign(window, {
+    toggleTheme,
+
+    toggleSearch, doSearch,
+    openWriter, openEditor, closeWriter, toggleTag, publishEntry,
+    openPhotoUpload, closePhotoUpload, handleFileSelect, clearPhotoPreview,
+    publishPhoto, deletePhoto, openLightbox, closeLightbox,
+    openEntryById, openStrip, closeReadModal, scrollToSection,
+    deleteEntry, toggleStrip,
+    toggleReaction, shareEntry, copyEntryLink,
+    addIdea, deleteIdea,
+    handleEntryPhotoSelect, removeEntryPhoto, openEntryPhoto, epLbNav
+});
+</script>
+<script>
+/* FORMAT D: 上映パネル（プロジェクター光＋埃の粒） */
+(function(){
+    const cv = document.getElementById('split-canvas'); if(!cv) return;
+    const ctx = cv.getContext('2d'); let W, H, t = 0;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dust = Array.from({length: 40}, () => ({ x:Math.random(), y:Math.random(), r:Math.random()*1.6+0.3, s:Math.random()*0.0005+0.0001, ph:Math.random()*6.28 }));
+    function resize(){ W = cv.width = cv.offsetWidth*dpr; H = cv.height = cv.offsetHeight*dpr; }
+    window.addEventListener('resize', resize); resize();
+    function frame(){
+        t += 0.006;
+        const g = ctx.createLinearGradient(0,0,0,H);
+        const shift = Math.sin(t*0.5)*0.06;
+        g.addColorStop(0,'#0b0806'); g.addColorStop(Math.min(0.9,0.5+shift),'#17110a'); g.addColorStop(1,'#060504');
+        ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+        const cx = W*(0.5+Math.sin(t*0.3)*0.09), cy = H*(0.42+Math.cos(t*0.24)*0.06);
+        const rad = ctx.createRadialGradient(cx,cy,0,cx,cy,H*0.62);
+        rad.addColorStop(0,'rgba(220,120,45,0.11)'); rad.addColorStop(0.5,'rgba(150,60,20,0.04)'); rad.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle = rad; ctx.fillRect(0,0,W,H);
+        dust.forEach(d => {
+            d.y -= d.s; if(d.y < 0){ d.y = 1; d.x = Math.random(); }
+            ctx.globalAlpha = Math.max(0, 0.28 + Math.sin(t*2+d.ph)*0.22);
+            ctx.fillStyle = 'rgba(236,229,216,0.8)';
+            ctx.beginPath(); ctx.arc(d.x*W, d.y*H, d.r*dpr, 0, 6.283); ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(frame);
+    }
+    frame();
+})();
+</script>
+</body>
+</html>
