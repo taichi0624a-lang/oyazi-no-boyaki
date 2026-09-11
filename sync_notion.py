@@ -80,7 +80,10 @@ def notion_page_to_movie(page):
 
     title     = "".join(t["plain_text"] for t in props["タイトル"]["title"])
     year      = str(int(props["製作年"]["number"])) if props["製作年"]["number"] else ""
-    score     = str(props["評価"]["number"]) if props["評価"]["number"] else ""
+    # 評価=0 は「観たい(towatch)」のマーカー。0.5〜5.0 or 空 は「観た(watched)」
+    raw_score = props["評価"]["number"]
+    is_towatch = (raw_score == 0)
+    score     = str(raw_score) if (raw_score and raw_score > 0) else ""
     comment   = get_text(props["コメント"])
     url       = props["URL"]["url"] or ""
     director  = get_text(props["監督"])
@@ -97,7 +100,7 @@ def notion_page_to_movie(page):
         "filmarksUrl":     url,
         "filmarksYear":    year,
         "year":            year,
-        "appStatus":       "watched",
+        "appStatus":       "towatch" if is_towatch else "watched",
         "id":              tmdb_id,
         "poster_path":     poster,
         "appDirector":     director,

@@ -27,7 +27,8 @@
 | `books.html` | 書籍アーカイブ |
 | `about.html` | アバウトページ |
 | `choco.html` | チョコの部屋（秘密） |
-| `sync_filmarks.py` | Filmarks→movies_watched.json 同期スクリプト |
+| `sync_notion.py` | Notion→movies_watched.json 同期スクリプト（GitHub Actions が毎朝実行）|
+| `add_movie.py` | 映画登録スクリプト（Filmarks投稿＋TMDBメタ取得）Samanthaが呼び出す |
 | `movies_watched.json` | 映画データ（GitHub Actions が自動更新）|
 
 **触ってはいけないもの:**
@@ -38,7 +39,7 @@
 ## GitHub
 - リポジトリ: `https://github.com/taichi0624a-lang/oyazi-no-boyaki`
 - デフォルトブランチ: `main`
-- GitHub Actions: 毎日 JST 6:00 に `sync_filmarks.py` を自動実行
+- GitHub Actions: 毎日 JST 6:00 に `sync_notion.py` を自動実行（Notion→ブログ同期）
 
 ---
 
@@ -75,15 +76,34 @@
 - `diary/` ノードに記事データ
 
 ### 映画アーカイブ（archive.html）
-- `movies_watched.json` から読み込み（Filmarks同期データ）
-- フォールバック: Google Sheets CSV
-- TOWATCH リストは引き続き Google Sheets から読み込み
+- 観た(WATCHED)・観たい(TOWATCH)とも **Notion 映画DB → sync_notion.py → `movies_watched.json`** に一本化（2026-09 Google Sheets卒業）
+- **ステータス判定 = 「評価」列**：`評価=0` が **観たい(towatch)**、`0.5〜5.0 or 空` が **観た(watched)**（Notionにselect列を足せなかったための運用）
+- archive.html は `appStatus` で watched/towatch を振り分け表示（Sheet読込は廃止）
+- id=0（TMDB未紐付け）作品はクライアント側でタイトル再検索してポスター/予告を補完
 
 ---
 
 ## Python環境
 - Anaconda: `C:/Users/taich/anaconda3/python.exe`
 - スクリプト実行時はこのパスを使う
+
+---
+
+## 映画登録フロー（Samanthaへの指示）
+
+ユーザーが「○○ 見た、評価4.0、コメントは〜」と言ったら:
+
+1. **Filmarks 投稿**（`add_movie.py` を実行）
+   ```
+   C:/Users/taich/anaconda3/python.exe C:/Users/taich/Desktop/home/add_movie.py "タイトル" "スコア" "コメント"
+   ```
+   → 出力 JSON に `filmarks_url`, `tmdb_id`, `poster_path` など含まれる
+
+2. **Notion に追加**（Notion MCP ツール `mcp__notion__API-post-page` を使用）
+   - Database ID: `3829a1b78e3e801da338e50d65543814`
+   - プロパティ: タイトル / 評価 / コメント / URL / 製作年 / 監督 / 製作国 / 上映時間 / ジャンル / TMDb_ID / poster_path
+
+3. **ブログ反映**: 翌朝 JST 6:00 に GitHub Actions が自動実行（手動不要）
 
 ---
 

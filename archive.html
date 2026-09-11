@@ -904,12 +904,8 @@
                 } catch(e) { console.error('WATCHEDシート読み込み失敗', e); }
             }
 
-            // TOWATCHは引き続きSheetsから
-            try {
-                const towatchRes = await fetch(TOWATCH_CSV_URL + '&t=' + t);
-                const towatchText = await towatchRes.text();
-                await Promise.allSettled(parseSheetCSV(towatchText, 'towatch'));
-            } catch(e) { console.error('TOWATCHシート読み込み失敗（公開設定を確認してください）', e); }
+            // TOWATCHもNotion一本化: movies_watched.json の appStatus==='towatch' から供給
+            // （旧TOWATCH_CSV_URLのSheet読み込みは廃止）
 
             renderAll();
             switchView('watched', document.querySelectorAll('.t-btn')[1], 1);
