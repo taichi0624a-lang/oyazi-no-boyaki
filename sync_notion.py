@@ -233,6 +233,8 @@ def notion_page_to_movie(page):
     genre     = get_text(props["ジャンル"])
     tmdb_id   = int(props["TMDb_ID"]["number"]) if props["TMDb_ID"]["number"] else 0
     poster    = get_text(props["poster_path"])
+    # 「ベスト100」チェックボックス（THE CANON用）。列が無くても安全に False
+    best100   = bool(props.get("ベスト100", {}).get("checkbox", False))
 
     return {
         "title":           title,
@@ -248,6 +250,7 @@ def notion_page_to_movie(page):
         "appCountry":      country,
         "appRuntime":      runtime,
         "appGenre":        genre,
+        "best100":         best100,
     }
 
 

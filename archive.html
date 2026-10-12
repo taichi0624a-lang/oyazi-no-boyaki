@@ -51,9 +51,9 @@
   .rand{background:none;border:none;font-family:var(--f);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);cursor:pointer}
   .rand:hover{color:var(--fg)}
 
-  .toprow{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(144px,1fr);gap:20px;overflow-x:auto;padding-bottom:18px;margin-bottom:8px}
-  .topcell .rank{font-size:11px;letter-spacing:.1em;color:var(--sub);margin-bottom:8px}
-  .topcell .rank b{color:var(--fg);font-size:13px}
+  .card .rank{font-size:11px;letter-spacing:.1em;color:var(--sub);margin-bottom:8px}
+  .card .rank b{color:var(--fg);font-size:13px}
+  .canon-empty{color:var(--sub);font-size:.92rem;line-height:2;padding:50px 0 80px;letter-spacing:.02em}
 
   #grid.dim .card:not(.match){opacity:.14;pointer-events:none}
   .gsec{margin-bottom:8px}
@@ -202,6 +202,7 @@
   <nav>
     <button class="t-btn on" data-v="watched" onclick="switchView('watched',this)">Watched</button>
     <button class="t-btn" data-v="towatch" onclick="switchView('towatch',this)">To See</button>
+    <button class="t-btn" data-v="canon" onclick="switchView('canon',this)">The Canon</button>
     <button class="t-btn" data-v="stats" onclick="switchView('stats',this)">Stats</button>
     <button onclick="toggleTheme()">◐ Theme</button>
     <button onclick="location.href='/'">Diary</button>
@@ -215,10 +216,6 @@
   </section>
 
   <div id="main">
-    <div id="topwrap">
-      <div class="seclabel"><span class="t">Top Rated</span><span class="c">私の高評価</span></div>
-      <div class="toprow" id="toprow"></div>
-    </div>
     <div class="seclabel">
       <span class="t" id="secT">Watched</span><span class="c" id="secC"></span>
       <span class="sp"></span>
@@ -374,7 +371,7 @@ async function loadData(){
   }catch(e){ console.error('データ読み込み失敗',e); }
   const missing=allMovies.filter(m=>!m.id||m.id===0||!m.poster_path);
   await Promise.allSettled(missing.map(backfillMovieFromTMDB));
-  renderAll();
+  if(currentTab==='stats') renderStats(); else renderAll();
   if(window._openMovieId){ const m=allMovies.find(m=>m.id===window._openMovieId); if(m) openImmersive(m); }
   prefetchProviders();
 }
@@ -427,17 +424,23 @@ function makeCard(m){
 }
 function renderAll(){
   if(currentTab==='stats') return;
+  const grid=$('grid'); grid.innerHTML='';
+  const tools=document.querySelector('.tools');
+  // THE CANON（Notionでキュレーションした生涯ベスト100）
+  if(currentTab==='canon'){
+    if(tools) tools.style.display='none';
+    const list=allMovies.filter(m=>m.best100).sort((a,b)=>(parseFloat(b.filmarksScore)||0)-(parseFloat(a.filmarksScore)||0));
+    $('secT').textContent='The Canon';
+    $('secC').textContent=list.length+' / 100';
+    if(!list.length){ grid.innerHTML='<div class="canon-empty">生涯ベスト100、選定中。<br>Notion の「ベスト100」にチェックした作品が、ここに刻まれていく。</div>'; return; }
+    const g=document.createElement('div'); g.className='grid';
+    list.forEach((m,i)=>{ const c=makeCard(m); const r=document.createElement('div'); r.className='rank'; r.innerHTML=`<b>${String(i+1).padStart(2,'0')}</b>`; c.insertBefore(r,c.firstChild); g.appendChild(c); });
+    grid.appendChild(g);
+    return;
+  }
+  if(tools) tools.style.display='';
   const facet=$('facet').value;
   const list=getFilteredSorted(currentTab);
-  const grid=$('grid'); grid.innerHTML='';
-  // TOP RATED (watched only, no facet)
-  $('topwrap').style.display=(currentTab==='watched')?'block':'none';
-  if(currentTab==='watched'){
-    const top=allMovies.filter(m=>effectiveStatus(m)==='watched'&&parseFloat(m.filmarksScore)>0).sort((a,b)=>(parseFloat(b.filmarksScore)||0)-(parseFloat(a.filmarksScore)||0)).slice(0,10);
-    $('toprow').innerHTML='';
-    top.forEach((m,i)=>{ const cell=document.createElement('div'); cell.className='topcell card'; cell.dataset.mid=m.id;
-      cell.innerHTML=`<div class="rank"><b>${String(i+1).padStart(2,'0')}</b></div>`+cardHTML(m); cell.onclick=()=>openImmersive(m); $('toprow').appendChild(cell); });
-  }
   if(facet==='flat'){
     const g=document.createElement('div'); g.className='grid';
     list.forEach(m=>g.appendChild(makeCard(m))); grid.appendChild(g);
@@ -662,6 +665,8 @@ function renderStats(){
 // ── init ──
 if(localStorage.getItem('o24-theme')==='dark') document.body.classList.add('dark');
 const urlId=new URLSearchParams(location.search).get('id'); if(urlId) window._openMovieId=parseInt(urlId);
+const _ht=(location.hash||'').replace('#','');
+if(['towatch','canon','stats'].includes(_ht)){ const _b=document.querySelector(`[data-v="${_ht}"]`); if(_b) switchView(_ht,_b); }
 loadData();
 </script>
 </body>

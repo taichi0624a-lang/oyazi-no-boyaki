@@ -82,6 +82,8 @@
 - id=0（TMDB未紐付け）作品はクライアント側でタイトル再検索してポスター/予告を補完
 - **sync_notion.py が id=0 を自動照合**（版表記を剥がしてTMDB検索→poster/監督/国/時間/ジャンル/あらすじを補完）し、**国名は英語→日本語に正規化**。補完済みの値は翌日のsyncでも引き継がれて消えない
 - 一回限りの一括補完は `fix_movies.py`（movies_watched.json を直接補完・整形）
+- **THE CANON（生涯ベスト100）**：Notionに**チェックボックス列「ベスト100」**を作り、入れたい作品にチェック → sync_notion.py が `best100:true` を出力 → archive.html の「The Canon」タブに番号付き表示（スコア降順）。タブ直リンク: `archive.html#canon`（他に #towatch #stats）
+- archive.html は**白基調ポスターグリッド（DOUBLET式）**。分類: All/By Genre/By Decade/By Country/By Rating。深海OP等は廃止済み
 
 ---
 
