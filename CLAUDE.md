@@ -80,6 +80,8 @@
 - **ステータス判定 = 「評価」列**：`評価=0` が **観たい(towatch)**、`0.5〜5.0 or 空` が **観た(watched)**（Notionにselect列を足せなかったための運用）
 - archive.html は `appStatus` で watched/towatch を振り分け表示（Sheet読込は廃止）
 - id=0（TMDB未紐付け）作品はクライアント側でタイトル再検索してポスター/予告を補完
+- **sync_notion.py が id=0 を自動照合**（版表記を剥がしてTMDB検索→poster/監督/国/時間/ジャンル/あらすじを補完）し、**国名は英語→日本語に正規化**。補完済みの値は翌日のsyncでも引き継がれて消えない
+- 一回限りの一括補完は `fix_movies.py`（movies_watched.json を直接補完・整形）
 
 ---
 
