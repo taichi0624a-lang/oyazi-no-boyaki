@@ -235,8 +235,11 @@ def notion_page_to_movie(page):
     poster    = get_text(props["poster_path"])
     # 「ベスト100」チェックボックス（THE CANON用）。列が無くても安全に False
     best100   = bool(props.get("ベスト100", {}).get("checkbox", False))
+    # 追加日（Notionページ作成日）＝ Recently Added 並び用
+    added     = (page.get("created_time") or "")[:10]
 
     return {
+        "added":           added,
         "title":           title,
         "filmarksScore":   score,
         "filmarksComment": comment,

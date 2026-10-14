@@ -228,8 +228,8 @@
       <div class="tools">
         <button class="rand" onclick="pickRandom()">⚄ Random</button>
         <div class="srch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg><input id="search-input" placeholder="SEARCH" oninput="applyFilters()"></div>
-        <div class="selw"><select id="facet" onchange="renderAll()"><option value="flat">All</option><option value="genre">By Genre</option><option value="decade">By Decade</option><option value="country">By Country</option><option value="score">By Rating</option></select></div>
-        <div class="selw"><select id="sort-by" onchange="applyFilters()"><option value="score-desc">Score</option><option value="year-desc">Year ↓</option><option value="year-asc">Year ↑</option><option value="title">A–Z</option><option value="random">Random</option></select></div>
+        <div class="selw"><select id="facet" onchange="renderAll()"><option value="flat">All</option><option value="genre">By Genre</option><option value="director">By Director</option><option value="decade">By Decade</option><option value="country">By Country</option><option value="score">By Rating</option></select></div>
+        <div class="selw"><select id="sort-by" onchange="applyFilters()"><option value="score-desc">Score</option><option value="added">Recently Added</option><option value="year-desc">Year ↓</option><option value="year-asc">Year ↑</option><option value="title">A–Z</option><option value="random">Random</option></select></div>
       </div>
     </div>
     <div id="grid"></div>
@@ -375,6 +375,7 @@ async function loadData(){
     const r=await fetch('./movies_watched.json?t='+t);
     if(r.ok){ const movies=await r.json(); movies.forEach(m=>allMovies.push(m)); }
   }catch(e){ console.error('データ読み込み失敗',e); }
+  allMovies.forEach((m,i)=>m._ord=i);
   const missing=allMovies.filter(m=>!m.id||m.id===0||!m.poster_path);
   await Promise.allSettled(missing.map(backfillMovieFromTMDB));
   if(currentTab==='stats') renderStats(); else renderAll();
@@ -407,10 +408,12 @@ function getFilteredSorted(status){
   else if(sortBy==='title') list.sort((a,b)=>(a.title||'').localeCompare(b.title||'','ja'));
   else if(sortBy==='score-desc') list.sort((a,b)=>(parseFloat(b.filmarksScore)||0)-(parseFloat(a.filmarksScore)||0));
   else if(sortBy==='score-asc') list.sort((a,b)=>(parseFloat(a.filmarksScore)||0)-(parseFloat(b.filmarksScore)||0));
+  else if(sortBy==='added') list.sort((a,b)=>{const da=a.added||'',db=b.added||'';if(da&&db&&da!==db)return db.localeCompare(da);if(da&&!db)return -1;if(db&&!da)return 1;return (b._ord||0)-(a._ord||0);});
   return list;
 }
 const FKEY={
   genre:  m=>((m.appGenre||'').split(/[,、\/]/)[0]||'').trim()||'その他',
+  director:m=>((m.appDirector||'').trim())||'監督 不明',
   decade: m=>{const y=parseInt(m.year);return isNaN(y)?'年代不明':(Math.floor(y/10)*10)+'s';},
   country:m=>((m.appCountry||'').split(/[,、\/]/)[0]||'').trim()||'国 不明',
   score:  m=>{const s=parseFloat(m.filmarksScore)||0;if(!s)return '未評価';if(s>=5)return '★5.0';if(s>=4)return '★4.0 – 4.5';if(s>=3)return '★3.0 – 3.5';if(s>=2)return '★2.0 – 2.5';return '★1.0 – 1.5';}
