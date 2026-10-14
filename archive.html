@@ -444,9 +444,32 @@ function renderHero(){
   const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
   if(!reduce && window.innerWidth>720){
     heroTrailer(m).then(key=>{ if(!key) return;
-      hv.innerHTML=`<iframe src="https://www.youtube.com/embed/${key}?autoplay=1&mute=1&loop=1&playlist=${key}&controls=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3" allow="autoplay" frameborder="0"></iframe>`;
-      setTimeout(()=>hv.classList.add('on'),1400);
+      hv.innerHTML='<div id="hero-yt"></div>';
+      loadYT(()=>{
+        let revealed=false;
+        const bail=()=>{ hv.classList.remove('on'); hv.innerHTML=''; };
+        try{
+          const p=new YT.Player('hero-yt',{videoId:key,
+            playerVars:{autoplay:1,mute:1,controls:0,loop:1,playlist:key,modestbranding:1,rel:0,playsinline:1,iv_load_policy:3,disablekb:1,fs:0},
+            events:{
+              onReady:e=>{ try{e.target.mute();e.target.playVideo();}catch(_){} },
+              onStateChange:e=>{ if(e.data===1 && !revealed){ revealed=true; hv.classList.add('on'); } },
+              onError:()=>bail()
+            }});
+        }catch(_){ bail(); }
+        // 5秒経っても再生が始まらない（地域ブロック等）なら静止画のまま
+        setTimeout(()=>{ if(!revealed) bail(); },5000);
+      });
     });
+  }
+}
+let _ytReady=false, _ytQ=[];
+function loadYT(cb){
+  if(window.YT && window.YT.Player){ cb(); return; }
+  _ytQ.push(cb);
+  if(!window._ytLoading){ window._ytLoading=true;
+    const s=document.createElement('script'); s.src='https://www.youtube.com/iframe_api'; document.head.appendChild(s);
+    window.onYouTubeIframeAPIReady=()=>{ _ytReady=true; _ytQ.forEach(f=>f()); _ytQ=[]; };
   }
 }
 async function heroTrailer(movie){
