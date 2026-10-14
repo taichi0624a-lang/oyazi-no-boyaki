@@ -36,13 +36,8 @@
 
   .wrap{max-width:1360px;margin:0 auto;padding:0 clamp(16px,4vw,48px)}
   .hero{position:relative;width:100%;min-height:clamp(340px,70vh,600px);display:flex;align-items:flex-end;overflow:hidden;background:var(--bg)}
-  #hero-bg{position:absolute;inset:0;background-size:cover;background-position:center 30%;opacity:0;transition:opacity 1s ease;transform:scale(1.06)}
-  .hero.has-image #hero-bg{opacity:1;animation:heroKen 26s ease-in-out infinite alternate}
-  @keyframes heroKen{from{transform:scale(1.06) translate(0,0)}to{transform:scale(1.17) translate(-2.5%,-2%)}}
-  @media (prefers-reduced-motion:reduce){.hero.has-image #hero-bg{animation:none}}
-  #hero-video{position:absolute;inset:0;overflow:hidden;z-index:1;opacity:0;transition:opacity 1.3s ease;pointer-events:none}
-  #hero-video.on{opacity:1}
-  #hero-video iframe{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100vw;height:56.25vw;min-height:100%;min-width:177.78vh;border:0}
+  #hero-bg,#hero-bg2{position:absolute;inset:0;background-size:cover;background-position:center 30%;opacity:0;transition:opacity 1.2s ease}
+  #hero-bg.on,#hero-bg2.on{opacity:1}
   .hero-scrim{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity 1s ease;background:linear-gradient(to top,rgba(0,0,0,.82),rgba(0,0,0,.12) 52%,rgba(0,0,0,.28))}
   .hero.has-image .hero-scrim{opacity:1}
   .hero-inner{position:relative;z-index:3;width:100%;max-width:1360px;margin:0 auto;padding:clamp(40px,7vw,78px) clamp(16px,4vw,48px) clamp(28px,4vw,46px)}
@@ -234,6 +229,7 @@
 
 <section id="hero" class="hero">
   <div id="hero-bg"></div>
+  <div id="hero-bg2"></div>
   <div class="hero-scrim"></div>
   <div class="hero-inner">
     <div class="k">Cinematic Archive</div>
@@ -420,24 +416,41 @@ async function backfillMovieFromTMDB(m){
 function effectiveStatus(movie){ return statusOverrides[movie.id]||movie.appStatus; }
 
 // ── ヒーロー（今日の一本）: THE CANON→★5.0→上位 からランダム ──
-function pickFeatured(){
+function pickFeaturedPool(){
   const img=m=>m.backdrop_path||m.poster_path;
   let pool=allMovies.filter(m=>m.best100 && effectiveStatus(m)==='watched' && img(m));
-  if(!pool.length) pool=allMovies.filter(m=>effectiveStatus(m)==='watched' && (parseFloat(m.filmarksScore)||0)>=5 && img(m));
-  if(!pool.length) pool=allMovies.filter(m=>effectiveStatus(m)==='watched' && img(m)).sort((a,b)=>(parseFloat(b.filmarksScore)||0)-(parseFloat(a.filmarksScore)||0)).slice(0,40);
-  return pool.length? pool[Math.floor(Math.random()*pool.length)] : null;
+  if(pool.length<2) pool=allMovies.filter(m=>effectiveStatus(m)==='watched' && (parseFloat(m.filmarksScore)||0)>=5 && img(m));
+  if(pool.length<2) pool=allMovies.filter(m=>effectiveStatus(m)==='watched' && img(m)).sort((a,b)=>(parseFloat(b.filmarksScore)||0)-(parseFloat(a.filmarksScore)||0)).slice(0,40);
+  for(let i=pool.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[pool[i],pool[j]]=[pool[j],pool[i]];}
+  return pool.slice(0,10);
+}
+const heroImg=m=>'https://image.tmdb.org/t/p/original'+(m.backdrop_path||m.poster_path);
+function heroFeature(m){
+  const sc=m.filmarksScore?`<span class="sc">★ ${parseFloat(m.filmarksScore).toFixed(1)}</span>`:'';
+  $('hero-feature').innerHTML=`<div class="hf-label">Now Showing · 偏愛のアーカイブ</div><div class="hf-title">${m.title}</div><div class="hf-meta"><span>${m.year||''}</span>${m.appDirector?`<span>${m.appDirector}</span>`:''}${sc}</div>`;
+  const t=$('hero-feature').querySelector('.hf-title'); if(t) t.onclick=()=>openImmersive(m);
 }
 function renderHero(){
   const hero=$('hero'); if(!hero) return;
-  const m=pickFeatured(); if(!m){ hero.classList.remove('has-image'); return; }
-  const url='https://image.tmdb.org/t/p/original'+(m.backdrop_path||m.poster_path);
-  const pre=new Image();
-  pre.onload=()=>{ $('hero-bg').style.backgroundImage="url('"+url+"')"; hero.classList.add('has-image'); };
-  pre.onerror=()=>{ hero.classList.remove('has-image'); };
-  pre.src=url;
-  const sc=m.filmarksScore?`<span class="sc">★ ${parseFloat(m.filmarksScore).toFixed(1)}</span>`:'';
-  $('hero-feature').innerHTML=`<div class="hf-label">Now Showing · 今日の一本</div><div class="hf-title">${m.title}</div><div class="hf-meta"><span>${m.year||''}</span>${m.appDirector?`<span>${m.appDirector}</span>`:''}${sc}</div>`;
-  const t=$('hero-feature').querySelector('.hf-title'); if(t) t.onclick=()=>openImmersive(m);
+  if(window._heroTimer){ clearInterval(window._heroTimer); window._heroTimer=null; }
+  const pool=pickFeaturedPool(); if(!pool.length){ hero.classList.remove('has-image'); return; }
+  const layers=[$('hero-bg'),$('hero-bg2')]; let cur=0, idx=0;
+  const show=m=>{
+    const pre=new Image();
+    pre.onload=()=>{
+      const next=layers[1-cur];
+      next.style.backgroundImage="url('"+heroImg(m)+"')";
+      next.classList.add('on'); layers[cur].classList.remove('on'); cur=1-cur;
+      hero.classList.add('has-image'); heroFeature(m);
+    };
+    pre.onerror=()=>{};
+    pre.src=heroImg(m);
+  };
+  show(pool[0]);
+  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(!reduce && pool.length>1){
+    window._heroTimer=setInterval(()=>{ idx=(idx+1)%pool.length; show(pool[idx]); },6000);
+  }
 }
 
 // ── Filter / sort / render ──
