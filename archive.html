@@ -40,9 +40,12 @@
   .hero.has-image #hero-bg{opacity:1;animation:heroKen 26s ease-in-out infinite alternate}
   @keyframes heroKen{from{transform:scale(1.06) translate(0,0)}to{transform:scale(1.17) translate(-2.5%,-2%)}}
   @media (prefers-reduced-motion:reduce){.hero.has-image #hero-bg{animation:none}}
-  .hero-scrim{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1s ease;background:linear-gradient(to top,rgba(0,0,0,.82),rgba(0,0,0,.12) 52%,rgba(0,0,0,.28))}
+  #hero-video{position:absolute;inset:0;overflow:hidden;z-index:1;opacity:0;transition:opacity 1.3s ease;pointer-events:none}
+  #hero-video.on{opacity:1}
+  #hero-video iframe{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100vw;height:56.25vw;min-height:100%;min-width:177.78vh;border:0}
+  .hero-scrim{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity 1s ease;background:linear-gradient(to top,rgba(0,0,0,.82),rgba(0,0,0,.12) 52%,rgba(0,0,0,.28))}
   .hero.has-image .hero-scrim{opacity:1}
-  .hero-inner{position:relative;z-index:2;width:100%;max-width:1360px;margin:0 auto;padding:clamp(40px,7vw,78px) clamp(16px,4vw,48px) clamp(28px,4vw,46px)}
+  .hero-inner{position:relative;z-index:3;width:100%;max-width:1360px;margin:0 auto;padding:clamp(40px,7vw,78px) clamp(16px,4vw,48px) clamp(28px,4vw,46px)}
   .hero .k{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--sub);margin-bottom:18px;transition:color .4s}
   .hero.has-image .k{color:rgba(255,255,255,.75)}
   .hero-mark{font-weight:300;font-size:clamp(3.2rem,11vw,7rem);line-height:.9;letter-spacing:-.03em;margin:0;transition:color .4s}
@@ -231,6 +234,7 @@
 
 <section id="hero" class="hero">
   <div id="hero-bg"></div>
+  <div id="hero-video"></div>
   <div class="hero-scrim"></div>
   <div class="hero-inner">
     <div class="k">Cinematic Archive</div>
@@ -435,6 +439,26 @@ function renderHero(){
   const sc=m.filmarksScore?`<span class="sc">★ ${parseFloat(m.filmarksScore).toFixed(1)}</span>`:'';
   $('hero-feature').innerHTML=`<div class="hf-label">Now Showing · 今日の一本</div><div class="hf-title">${m.title}</div><div class="hf-meta"><span>${m.year||''}</span>${m.appDirector?`<span>${m.appDirector}</span>`:''}${sc}</div>`;
   const t=$('hero-feature').querySelector('.hf-title'); if(t) t.onclick=()=>openImmersive(m);
+  // 背景に予告編を無音ループ再生（PC幅のみ・動きを減らす設定は除外・静止画フォールバック）
+  const hv=$('hero-video'); hv.innerHTML=''; hv.classList.remove('on');
+  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(!reduce && window.innerWidth>720){
+    heroTrailer(m).then(key=>{ if(!key) return;
+      hv.innerHTML=`<iframe src="https://www.youtube.com/embed/${key}?autoplay=1&mute=1&loop=1&playlist=${key}&controls=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3" allow="autoplay" frameborder="0"></iframe>`;
+      setTimeout(()=>hv.classList.add('on'),1400);
+    });
+  }
+}
+async function heroTrailer(movie){
+  try{
+    for(const lang of ['','language=ja-JP']){
+      const d=await (await fetch(`https://api.themoviedb.org/3/movie/${movie.id}/videos?api_key=${API_KEY}&${lang}`)).json();
+      const yt=(d.results||[]).filter(v=>v.site==='YouTube');
+      const v=yt.find(x=>x.type==='Trailer')||yt.find(x=>x.type==='Teaser')||yt[0];
+      if(v) return v.key;
+    }
+  }catch(e){}
+  return null;
 }
 
 // ── Filter / sort / render ──
