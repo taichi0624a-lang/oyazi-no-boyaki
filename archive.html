@@ -14,7 +14,12 @@
     --bg:#ffffff; --fg:#111111; --sub:#8a8a8a; --dim:#b5b5b5; --line:#ececec; --line2:#f4f4f4;
     --f:'Noto Sans JP',system-ui,sans-serif;
   }
-  body.dark{--bg:#0e0e10;--fg:#eceae6;--sub:#8f8c86;--dim:#5a5853;--line:#242427;--line2:#1a1a1c}
+  /* ── THEME variations ── */
+  body[data-theme="ink"]{--bg:#0e0e10;--fg:#eceae6;--sub:#8f8c86;--dim:#5a5853;--line:#242427;--line2:#1a1a1c;color-scheme:dark}
+  body[data-theme="cream"]{--bg:#f2ece0;--fg:#2a2317;--sub:#8a7f6a;--dim:#b2a892;--line:#e3dac8;--line2:#ebe3d4}
+  body[data-theme="noir"]{--bg:#000000;--fg:#ffffff;--sub:#9a9a9a;--dim:#555555;--line:#242424;--line2:#121212;color-scheme:dark}
+  body[data-theme="sea"]{--bg:#0a191e;--fg:#dcecee;--sub:#7ba3a7;--dim:#4a696d;--line:#15323a;--line2:#0f262c;color-scheme:dark}
+  body[data-theme="dusk"]{--bg:#17131b;--fg:#ece5f0;--sub:#948b9f;--dim:#5d5569;--line:#2b2533;--line2:#1e1a26;color-scheme:dark}
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--fg);font-family:var(--f);font-weight:400;line-height:1.7;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
   img{display:block;max-width:100%}
@@ -205,7 +210,7 @@
     <button class="t-btn" data-v="towatch" onclick="switchView('towatch',this)">To See</button>
     <button class="t-btn" data-v="canon" onclick="switchView('canon',this)">The Canon</button>
     <button class="t-btn" data-v="stats" onclick="switchView('stats',this)">Stats</button>
-    <button onclick="toggleTheme()">◐ Theme</button>
+    <button id="themeBtn" onclick="toggleTheme()">◐ Theme</button>
     <button onclick="location.href='/'">Diary</button>
   </nav>
 </div></header>
@@ -476,7 +481,11 @@ function switchView(type,btn){
   if(type==='stats'){ $('main').style.display='none'; $('stats-view').style.display='block'; renderStats(); }
   else{ $('main').style.display='block'; $('stats-view').style.display='none'; $('secT').textContent=type==='towatch'?'To See':'Watched'; renderAll(); }
 }
-function toggleTheme(){ document.body.classList.toggle('dark'); localStorage.setItem('o24-theme', document.body.classList.contains('dark')?'dark':'light'); }
+const THEMES=[['paper','Paper'],['ink','Ink'],['cream','Cream'],['noir','Noir'],['sea','Deep Sea'],['dusk','Dusk']];
+function applyTheme(name){ if(!THEMES.some(t=>t[0]===name)) name='paper'; document.body.setAttribute('data-theme',name);
+  const label=(THEMES.find(t=>t[0]===name)||THEMES[0])[1]; const b=document.getElementById('themeBtn'); if(b) b.textContent='◐ '+label;
+  try{ localStorage.setItem('o24-theme',name); }catch(e){} }
+function toggleTheme(){ const cur=document.body.getAttribute('data-theme')||'paper'; const i=THEMES.findIndex(t=>t[0]===cur); applyTheme(THEMES[(i+1)%THEMES.length][0]); }
 
 // ── Modal ──
 function openImmersive(movie){
@@ -664,7 +673,7 @@ function renderStats(){
 })();
 
 // ── init ──
-if(localStorage.getItem('o24-theme')==='dark') document.body.classList.add('dark');
+(function(){ let s=new URLSearchParams(location.search).get('theme')||localStorage.getItem('o24-theme'); if(s==='dark')s='ink'; if(s==='light')s='paper'; applyTheme(s||'paper'); })();
 const urlId=new URLSearchParams(location.search).get('id'); if(urlId) window._openMovieId=parseInt(urlId);
 const _ht=(location.hash||'').replace('#','');
 if(['towatch','canon','stats'].includes(_ht)){ const _b=document.querySelector(`[data-v="${_ht}"]`); if(_b) switchView(_ht,_b); }
