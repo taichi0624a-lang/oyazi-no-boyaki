@@ -673,7 +673,7 @@ function renderStats(){
 })();
 
 // ── init ──
-(function(){ let s=new URLSearchParams(location.search).get('theme')||localStorage.getItem('o24-theme'); if(s==='dark')s='ink'; if(s==='light')s='paper'; applyTheme(s||'paper'); })();
+(function(){ const q=new URLSearchParams(location.search).get('theme'); if(q){ applyTheme(q); return; } applyTheme(THEMES[Math.floor(Math.random()*THEMES.length)][0]); })();
 const urlId=new URLSearchParams(location.search).get('id'); if(urlId) window._openMovieId=parseInt(urlId);
 const _ht=(location.hash||'').replace('#','');
 if(['towatch','canon','stats'].includes(_ht)){ const _b=document.querySelector(`[data-v="${_ht}"]`); if(_b) switchView(_ht,_b); }
