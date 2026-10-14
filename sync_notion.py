@@ -74,6 +74,25 @@ def fetch_tmdb_extra(tmdb_id):
         return {"backdrop_path": "", "overview": "", "release_date": "", "genre_ids": []}
 
 
+def overseas_poster(mid):
+    """日本版を避けた海外ポスター（オリジナル言語→英語→テキストレス国際版）を返す。無ければ ''"""
+    try:
+        meta = requests.get(f"https://api.themoviedb.org/3/movie/{mid}?api_key={TMDB_API_KEY}", timeout=12).json()
+        orig = meta.get("original_language", "") or ""
+        d = requests.get(f"https://api.themoviedb.org/3/movie/{mid}/images?api_key={TMDB_API_KEY}", timeout=12).json()
+        cands = [p for p in d.get("posters", []) if (p.get("iso_639_1") or "") != "ja"]
+        if not cands:
+            return ""
+        def rank(p):
+            l = p.get("iso_639_1") or ""
+            pref = 4 if (l == orig and orig and orig != "ja") else 3 if l == "en" else 2 if l == "" else 1
+            return (pref, p.get("vote_average", 0), p.get("vote_count", 0))
+        cands.sort(key=rank, reverse=True)
+        return cands[0].get("file_path", "") or ""
+    except Exception:
+        return ""
+
+
 # ── 国名 英語→日本語 正規化 ──
 COUNTRY_JP = {
     "United States of America": "アメリカ", "United States": "アメリカ", "USA": "アメリカ", "US": "アメリカ",
@@ -298,6 +317,9 @@ def main():
             movie["overview"]      = prev.get("overview", "")
             movie["release_date"]  = prev.get("release_date", "")
             movie["genre_ids"]     = prev.get("genre_ids", [])
+            # 海外版ポスターを維持（既存jsonの poster を優先。日々の再取得を避ける）
+            if prev.get("poster_path"):
+                movie["poster_path"] = prev["poster_path"]
             # Notionにメタが無い作品は、補完済みjsonの値を引き継ぐ（翌日消さない）
             if not movie["id"] and prev.get("id"):
                 movie["id"] = prev["id"]
@@ -320,6 +342,11 @@ def main():
                 extra = fetch_tmdb_extra(movie["id"])
                 movie.update(extra)
                 print("OK")
+            # 新規は海外版ポスターを取得
+            if movie["id"]:
+                op = overseas_poster(movie["id"])
+                if op:
+                    movie["poster_path"] = op
             new_count += 1
             time.sleep(0.3)
 

@@ -36,8 +36,10 @@
 
   .wrap{max-width:1360px;margin:0 auto;padding:0 clamp(16px,4vw,48px)}
   .hero{position:relative;width:100%;min-height:clamp(340px,70vh,600px);display:flex;align-items:flex-end;overflow:hidden;background:var(--bg)}
-  #hero-bg{position:absolute;inset:0;background-size:cover;background-position:center 30%;opacity:0;transition:opacity 1s ease;transform:scale(1.03)}
-  .hero.has-image #hero-bg{opacity:1}
+  #hero-bg{position:absolute;inset:0;background-size:cover;background-position:center 30%;opacity:0;transition:opacity 1s ease;transform:scale(1.06)}
+  .hero.has-image #hero-bg{opacity:1;animation:heroKen 26s ease-in-out infinite alternate}
+  @keyframes heroKen{from{transform:scale(1.06) translate(0,0)}to{transform:scale(1.17) translate(-2.5%,-2%)}}
+  @media (prefers-reduced-motion:reduce){.hero.has-image #hero-bg{animation:none}}
   .hero-scrim{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1s ease;background:linear-gradient(to top,rgba(0,0,0,.82),rgba(0,0,0,.12) 52%,rgba(0,0,0,.28))}
   .hero.has-image .hero-scrim{opacity:1}
   .hero-inner{position:relative;z-index:2;width:100%;max-width:1360px;margin:0 auto;padding:clamp(40px,7vw,78px) clamp(16px,4vw,48px) clamp(28px,4vw,46px)}
