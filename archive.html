@@ -45,6 +45,8 @@
   .hero.has-image .k{color:rgba(255,255,255,.75)}
   .hero-mark{font-weight:300;font-size:clamp(3.2rem,11vw,7rem);line-height:.9;letter-spacing:-.03em;margin:0;transition:color .4s}
   .hero.has-image .hero-mark{color:#fff;text-shadow:0 2px 30px rgba(0,0,0,.45)}
+  .hero.has-image{cursor:pointer}
+  .hero.has-image .hf-title{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px;text-decoration-color:rgba(255,255,255,.4)}
   #hero-feature{display:none;margin-top:24px}
   .hero.has-image #hero-feature{display:block}
   .hf-label{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:9px}
@@ -416,41 +418,46 @@ async function backfillMovieFromTMDB(m){
 function effectiveStatus(movie){ return statusOverrides[movie.id]||movie.appStatus; }
 
 // ── ヒーロー（今日の一本）: THE CANON→★5.0→上位 からランダム ──
-function pickFeaturedPool(){
+function pickFeatured(){
   const img=m=>m.backdrop_path||m.poster_path;
   let pool=allMovies.filter(m=>m.best100 && effectiveStatus(m)==='watched' && img(m));
-  if(pool.length<2) pool=allMovies.filter(m=>effectiveStatus(m)==='watched' && (parseFloat(m.filmarksScore)||0)>=5 && img(m));
-  if(pool.length<2) pool=allMovies.filter(m=>effectiveStatus(m)==='watched' && img(m)).sort((a,b)=>(parseFloat(b.filmarksScore)||0)-(parseFloat(a.filmarksScore)||0)).slice(0,40);
-  for(let i=pool.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[pool[i],pool[j]]=[pool[j],pool[i]];}
-  return pool.slice(0,10);
+  if(!pool.length) pool=allMovies.filter(m=>effectiveStatus(m)==='watched' && (parseFloat(m.filmarksScore)||0)>=5 && img(m));
+  if(!pool.length) pool=allMovies.filter(m=>effectiveStatus(m)==='watched' && img(m)).sort((a,b)=>(parseFloat(b.filmarksScore)||0)-(parseFloat(a.filmarksScore)||0)).slice(0,40);
+  return pool.length? pool[Math.floor(Math.random()*pool.length)] : null;
 }
-const heroImg=m=>'https://image.tmdb.org/t/p/original'+(m.backdrop_path||m.poster_path);
+// その映画の「有名な場面」＝TMDBのbackdrops（複数シーン）を取得
+async function heroScenes(m){
+  try{
+    const d=await (await fetch(`https://api.themoviedb.org/3/movie/${m.id}/images?api_key=${API_KEY}`)).json();
+    const bd=(d.backdrops||[]).slice().sort((a,b)=>((a.iso_639_1?1:0)-(b.iso_639_1?1:0))||((b.vote_average||0)-(a.vote_average||0)));
+    const urls=bd.slice(0,6).map(x=>'https://image.tmdb.org/t/p/original'+x.file_path);
+    if(urls.length) return urls;
+  }catch(e){}
+  const f=m.backdrop_path||m.poster_path;
+  return f?['https://image.tmdb.org/t/p/original'+f]:[];
+}
 function heroFeature(m){
   const sc=m.filmarksScore?`<span class="sc">★ ${parseFloat(m.filmarksScore).toFixed(1)}</span>`:'';
-  $('hero-feature').innerHTML=`<div class="hf-label">Now Showing · 偏愛のアーカイブ</div><div class="hf-title">${m.title}</div><div class="hf-meta"><span>${m.year||''}</span>${m.appDirector?`<span>${m.appDirector}</span>`:''}${sc}</div>`;
-  const t=$('hero-feature').querySelector('.hf-title'); if(t) t.onclick=()=>openImmersive(m);
+  $('hero-feature').innerHTML=`<div class="hf-label">Now Showing · レビューを読む →</div><div class="hf-title">${m.title}</div><div class="hf-meta"><span>${m.year||''}</span>${m.appDirector?`<span>${m.appDirector}</span>`:''}${sc}</div>`;
+}
+function openReview(m){
+  openImmersive(m);
+  if(effectiveStatus(m)==='watched'){ const b=$('review-tab-btn'); if(b){ b.style.display=''; switchModalTab('review',b); } }
 }
 function renderHero(){
   const hero=$('hero'); if(!hero) return;
   if(window._heroTimer){ clearInterval(window._heroTimer); window._heroTimer=null; }
-  const pool=pickFeaturedPool(); if(!pool.length){ hero.classList.remove('has-image'); return; }
-  const layers=[$('hero-bg'),$('hero-bg2')]; let cur=0, idx=0;
-  const show=m=>{
-    const pre=new Image();
-    pre.onload=()=>{
-      const next=layers[1-cur];
-      next.style.backgroundImage="url('"+heroImg(m)+"')";
-      next.classList.add('on'); layers[cur].classList.remove('on'); cur=1-cur;
-      hero.classList.add('has-image'); heroFeature(m);
-    };
-    pre.onerror=()=>{};
-    pre.src=heroImg(m);
-  };
-  show(pool[0]);
-  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  if(!reduce && pool.length>1){
-    window._heroTimer=setInterval(()=>{ idx=(idx+1)%pool.length; show(pool[idx]); },6000);
-  }
+  const m=pickFeatured(); if(!m){ hero.classList.remove('has-image'); hero.onclick=null; return; }
+  heroFeature(m);
+  hero.onclick=()=>openReview(m);
+  heroScenes(m).then(urls=>{
+    if(!urls.length){ hero.classList.remove('has-image'); return; }
+    const layers=[$('hero-bg'),$('hero-bg2')]; let cur=0, idx=0;
+    const show=url=>{ const pre=new Image(); pre.onload=()=>{ const next=layers[1-cur]; next.style.backgroundImage="url('"+url+"')"; next.classList.add('on'); layers[cur].classList.remove('on'); cur=1-cur; hero.classList.add('has-image'); }; pre.onerror=()=>{}; pre.src=url; };
+    show(urls[0]);
+    const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if(!reduce && urls.length>1){ window._heroTimer=setInterval(()=>{ idx=(idx+1)%urls.length; show(urls[idx]); },5000); }
+  });
 }
 
 // ── Filter / sort / render ──
