@@ -35,11 +35,23 @@
   .hd nav button.on::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:1px;background:var(--fg)}
 
   .wrap{max-width:1360px;margin:0 auto;padding:0 clamp(16px,4vw,48px)}
-  .hero{padding:clamp(44px,7vw,90px) 0 clamp(26px,4vw,50px);max-width:52rem}
-  .hero .k{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--sub);margin-bottom:20px}
-  .hero h1{font-weight:300;font-size:clamp(1.8rem,4vw,3rem);line-height:1.4;letter-spacing:-.01em}
-  .hero h1 b{font-weight:700}
-  .hero-mark{font-weight:300;font-size:clamp(3.6rem,12vw,7.5rem)!important;line-height:.9!important;letter-spacing:-.03em!important;margin-top:8px}
+  .hero{position:relative;width:100%;min-height:clamp(340px,70vh,600px);display:flex;align-items:flex-end;overflow:hidden;background:var(--bg)}
+  #hero-bg{position:absolute;inset:0;background-size:cover;background-position:center 30%;opacity:0;transition:opacity 1s ease;transform:scale(1.03)}
+  .hero.has-image #hero-bg{opacity:1}
+  .hero-scrim{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1s ease;background:linear-gradient(to top,rgba(0,0,0,.82),rgba(0,0,0,.12) 52%,rgba(0,0,0,.28))}
+  .hero.has-image .hero-scrim{opacity:1}
+  .hero-inner{position:relative;z-index:2;width:100%;max-width:1360px;margin:0 auto;padding:clamp(40px,7vw,78px) clamp(16px,4vw,48px) clamp(28px,4vw,46px)}
+  .hero .k{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--sub);margin-bottom:18px;transition:color .4s}
+  .hero.has-image .k{color:rgba(255,255,255,.75)}
+  .hero-mark{font-weight:300;font-size:clamp(3.2rem,11vw,7rem);line-height:.9;letter-spacing:-.03em;margin:0;transition:color .4s}
+  .hero.has-image .hero-mark{color:#fff;text-shadow:0 2px 30px rgba(0,0,0,.45)}
+  #hero-feature{display:none;margin-top:24px}
+  .hero.has-image #hero-feature{display:block}
+  .hf-label{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:9px}
+  .hf-title{font-size:clamp(1.1rem,2.6vw,1.7rem);font-weight:500;color:#fff;cursor:pointer;display:inline-block;border-bottom:1px solid transparent;transition:border-color .2s}
+  .hf-title:hover{border-color:#fff}
+  .hf-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:rgba(255,255,255,.82);margin-top:8px;letter-spacing:.02em}
+  .hf-meta .sc{color:#ffcf52}
 
   .seclabel{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--fg);padding-bottom:10px;margin:38px 0 26px;flex-wrap:wrap}
   .seclabel .t{font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:500}
@@ -215,12 +227,17 @@
   </nav>
 </div></header>
 
-<div class="wrap">
-  <section class="hero">
+<section id="hero" class="hero">
+  <div id="hero-bg"></div>
+  <div class="hero-scrim"></div>
+  <div class="hero-inner">
     <div class="k">Cinematic Archive</div>
     <h1 class="hero-mark">drop off</h1>
-  </section>
+    <div id="hero-feature"></div>
+  </div>
+</section>
 
+<div class="wrap">
   <div id="main">
     <div class="seclabel">
       <span class="t" id="secT">Watched</span><span class="c" id="secC"></span>
@@ -379,6 +396,7 @@ async function loadData(){
   const missing=allMovies.filter(m=>!m.id||m.id===0||!m.poster_path);
   await Promise.allSettled(missing.map(backfillMovieFromTMDB));
   if(currentTab==='stats') renderStats(); else renderAll();
+  renderHero();
   if(window._openMovieId){ const m=allMovies.find(m=>m.id===window._openMovieId); if(m) openImmersive(m); }
   prefetchProviders();
 }
@@ -395,6 +413,27 @@ async function backfillMovieFromTMDB(m){
   }catch(e){}
 }
 function effectiveStatus(movie){ return statusOverrides[movie.id]||movie.appStatus; }
+
+// ── ヒーロー（今日の一本）: THE CANON→★5.0→上位 からランダム ──
+function pickFeatured(){
+  const img=m=>m.backdrop_path||m.poster_path;
+  let pool=allMovies.filter(m=>m.best100 && effectiveStatus(m)==='watched' && img(m));
+  if(!pool.length) pool=allMovies.filter(m=>effectiveStatus(m)==='watched' && (parseFloat(m.filmarksScore)||0)>=5 && img(m));
+  if(!pool.length) pool=allMovies.filter(m=>effectiveStatus(m)==='watched' && img(m)).sort((a,b)=>(parseFloat(b.filmarksScore)||0)-(parseFloat(a.filmarksScore)||0)).slice(0,40);
+  return pool.length? pool[Math.floor(Math.random()*pool.length)] : null;
+}
+function renderHero(){
+  const hero=$('hero'); if(!hero) return;
+  const m=pickFeatured(); if(!m){ hero.classList.remove('has-image'); return; }
+  const url='https://image.tmdb.org/t/p/original'+(m.backdrop_path||m.poster_path);
+  const pre=new Image();
+  pre.onload=()=>{ $('hero-bg').style.backgroundImage="url('"+url+"')"; hero.classList.add('has-image'); };
+  pre.onerror=()=>{ hero.classList.remove('has-image'); };
+  pre.src=url;
+  const sc=m.filmarksScore?`<span class="sc">★ ${parseFloat(m.filmarksScore).toFixed(1)}</span>`:'';
+  $('hero-feature').innerHTML=`<div class="hf-label">Now Showing · 今日の一本</div><div class="hf-title">${m.title}</div><div class="hf-meta"><span>${m.year||''}</span>${m.appDirector?`<span>${m.appDirector}</span>`:''}${sc}</div>`;
+  const t=$('hero-feature').querySelector('.hf-title'); if(t) t.onclick=()=>openImmersive(m);
+}
 
 // ── Filter / sort / render ──
 function getFilteredSorted(status){
