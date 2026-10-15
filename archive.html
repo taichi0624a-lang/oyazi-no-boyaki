@@ -418,8 +418,12 @@ async function backfillMovieFromTMDB(m){
 function effectiveStatus(movie){ return statusOverrides[movie.id]||movie.appStatus; }
 
 // ── ヒーロー（今日の一本）: THE CANON→★5.0→上位 からランダム ──
-function pickFeatured(){
+function pickFeatured(mode){
   const img=m=>m.backdrop_path||m.poster_path;
+  if(mode==='towatch'){
+    const p=allMovies.filter(m=>effectiveStatus(m)==='towatch' && img(m));
+    return p.length? p[Math.floor(Math.random()*p.length)] : null;
+  }
   let pool=allMovies.filter(m=>m.best100 && effectiveStatus(m)==='watched' && img(m));
   if(!pool.length) pool=allMovies.filter(m=>effectiveStatus(m)==='watched' && (parseFloat(m.filmarksScore)||0)>=5 && img(m));
   if(!pool.length) pool=allMovies.filter(m=>effectiveStatus(m)==='watched' && img(m)).sort((a,b)=>(parseFloat(b.filmarksScore)||0)-(parseFloat(a.filmarksScore)||0)).slice(0,40);
@@ -436,9 +440,10 @@ async function heroScenes(m){
   const f=m.backdrop_path||m.poster_path;
   return f?['https://image.tmdb.org/t/p/original'+f]:[];
 }
-function heroFeature(m){
-  const sc=m.filmarksScore?`<span class="sc">★ ${parseFloat(m.filmarksScore).toFixed(1)}</span>`:'';
-  $('hero-feature').innerHTML=`<div class="hf-label">Now Showing · レビューを読む →</div><div class="hf-title">${m.title}</div><div class="hf-meta"><span>${m.year||''}</span>${m.appDirector?`<span>${m.appDirector}</span>`:''}${sc}</div>`;
+function heroFeature(m, towatch){
+  const sc=towatch?'':(m.filmarksScore?`<span class="sc">★ ${parseFloat(m.filmarksScore).toFixed(1)}</span>`:'');
+  const label=towatch?'Next Up · 次に観る →':'Now Showing · レビューを読む →';
+  $('hero-feature').innerHTML=`<div class="hf-label">${label}</div><div class="hf-title">${m.title}</div><div class="hf-meta"><span>${m.year||''}</span>${m.appDirector?`<span>${m.appDirector}</span>`:''}${sc}</div>`;
 }
 function openReview(m){
   openImmersive(m);
@@ -447,9 +452,11 @@ function openReview(m){
 function renderHero(){
   const hero=$('hero'); if(!hero) return;
   if(window._heroTimer){ clearInterval(window._heroTimer); window._heroTimer=null; }
-  const m=pickFeatured(); if(!m){ hero.classList.remove('has-image'); hero.onclick=null; return; }
-  heroFeature(m);
-  hero.onclick=()=>openReview(m);
+  if(currentTab==='stats'){ hero.classList.remove('has-image'); hero.onclick=null; $('hero-bg').classList.remove('on'); $('hero-bg2').classList.remove('on'); return; }
+  const mode=currentTab==='towatch'?'towatch':'watched';
+  const m=pickFeatured(mode); if(!m){ hero.classList.remove('has-image'); hero.onclick=null; return; }
+  heroFeature(m, mode==='towatch');
+  hero.onclick = mode==='towatch' ? (()=>openImmersive(m)) : (()=>openReview(m));
   heroScenes(m).then(urls=>{
     if(!urls.length){ hero.classList.remove('has-image'); return; }
     const layers=[$('hero-bg'),$('hero-bg2')]; let cur=0, idx=0;
@@ -547,6 +554,7 @@ function switchView(type,btn){
   if(btn) btn.classList.add('on');
   if(type==='stats'){ $('main').style.display='none'; $('stats-view').style.display='block'; renderStats(); }
   else{ $('main').style.display='block'; $('stats-view').style.display='none'; $('secT').textContent=type==='towatch'?'To See':'Watched'; renderAll(); }
+  renderHero();
 }
 const THEMES=[['paper','Paper'],['ink','Ink'],['cream','Cream'],['noir','Noir'],['sea','Deep Sea'],['dusk','Dusk']];
 function applyTheme(name){ if(!THEMES.some(t=>t[0]===name)) name='paper'; document.body.setAttribute('data-theme',name);
