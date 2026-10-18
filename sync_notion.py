@@ -313,6 +313,11 @@ def main():
         # 既存データからTMDB補足情報を再利用
         if title in existing:
             prev = existing[title]
+            # Filmarksの「続きを読む」で切れたNotionコメントを、補完済みjsonの全文で維持
+            # （Notion側より長い＝全文が入っている場合のみ上書きを防ぐ）
+            pj = prev.get("filmarksComment", "") or ""
+            if len(pj) > len(movie.get("filmarksComment", "") or ""):
+                movie["filmarksComment"] = pj
             movie["backdrop_path"] = prev.get("backdrop_path", "")
             movie["overview"]      = prev.get("overview", "")
             movie["release_date"]  = prev.get("release_date", "")

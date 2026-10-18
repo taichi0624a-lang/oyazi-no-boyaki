@@ -84,6 +84,7 @@
 - 一回限りの一括補完は `fix_movies.py`（movies_watched.json を直接補完・整形）
 - **THE CANON（生涯ベスト100）**：Notionに**チェックボックス列「ベスト100」**を作り、入れたい作品にチェック → sync_notion.py が `best100:true` を出力 → archive.html の「The Canon」タブに番号付き表示（スコア降順）。タブ直リンク: `archive.html#canon`（他に #towatch #stats）
 - archive.html は**白基調ポスターグリッド（DOUBLET式）**。分類: All/By Genre/By Decade/By Country/By Rating。深海OP等は廃止済み
+- **レビュー全文**：Filmarks移行時に「続きを読む」手前（約96字）で切れたレビューがあった。全文は `movies_watched.json` の `filmarksComment` に直接入れて復旧。sync_notion.py に「補完済みjsonのコメントがNotionより長ければ維持」ガードを入れたので、翌朝の同期でも切り戻されない
 
 ---
 
