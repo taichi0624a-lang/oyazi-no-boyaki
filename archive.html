@@ -768,7 +768,7 @@ function renderStats(){
 
 // ── admin ──
 function updateAdminIndicator(flashOff){ const ind=$('admin-indicator'); if(!ind) return;
-  if(adminMode){ ind.textContent='● ADMIN ×'; ind.classList.add('visible','sticky'); }
+  if(adminMode){ ind.textContent='● ADMIN ON ・ クリックで解除'; ind.classList.add('visible','sticky'); }
   else { ind.classList.remove('sticky'); if(flashOff){ ind.textContent='ADMIN OFF'; ind.classList.add('visible'); setTimeout(()=>ind.classList.remove('visible'),1800); } else { ind.classList.remove('visible'); } } }
 function setAdmin(v){ adminMode=v; try{localStorage.setItem('o24-admin', v?'1':'0');}catch(e){} updateAdminIndicator(true);
   if(activeMovie && $('immersive-modal').style.display==='block'){
