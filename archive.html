@@ -192,12 +192,14 @@
   .rec-poster{aspect-ratio:2/3;background-size:cover;background-position:center;background-color:var(--line2);margin-bottom:8px}
   .rec-title{font-size:.76rem;line-height:1.3}.rec-year{font-size:.6rem;color:var(--sub);margin-top:2px}
   .rating-section{padding:24px;border:1px solid var(--line)}
+  .review-back{background:none;border:none;color:var(--sub);font-family:var(--f);font-size:11px;letter-spacing:.1em;cursor:pointer;padding:0 0 18px;display:block}
+  .review-back:hover{color:var(--fg)}
   .rating-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);margin-bottom:14px}
   .star-rating{display:flex;gap:8px;margin-bottom:20px}
   .star{font-size:1.8rem;cursor:pointer;color:var(--line);user-select:none;transition:color .15s}.star.active{color:var(--fg)}
   .memo-input{width:100%;border:1px solid var(--line);background:none;color:var(--fg);font-family:var(--f);font-size:.9rem;padding:12px;resize:none;outline:none;line-height:1.7}
   .memo-input:focus{border-color:var(--fg)}
-  .save-memo-btn{margin-top:12px;background:none;border:1px solid var(--fg);color:var(--fg);padding:10px 24px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;font-family:var(--f);display:none}
+  .save-memo-btn{margin-top:12px;background:none;border:1px solid var(--fg);color:var(--fg);padding:10px 24px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;font-family:var(--f)}
   .save-memo-btn:hover{background:var(--fg);color:var(--bg)}
   .i-back-btn{margin-top:48px;background:none;border:1px solid var(--line);color:var(--sub);padding:14px 36px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;font-family:var(--f)}
   .i-back-btn:hover{border-color:var(--fg);color:var(--fg)}
@@ -287,7 +289,6 @@
       <div class="i-action-bar">
         <div id="i-meta"></div>
         <button id="watched-btn" class="watched-btn" onclick="markAsWatched()" style="display:none;">✓ Mark as Watched</button>
-        <button id="review-btn" class="watched-btn" onclick="jumpToReview()" style="display:none;">✎ レビューを書く</button>
         <button class="share-btn" onclick="shareMovie()">↗ Share</button>
       </div>
       <div id="watch-panel" class="watch-panel" style="display:none;">
@@ -312,20 +313,20 @@
         <button class="i-tab-btn active" onclick="switchModalTab('overview',this)">Overview</button>
         <button class="i-tab-btn" onclick="switchModalTab('cast',this)">Cast</button>
         <button class="i-tab-btn" onclick="switchModalTab('recs',this)">More Like This</button>
-        <button id="review-tab-btn" class="i-tab-btn" onclick="switchModalTab('review',this)">My Review</button>
       </div>
       <div id="overview-tab"><div id="where-to-watch"></div><div id="i-overview"></div></div>
       <div id="cast-tab" style="display:none;"><div id="cast-grid" class="cast-grid"></div></div>
       <div id="recs-tab" style="display:none;"><div id="recs-grid" class="rec-grid"></div></div>
       <div id="review-tab" style="display:none;">
         <div class="rating-section">
-          <div class="rating-label">My Rating</div>
+          <button class="review-back" onclick="switchModalTab('overview',document.querySelector('.i-tab-btn'))">← 戻る</button>
+          <div class="rating-label">評価</div>
           <div class="star-rating" id="star-rating">
             <span class="star" onclick="setRating(1)">★</span><span class="star" onclick="setRating(2)">★</span><span class="star" onclick="setRating(3)">★</span><span class="star" onclick="setRating(4)">★</span><span class="star" onclick="setRating(5)">★</span>
           </div>
-          <div class="rating-label">My Memo</div>
-          <textarea class="memo-input" id="memo-input" rows="4" placeholder="この映画についてのメモ..."></textarea>
-          <button class="save-memo-btn" id="save-btn" onclick="saveMemo()">Save</button>
+          <div class="rating-label">レビュー</div>
+          <textarea class="memo-input" id="memo-input" rows="8" placeholder="この映画について、思ったことを自由に…"></textarea>
+          <button class="save-memo-btn" id="save-btn" onclick="saveMemo()">保存</button>
         </div>
       </div>
       <button class="i-back-btn" onclick="closeImmersive()">Return</button>
@@ -578,6 +579,21 @@ function applyTheme(name){ if(!THEMES.some(t=>t[0]===name)) name='paper'; docume
 function toggleTheme(){ const cur=document.body.getAttribute('data-theme')||'paper'; const i=THEMES.findIndex(t=>t[0]===cur); applyTheme(THEMES[(i+1)%THEMES.length][0]); }
 
 // ── Modal ──
+function renderOverview(movie){
+  const hasSyn=!!movie.overview;
+  const synBody=hasSyn?`<p class="i-body-text">${movie.overview}</p>`:'<p class="i-body-text" style="color:var(--dim)">あらすじ情報がありません。</p>';
+  const fScore=movie.filmarksScore||'', fComment=movie.filmarksComment||'';
+  let myReviewBlock='';
+  if(fScore||fComment){
+    const scoreStr=fScore?`<div class="my-review-score">★ ${fScore} <span>/ 5.0</span></div>`:'';
+    const commentStr=fComment?`<p class="my-review-text">${fComment}</p>`:'';
+    myReviewBlock=`<div class="my-review"><div class="my-review-label">My Review</div>${scoreStr}${commentStr}${adminMode?'<button class="my-review-edit" onclick="jumpToReview()">✎ 編集</button>':''}</div>`;
+  } else if(adminMode){
+    myReviewBlock=`<div class="my-review my-review-empty"><div class="my-review-label">My Review</div><button class="my-review-edit" onclick="jumpToReview()">✎ レビューを書く</button></div>`;
+  }
+  const synBlock=`<div class="i-synopsis"><div class="my-review-label" style="color:var(--dim)">Synopsis</div>${synBody}</div>`;
+  $('i-overview').innerHTML=myReviewBlock+synBlock;
+}
 function openImmersive(movie){
   activeMovie=movie;
   const status=effectiveStatus(movie);
@@ -589,28 +605,13 @@ function openImmersive(movie){
   if(movie.appDirector) metaHtml+=` / <span class="director-link" onclick="openDirectorPanel('${(movie.appDirector||'').replace(/'/g,"\\'")}')">DIR: ${movie.appDirector}</span>`;
   $('i-meta').innerHTML=metaHtml;
   $('watched-btn').style.display=(status==='towatch'&&adminMode)?'':'none';
-  $('review-btn').style.display=(status==='watched'&&adminMode)?'':'none';
-  $('review-tab-btn').style.display=status==='watched'?'':'none';
   const review=reviews[movie.id]||{};
   currentRating=review.rating||0;
   $('memo-input').value=review.memo||'';
   updateStars(currentRating);
-  $('save-btn').textContent='Save';
-  $('save-btn').style.display=adminMode?'inline-block':'none';
+  $('save-btn').textContent='保存';
   renderTicket(movie);
-  const hasSyn=!!movie.overview;
-  const synBody=hasSyn?`<p class="i-body-text">${movie.overview}</p>`:'<p class="i-body-text" style="color:var(--dim)">あらすじ情報がありません。</p>';
-  let myReviewBlock='';
-  const fScore=movie.filmarksScore||'', fComment=movie.filmarksComment||'';
-  if(fScore||fComment){
-    const scoreStr=fScore?`<div class="my-review-score">★ ${fScore} <span>/ 5.0</span></div>`:'';
-    const commentStr=fComment?`<p class="my-review-text">${fComment}</p>`:'';
-    myReviewBlock=`<div class="my-review"><div class="my-review-label">My Review</div>${scoreStr}${commentStr}${adminMode?'<button class="my-review-edit" onclick="jumpToReview()">✎ 編集</button>':''}</div>`;
-  } else if(adminMode){
-    myReviewBlock=`<div class="my-review my-review-empty"><div class="my-review-label">My Review</div><button class="my-review-edit" onclick="jumpToReview()">✎ レビューを書く</button></div>`;
-  }
-  const synBlock=`<div class="i-synopsis"><div class="my-review-label" style="color:var(--dim)">Synopsis</div>${synBody}</div>`;
-  $('i-overview').innerHTML=myReviewBlock+synBlock;
+  renderOverview(movie);
   $('i-player').classList.add('hidden'); $('i-placeholder').classList.remove('hidden'); $('i-player').innerHTML='';
   $('cast-grid').innerHTML='<div class="cast-loading">Loading cast…</div>';
   $('recs-grid').innerHTML='<div class="cast-loading">Loading…</div>';
@@ -655,7 +656,7 @@ async function confirmWatched(){
   if(score>0||comment){ reviews[activeMovie.id]={rating:score,memo:comment}; localStorage.setItem('o24-reviews',JSON.stringify(reviews)); }
   if(score>0) activeMovie.filmarksScore=String(score);
   if(comment) activeMovie.filmarksComment=comment;
-  $('watch-panel').style.display='none'; $('review-tab-btn').style.display=''; renderTicket(activeMovie); renderAll();
+  $('watch-panel').style.display='none'; renderTicket(activeMovie); renderAll(); renderOverview(activeMovie);
   saveReviewRemote(activeMovie,score,comment);
   btn.textContent='Posting to Filmarks…';
   try{
@@ -705,30 +706,26 @@ async function openDirectorPanel(name){
 function closeDirectorPanel(){ $('director-panel').classList.remove('open'); $('director-overlay').style.display='none'; }
 function setRating(n){ currentRating=n; updateStars(n); }
 function updateStars(n){ document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('active',i<n)); }
-function jumpToReview(){ const b=$('review-tab-btn'); if(b){ b.style.display=''; switchModalTab('review',b); } const mi=$('memo-input'); if(mi) setTimeout(()=>{try{mi.focus();}catch(e){}},60); }
+function jumpToReview(){ switchModalTab('review',null); const mi=$('memo-input'); if(mi) setTimeout(()=>{try{mi.focus();}catch(e){}},60); }
 // Notionへ永続化（fire-and-forget・未設定/失敗でもUIは成立）
 function saveReviewRemote(m,score,comment){
   try{ fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:m.id,title:m.title,score:score||'',comment:comment||'',secret:'o24-secret-2026'})}).catch(()=>{}); }catch(e){}
 }
 async function saveMemo(){
   if(!activeMovie) return;
-  const memo=$('memo-input').value;
+  const memo=$('memo-input').value.trim();
   reviews[activeMovie.id]={rating:currentRating,memo}; localStorage.setItem('o24-reviews',JSON.stringify(reviews));
   // この端末では即サイトに反映
   if(currentRating>0) activeMovie.filmarksScore=String(currentRating);
-  if(memo) activeMovie.filmarksComment=memo;
-  renderAll();
-  // Notionへ永続化（翌朝syncで公開表示にも）
+  activeMovie.filmarksComment=memo;
+  renderAll(); renderOverview(activeMovie);
+  // 保存したらOVERVIEWに戻って、書いたレビューをその場で確認
+  switchModalTab('overview',document.querySelector('.i-tab-btn'));
+  // Notionへ永続化（翌朝syncで公開表示にも）＋Filmarks投稿（バックグラウンド）
   saveReviewRemote(activeMovie,currentRating,memo);
-  const btn=$('save-btn');
   if(memo||currentRating>0){
-    btn.textContent='Posting…';
-    try{
-      const res=await fetch('https://o24-filmarks.onrender.com/mark-movie',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:'o24-secret-2026',title:activeMovie.title,score:currentRating>0?currentRating:'',comment:memo})});
-      const data=await res.json(); btn.textContent=data.ok?'✓ 保存＆投稿':'✓ 保存';
-    }catch(e){ btn.textContent='✓ 保存'; }
-  }else btn.textContent='✓ 保存';
-  setTimeout(()=>btn.textContent='Save',3000);
+    try{ fetch('https://o24-filmarks.onrender.com/mark-movie',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:'o24-secret-2026',title:activeMovie.title,score:currentRating>0?currentRating:'',comment:memo})}).catch(()=>{}); }catch(e){}
+  }
 }
 async function startCinema(){
   if(!activeMovie) return;
@@ -774,10 +771,12 @@ function renderStats(){
   document.addEventListener('keydown',e=>{
     if(e.key===K[p]){ p++; if(p===K.length){ p=0; adminMode=!adminMode;
       localStorage.setItem('o24-admin', adminMode?'1':'0');
-      $('save-btn').style.display=adminMode?'inline-block':'none';
-      if(activeMovie){ const st=statusOverrides[activeMovie.id]||activeMovie.appStatus;
-        if(st==='towatch'){ $('watched-btn').style.display=adminMode?'':'none'; $('watch-panel').style.display='none'; }
-        if(st==='watched'){ const rb=$('review-btn'); if(rb) rb.style.display=adminMode?'':'none'; } }
+      if(activeMovie && $('immersive-modal').style.display==='block'){
+        const st=effectiveStatus(activeMovie);
+        $('watched-btn').style.display=(st==='towatch'&&adminMode)?'':'none';
+        if(!adminMode) $('watch-panel').style.display='none';
+        renderOverview(activeMovie); // ✎編集ボタンの出し入れを即反映
+      }
       const ind=$('admin-indicator'); if(ind){ ind.textContent=adminMode?'ADMIN MODE':'ADMIN OFF'; ind.classList.add('visible'); setTimeout(()=>ind.classList.remove('visible'),2000); }
     }} else { p=e.key===K[0]?1:0; }
   });
